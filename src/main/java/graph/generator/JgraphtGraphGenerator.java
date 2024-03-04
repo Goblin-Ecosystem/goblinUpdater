@@ -1,0 +1,93 @@
+package graph.generator;
+
+import addedvalue.AddedValue;
+import addedvalue.AddedValueEnum;
+import graph.entities.edges.DependencyEdge;
+import graph.entities.edges.EdgeType;
+import graph.entities.edges.RelationshipArEdge;
+import graph.entities.nodes.ArtifactNode;
+import graph.entities.nodes.NodeType;
+import graph.entities.nodes.ReleaseNode;
+import graph.structures.GraphStructure;
+import graph.structures.JgraphtGraphStructure;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+public class JgraphtGraphGenerator implements GraphGenerator{
+
+    @Override
+    public GraphStructure generateAllPossibilitiesRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute){
+        GraphStructure graph = new JgraphtGraphStructure();
+        // Add nodes
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        JSONArray nodesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("nodes");
+        System.out.println(dtf.format(LocalDateTime.now())+" Create "+nodesArray.size()+" vertices");
+        nodesArray.parallelStream().forEach(node -> {
+            JSONObject nodeJson = (JSONObject) node;
+            String id = (String) nodeJson.get("id");
+            NodeType nodeType = NodeType.valueOf((String) nodeJson.get("nodeType"));
+            switch (nodeType) {
+                case ARTIFACT -> {
+                    boolean found = (boolean) nodeJson.get("found");
+                    ArtifactNode newArtifact = new ArtifactNode(id, found);
+                    for(AddedValueEnum addedValueEnum : addedValuesToCompute){
+                        try {
+                            newArtifact.addAddedValue(addedValueEnum.getAddedValueClass()
+                                    .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    synchronized (graph) {
+                        graph.addVertex(newArtifact);
+                    }
+                }
+                case RELEASE -> {
+                    long timestamp = (long) nodeJson.get("timestamp");
+                    String version = (String) nodeJson.get("version");
+                    ReleaseNode newRelease = new ReleaseNode(id, timestamp, version);
+                    for(AddedValueEnum addedValueEnum : addedValuesToCompute){
+                        try {
+                            newRelease.addAddedValue(addedValueEnum.getAddedValueClass()
+                                    .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    synchronized (graph) {
+                        graph.addVertex(newRelease);
+                    }
+                }
+            }
+        });
+        // Add edges
+        JSONArray edgesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("edges");
+        System.out.println(dtf.format(LocalDateTime.now())+" Create "+edgesArray.size()+" edges");
+        edgesArray.parallelStream().forEach(edge -> {
+            JSONObject edgeJson = (JSONObject) edge;
+            String sourceId = (String) edgeJson.get("sourceId");
+            String targetId = (String) edgeJson.get("targetId");
+            EdgeType edgeType = EdgeType.valueOf((String) edgeJson.get("type"));
+            switch (edgeType) {
+                case DEPENDENCY -> {
+                    String targetVersion = (String) edgeJson.get("targetVersion");
+                    String scope = (String) edgeJson.get("scope");
+                    synchronized (graph) {
+                        graph.addEdgeFromVertexId(sourceId, targetId, new DependencyEdge(targetVersion, scope));
+                    }
+                }
+                case RELATIONSHIP_AR -> {
+                    synchronized (graph) {
+                        graph.addEdgeFromVertexId(sourceId, targetId, new RelationshipArEdge());
+                    }
+                }
+            }
+        });
+        return graph;
+    }
+}
