@@ -20,6 +20,9 @@ public class Cve implements AddedValue{
         double score = 0;
         for(Object cve : valueJsonArray){
             JSONObject cveJson = (JSONObject) cve;
+            if(getSeverityCoef(cveJson.get("severity").toString()) == 0.0){
+                System.out.println(cve);
+            }
             score += 1 * getSeverityCoef(cveJson.get("severity").toString());
         }
         return score;
@@ -27,11 +30,11 @@ public class Cve implements AddedValue{
 
     private double getSeverityCoef(String severity) {
         return switch (severity) {
-            case "LOW" -> 0.25;
-            case "MODERATE" -> 0.5;
-            case "HIGH" -> 0.75;
-            case "CRITICAL" -> 1;
-            default -> 0;
+            case "LOW" -> 2;
+            case "MODERATE" -> 3;
+            case "HIGH" -> 5;
+            case "CRITICAL" -> 8;
+            default -> 2;
         };
     }
 }

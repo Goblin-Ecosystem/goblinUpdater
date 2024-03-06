@@ -76,13 +76,7 @@ public class JgraphtGraphStructure implements GraphStructure{
                             .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
                                     .filter(edge -> edge.getType().equals(EdgeType.RELATIONSHIP_AR))
                                     .map(graphCopy::getEdgeTarget)
-                                    .forEach(possibleRelease -> {
-                                        int size = graph.edgeSet().size();
-                                        if( size % 300000 == 0){
-                                            System.out.println(size);
-                                        }
-                                        graph.addEdge(releaseNode, possibleRelease, new ChangeEdge());
-                                    }));
+                                    .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new ChangeEdge())));
                 });
     }
 

@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JgraphtGraphGenerator implements GraphGenerator{
 
@@ -35,7 +36,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                 case ARTIFACT -> {
                     boolean found = (boolean) nodeJson.get("found");
                     ArtifactNode newArtifact = new ArtifactNode(id, found);
-                    for(AddedValueEnum addedValueEnum : addedValuesToCompute){
+                    for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.ARTIFACT)).collect(Collectors.toSet())){
                         try {
                             newArtifact.addAddedValue(addedValueEnum.getAddedValueClass()
                                     .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
@@ -51,7 +52,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                     long timestamp = (long) nodeJson.get("timestamp");
                     String version = (String) nodeJson.get("version");
                     ReleaseNode newRelease = new ReleaseNode(id, timestamp, version);
-                    for(AddedValueEnum addedValueEnum : addedValuesToCompute){
+                    for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.RELEASE)).collect(Collectors.toSet())){
                         try {
                             newRelease.addAddedValue(addedValueEnum.getAddedValueClass()
                                     .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));

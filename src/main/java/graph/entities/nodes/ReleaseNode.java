@@ -38,4 +38,8 @@ public class ReleaseNode extends NodeObject {
     public String getJarName(){
         return getId().replaceAll(":","_")+".jar";
     }
+
+    public boolean dominates(ReleaseNode other) {
+        return this.getNodeQuality() <= other.getNodeQuality() && this.changeCost <= other.changeCost && (this.getNodeQuality() < other.getNodeQuality() || this.changeCost < other.changeCost);
+    }
 }

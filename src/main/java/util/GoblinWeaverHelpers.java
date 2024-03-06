@@ -62,4 +62,23 @@ public class GoblinWeaverHelpers {
         bodyJsonObject.put("addedValues", addedValuesArray);
         return executeQuery(bodyJsonObject, apiRoute);
     }
+
+    public static JSONObject getDirectPossibilitiesRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+        String apiRoute = "/graph/directPossibilitiesRooted";
+
+        JSONObject bodyJsonObject = new JSONObject();
+        JSONArray releasesArray = new JSONArray();
+        for(Dependency directDependency : directDependencies) {
+            JSONObject releaseJsonObject = new JSONObject();
+            releaseJsonObject.put("groupId", directDependency.getGroupId());
+            releaseJsonObject.put("artifactId", directDependency.getArtifactId());
+            releaseJsonObject.put("version", directDependency.getVersion());
+            releasesArray.add(releaseJsonObject);
+        }
+        bodyJsonObject.put("releases", releasesArray);
+        JSONArray addedValuesArray = new JSONArray();
+        addedValuesArray.addAll(addedValues.stream().map(AddedValueEnum::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", addedValuesArray);
+        return executeQuery(bodyJsonObject, apiRoute);
+    }
 }
