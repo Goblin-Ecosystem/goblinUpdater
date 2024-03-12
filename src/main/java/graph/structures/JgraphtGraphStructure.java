@@ -105,4 +105,14 @@ public class JgraphtGraphStructure implements GraphStructure{
                 .map(edge -> (ReleaseNode) graph.getEdgeTarget(edge))
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode){
+        return graph.outgoingEdgesOf(releaseNode).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast).collect(Collectors.toSet());
+    }
+
+    @Override
+    public NodeObject getEdgeTarget(CustomEdge edge){
+        return graph.getEdgeTarget(edge);
+    }
 }

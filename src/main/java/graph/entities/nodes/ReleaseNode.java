@@ -35,6 +35,11 @@ public class ReleaseNode extends NodeObject {
         this.changeCost = changeCost;
     }
 
+    public String getGa(){
+        String[] splitedGav = getId().split(":");
+        return splitedGav[0]+":"+splitedGav[1];
+    }
+
     public String getJarName(){
         return getId().replaceAll(":","_")+".jar";
     }

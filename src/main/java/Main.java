@@ -1,12 +1,7 @@
 import addedvalue.AddedValueEnum;
-import com.github.maracas.LibraryJar;
-import com.github.maracas.Maracas;
-import com.github.maracas.SourcesDirectory;
-import com.github.maracas.brokenuse.BrokenUse;
-import com.github.maracas.brokenuse.DeltaImpact;
-import com.github.maracas.delta.BreakingChange;
-import com.github.maracas.delta.Delta;
+import graph.entities.edges.ChangeEdge;
 import graph.entities.nodes.ArtifactNode;
+import graph.entities.nodes.NodeType;
 import graph.entities.nodes.ReleaseNode;
 import graph.generator.GraphGenerator;
 import graph.generator.JgraphtGraphGenerator;
@@ -17,17 +12,16 @@ import org.json.simple.JSONObject;
 import util.GoblinWeaverHelpers;
 import util.MaracasHelpers;
 import util.MavenHelpers;
-import util.MavenLocalRepository;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Main {
 
+    // Direct all possibilities & transitives dependencies
     public static void main(String[] args){
         // TODO project en argument
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -38,66 +32,37 @@ public class Main {
             List<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
             System.out.println(dtf.format(LocalDateTime.now())+" Direct dependencies number: "+pomDependencies.size());
             // TODO addedValues via conf file
-            List<AddedValueEnum> addedValuesToCompute = List.of(AddedValueEnum.CVE_AGGREGATED, AddedValueEnum.FRESHNESS_AGGREGATED);
+            List<AddedValueEnum> addedValuesToCompute = List.of(AddedValueEnum.CVE, AddedValueEnum.FRESHNESS);
             System.out.println(dtf.format(LocalDateTime.now())+" Get direct all possibilities graph");
-            JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesRootedGraph(pomDependencies, addedValuesToCompute);
+            JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesWithTransitiveRootedGraph(pomDependencies, addedValuesToCompute);
             // Transform Json to JgraphT graph
             System.out.println(dtf.format(LocalDateTime.now())+" Graph transform");
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();
             GraphStructure graph = graphGenerator.generateAllPossibilitiesRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
             System.out.println(dtf.format(LocalDateTime.now())+" Graph size: "+graph.getVertexSet().size()+" vertices, "+graph.getEdgeSet().size()+"edges");
-            // compute direct dep cost
-            System.out.println(dtf.format(LocalDateTime.now())+" Compute quality and cost");
-            Set<ArtifactNode> artifactDirectDeps = graph.getRootArtifactDirectDep();
-            for(ArtifactNode artifactDirectDep : artifactDirectDeps){
-                // Get current used version
-                ReleaseNode currentRelease = graph.getCurrentUseReleaseOfArtifact(artifactDirectDep);
-                Set<ReleaseNode> allArtifactRelease = graph.getAllArtifactRelease(artifactDirectDep);
-                double currentReleaseQuality = currentRelease.getNodeQuality();
-                for(ReleaseNode artifactRelease : allArtifactRelease){
-                    // If quality of current release < artifact release, delete node
-                    if(currentReleaseQuality <= artifactRelease.getNodeQuality()){
-                        graph.removeVertex(artifactRelease);
+            System.out.println(dtf.format(LocalDateTime.now())+" Create change edge");
+            graph.generateChangeEdge();
+            System.out.println(dtf.format(LocalDateTime.now())+" Graph size: "+graph.getVertexSet().size()+" vertices, "+graph.getEdgeSet().size()+"edges");
+            System.out.println(dtf.format(LocalDateTime.now())+" Compute change link values");
+            // compute change link quality and cost
+            for(ReleaseNode sourceReleaseNode : graph.getVertexSet().stream().filter(n -> n.getType().equals(NodeType.RELEASE)).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
+                double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
+                for(ChangeEdge changeEdge : graph.getChangeEdgeOf(sourceReleaseNode)){
+                    ReleaseNode targetReleaseNode = (ReleaseNode) graph.getEdgeTarget(changeEdge);
+                    changeEdge.setQualityChange(targetReleaseNode.getNodeQuality() - sourceReleaseNodeQuality);
+                    // Compute cost only for direct dependencies
+                    if(sourceReleaseNode.getId().equals("ROOT")){
+                        changeEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa(), false)), targetReleaseNode));
                     }
-                    // Else compute change cost
-                    else{
-                        artifactRelease.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, currentRelease, artifactRelease));
+                    else {
+                        changeEdge.setChangeCost(9999999.9);
                     }
                 }
-                MavenLocalRepository.getInstance().clearLocalRepo();
-                System.out.println("\n------------------");
-                findOptimals(allArtifactRelease, currentRelease);
-                System.out.println("------------------\n");
             }
+            System.out.println(dtf.format(LocalDateTime.now())+" End compute change link values");
+
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void findOptimals(Set<ReleaseNode> allArtifactRelease, ReleaseNode currentRelease) {
-        List<ReleaseNode> optimals = new ArrayList<>();
-
-        for (ReleaseNode candidate : allArtifactRelease) {
-            boolean isDominant = false;
-            List<ReleaseNode> toDelete = new ArrayList<>();
-            for (ReleaseNode current : optimals) {
-                if (current.dominates(candidate)) {
-                    isDominant = true;
-                    break;
-                } else if (candidate.dominates(current)) {
-                    toDelete.add(current);
-                }
-            }
-            optimals.removeAll(toDelete);
-
-            if (!isDominant) {
-                optimals.add(candidate);
-            }
-        }
-
-        System.out.println("Optimals for change: "+currentRelease.getId());
-        for (ReleaseNode opti : optimals){
-            System.out.println("\t"+opti.getId() + " quality:"+opti.getNodeQuality()+" cost:"+opti.getChangeCost());
         }
     }
 }

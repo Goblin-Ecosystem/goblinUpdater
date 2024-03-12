@@ -10,6 +10,7 @@ public abstract class NodeObject {
     private final String id;
     private final NodeType type;
     private final List<AddedValue> addedValues = new ArrayList<>();
+    private Double quality = null;
 
     public NodeObject(String id, NodeType type) {
         this.id = id;
@@ -29,11 +30,14 @@ public abstract class NodeObject {
     }
 
     public double getNodeQuality(){
-        double quality = 0.0;
-        for(AddedValue addedValue : addedValues){
-            quality += addedValue.getQualityScore();
+        if(this.quality != null){
+            return this.quality;
         }
-        return quality;
+        this.quality = 0.0;
+        for(AddedValue addedValue : addedValues){
+            this.quality += addedValue.getQualityScore();
+        }
+        return this.quality;
     }
 
     @Override

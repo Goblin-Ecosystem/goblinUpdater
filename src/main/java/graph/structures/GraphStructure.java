@@ -1,5 +1,6 @@
 package graph.structures;
 
+import graph.entities.edges.ChangeEdge;
 import graph.entities.edges.CustomEdge;
 import graph.entities.nodes.ArtifactNode;
 import graph.entities.nodes.NodeObject;
@@ -17,4 +18,6 @@ public interface GraphStructure {
     ReleaseNode getCurrentUseReleaseOfArtifact(ArtifactNode artifact);
     Set<ReleaseNode> getAllArtifactRelease(ArtifactNode artifact);
     void generateChangeEdge();
+    Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode);
+    NodeObject getEdgeTarget(CustomEdge edge);
 }

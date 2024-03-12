@@ -18,6 +18,7 @@ import java.util.Set;
 
 public class MainAllPossibilities {
 
+    // Graph all prosibilities
     public static void mainAllPossibilities(String[] args){
         // TODO project en argument
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
