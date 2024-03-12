@@ -25,9 +25,10 @@ public class Main {
     public static void main(String[] args){
         // TODO project en argument
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        String projectPath = "C:/Users/I542791/Desktop/expUpdate/goblinWeaver";
+        String projectPath = args[0];
         try {
             // Get pom direct dependencies
+            // TODO logger
             System.out.println(dtf.format(LocalDateTime.now())+" Get pom direct dependencies");
             List<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
             System.out.println(dtf.format(LocalDateTime.now())+" Direct dependencies number: "+pomDependencies.size());
