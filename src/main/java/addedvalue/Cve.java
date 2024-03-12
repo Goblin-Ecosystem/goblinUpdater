@@ -20,9 +20,6 @@ public class Cve implements AddedValue{
         double score = 0;
         for(Object cve : valueJsonArray){
             JSONObject cveJson = (JSONObject) cve;
-            if(getSeverityCoef(cveJson.get("severity").toString()) == 0.0){
-                System.out.println(cve);
-            }
             score += 1 * getSeverityCoef(cveJson.get("severity").toString());
         }
         return score;

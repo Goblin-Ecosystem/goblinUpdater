@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GoblinWeaverHelpers {
+    //TODO Weaver url as arg
     private static final String API_URL = "http://localhost:8080";
 
     private static JSONObject executeQuery(JSONObject bodyJsonObject, String apiRoute){
@@ -39,12 +40,13 @@ public class GoblinWeaverHelpers {
             }
             http.disconnect();
         } catch (IOException | org.json.simple.parser.ParseException e) {
-            System.out.println("Unable to connect to API:\n" + e);
+            LoggerHelpers.fatal("Unable to connect to API:\n" + e.getMessage());
         }
         return null;
     }
 
     public static JSONObject getAllPossibilitiesRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+        LoggerHelpers.info("Get all possibilities graph");
         String apiRoute = "/graph/allPossibilitiesRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
@@ -64,6 +66,7 @@ public class GoblinWeaverHelpers {
     }
 
     public static JSONObject getDirectPossibilitiesRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+        LoggerHelpers.info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
@@ -83,6 +86,7 @@ public class GoblinWeaverHelpers {
     }
 
     public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+        LoggerHelpers.info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 
         JSONObject bodyJsonObject = new JSONObject();

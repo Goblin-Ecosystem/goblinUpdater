@@ -12,6 +12,7 @@ import graph.structures.GraphStructure;
 import graph.structures.JgraphtGraphStructure;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import util.LoggerHelpers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
@@ -22,12 +23,11 @@ import java.util.stream.Collectors;
 public class JgraphtGraphGenerator implements GraphGenerator{
 
     @Override
-    public GraphStructure generateAllPossibilitiesRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute){
+    public GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute){
         GraphStructure graph = new JgraphtGraphStructure();
         // Add nodes
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         JSONArray nodesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("nodes");
-        System.out.println(dtf.format(LocalDateTime.now())+" Create "+nodesArray.size()+" vertices");
         nodesArray.parallelStream().forEach(node -> {
             JSONObject nodeJson = (JSONObject) node;
             String id = (String) nodeJson.get("id");
@@ -41,7 +41,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                             newArtifact.addAddedValue(addedValueEnum.getAddedValueClass()
                                     .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            e.printStackTrace();
+                            LoggerHelpers.warning(e.getMessage());
                         }
                     }
                     synchronized (graph) {
@@ -57,7 +57,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                             newRelease.addAddedValue(addedValueEnum.getAddedValueClass()
                                     .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            e.printStackTrace();
+                            LoggerHelpers.warning(e.getMessage());
                         }
                     }
                     synchronized (graph) {
@@ -68,7 +68,6 @@ public class JgraphtGraphGenerator implements GraphGenerator{
         });
         // Add edges
         JSONArray edgesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("edges");
-        System.out.println(dtf.format(LocalDateTime.now())+" Create "+edgesArray.size()+" edges");
         edgesArray.parallelStream().forEach(edge -> {
             JSONObject edgeJson = (JSONObject) edge;
             String sourceId = (String) edgeJson.get("sourceId");
@@ -89,6 +88,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                 }
             }
         });
+        graph.logGraphSize();
         return graph;
     }
 }

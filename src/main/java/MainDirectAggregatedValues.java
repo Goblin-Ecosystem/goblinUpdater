@@ -7,14 +7,9 @@ import graph.structures.GraphStructure;
 import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.json.simple.JSONObject;
-import util.GoblinWeaverHelpers;
-import util.MaracasHelpers;
-import util.MavenHelpers;
-import util.MavenLocalRepository;
+import util.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,24 +19,18 @@ public class MainDirectAggregatedValues {
     // Direct dependencies all possibilities & aggregated metrics
     public static void mainDirectAggregatesValues(String[] args){
         // TODO project en argument
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        String projectPath = "C:/Users/I542791/Desktop/expUpdate/goblinWeaver";
+        String projectPath = args[0];
         try {
             // Get pom direct dependencies
-            System.out.println(dtf.format(LocalDateTime.now())+" Get pom direct dependencies");
             List<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
-            System.out.println(dtf.format(LocalDateTime.now())+" Direct dependencies number: "+pomDependencies.size());
             // TODO addedValues via conf file
             List<AddedValueEnum> addedValuesToCompute = List.of(AddedValueEnum.CVE_AGGREGATED, AddedValueEnum.FRESHNESS_AGGREGATED);
-            System.out.println(dtf.format(LocalDateTime.now())+" Get direct all possibilities graph");
             JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesRootedGraph(pomDependencies, addedValuesToCompute);
             // Transform Json to JgraphT graph
-            System.out.println(dtf.format(LocalDateTime.now())+" Graph transform");
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();
-            GraphStructure graph = graphGenerator.generateAllPossibilitiesRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
-            System.out.println(dtf.format(LocalDateTime.now())+" Graph size: "+graph.getVertexSet().size()+" vertices, "+graph.getEdgeSet().size()+"edges");
+            GraphStructure graph = graphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
             // compute direct dep cost
-            System.out.println(dtf.format(LocalDateTime.now())+" Compute quality and cost");
+            LoggerHelpers.info("Compute quality and cost");
             Set<ArtifactNode> artifactDirectDeps = graph.getRootArtifactDirectDep();
             for(ArtifactNode artifactDirectDep : artifactDirectDeps){
                 // Get current used version
@@ -64,7 +53,7 @@ public class MainDirectAggregatedValues {
                 System.out.println("------------------\n");
             }
         } catch (IOException | XmlPullParserException e) {
-            e.printStackTrace();
+            LoggerHelpers.fatal(e.getMessage());
         }
     }
 

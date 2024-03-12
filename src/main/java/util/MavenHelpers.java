@@ -19,8 +19,9 @@ public class MavenHelpers {
     }
 
     public static List<Dependency> getProjectDirectDependencies(String projectPath) throws IOException, XmlPullParserException {
+        LoggerHelpers.info("Get pom direct dependencies");
         List<Dependency> resultList = new ArrayList<>();
-        System.out.println(projectPath.replace("/","\\\\"));
+        //TODO Windows specific
         List<String> lines = SystemHelpers.execCommand("cd /d "+projectPath.replace("/","\\")+ " && mvn dependency:list -DexcludeTransitive=true");
         Iterator<String> lineIterator = lines.iterator();
         String line = lineIterator.next();
@@ -44,6 +45,7 @@ public class MavenHelpers {
 
             }
         }
+        LoggerHelpers.info("Direct dependencies number: "+resultList.size());
         return resultList;
     }
 }

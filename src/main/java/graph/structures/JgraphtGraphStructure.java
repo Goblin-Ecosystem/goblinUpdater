@@ -11,6 +11,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.w3c.dom.Node;
+import util.LoggerHelpers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +65,7 @@ public class JgraphtGraphStructure implements GraphStructure{
 
     @Override
     public void generateChangeEdge() {
+        LoggerHelpers.info("Generate change edge");
         Graph<NodeObject, CustomEdge> graphCopy = new DefaultDirectedGraph<>(CustomEdge.class);
         Graphs.addGraph(graphCopy, graph);
         graphCopy.vertexSet().stream()
@@ -78,6 +80,7 @@ public class JgraphtGraphStructure implements GraphStructure{
                                     .map(graphCopy::getEdgeTarget)
                                     .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new ChangeEdge())));
                 });
+        logGraphSize();
     }
 
 
@@ -87,7 +90,7 @@ public class JgraphtGraphStructure implements GraphStructure{
                 .stream().filter(e -> e instanceof DependencyEdge)
                 .map(e -> (DependencyEdge) e).findFirst().orElse(null);
         if(edge ==  null){
-            System.out.println("Fail to get current release of: "+artifact.getId());
+            LoggerHelpers.error("Fail to get current release of: "+artifact.getId());
             return null;
         }
         String releaseId = artifact.getId()+":"+edge.getTargetVersion();
@@ -114,5 +117,10 @@ public class JgraphtGraphStructure implements GraphStructure{
     @Override
     public NodeObject getEdgeTarget(CustomEdge edge){
         return graph.getEdgeTarget(edge);
+    }
+
+    @Override
+    public void logGraphSize(){
+        LoggerHelpers.info("Graph size: "+graph.vertexSet().size()+" vertices, "+graph.edgeSet().size()+" edges");
     }
 }

@@ -28,7 +28,7 @@ public class MaracasHelpers {
             //TODO fonction d'estimation de coût
             return brokenUses.size();
         }catch (Exception e){
-            System.out.println(e);
+            LoggerHelpers.error("Maracas fail:\n"+e.getMessage());
             return 9999999.0;
         }
     }

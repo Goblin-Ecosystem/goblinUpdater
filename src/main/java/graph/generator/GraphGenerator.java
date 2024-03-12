@@ -7,5 +7,5 @@ import org.json.simple.JSONObject;
 import java.util.List;
 
 public interface GraphGenerator {
-    GraphStructure generateAllPossibilitiesRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute);
+    GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute);
 }

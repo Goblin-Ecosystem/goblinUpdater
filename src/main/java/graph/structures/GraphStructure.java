@@ -20,4 +20,5 @@ public interface GraphStructure {
     void generateChangeEdge();
     Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode);
     NodeObject getEdgeTarget(CustomEdge edge);
+    void logGraphSize();
 }

@@ -22,7 +22,7 @@ public class SystemHelpers {
                 errorHandling(process, command);
             }
         } catch (IOException e) {
-            System.out.println("Unable to run command: " + command + "\n" + e.getMessage());
+            LoggerHelpers.error("Unable to run command: " + command + "\n" + e.getMessage());
         }
         return output;
     }
@@ -38,11 +38,11 @@ public class SystemHelpers {
                 while ((line = stdError.readLine()) != null) {
                     errorSb.append(line).append("\n");
                 }
-                System.out.println("Error on command: "+command+"\n Error output: \n"+errorSb);
+                LoggerHelpers.error("Error on command: "+command+"\n Error output: \n"+errorSb);
             }
             stdError.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerHelpers.error(e.getMessage());
         }
     }
 }
