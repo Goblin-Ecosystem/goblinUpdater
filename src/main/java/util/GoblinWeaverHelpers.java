@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class GoblinWeaverHelpers {
     //TODO Weaver url as arg
-    private static final String API_URL = "http://localhost:8080";
+    private static final String API_URL = System.getProperty("weaverUrl");
 
     private static JSONObject executeQuery(JSONObject bodyJsonObject, String apiRoute){
         try {
