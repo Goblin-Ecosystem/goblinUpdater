@@ -35,7 +35,7 @@ public abstract class NodeObject {
         }
         this.quality = 0.0;
         for(AddedValue addedValue : addedValues){
-            this.quality += addedValue.getQualityScore();
+            this.quality += (addedValue.getQualityScore() * addedValue.getAddedValueEnum().getCoef());
         }
         return this.quality;
     }

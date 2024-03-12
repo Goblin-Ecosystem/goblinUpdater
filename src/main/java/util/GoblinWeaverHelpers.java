@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GoblinWeaverHelpers {
@@ -45,7 +45,7 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
-    public static JSONObject getAllPossibilitiesRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+    public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
         LoggerHelpers.info("Get all possibilities graph");
         String apiRoute = "/graph/allPossibilitiesRooted";
 
@@ -65,7 +65,7 @@ public class GoblinWeaverHelpers {
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
-    public static JSONObject getDirectPossibilitiesRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+    public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
         LoggerHelpers.info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
 
@@ -85,7 +85,7 @@ public class GoblinWeaverHelpers {
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
-    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(List<Dependency> directDependencies, List<AddedValueEnum> addedValues){
+    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
         LoggerHelpers.info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 

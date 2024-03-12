@@ -18,13 +18,11 @@ public class MainDirectAggregatedValues {
 
     // Direct dependencies all possibilities & aggregated metrics
     public static void mainDirectAggregatesValues(String[] args){
-        // TODO project en argument
-        String projectPath = args[0];
+        String projectPath = System.getProperty("projectPath");
         try {
             // Get pom direct dependencies
-            List<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
-            // TODO addedValues via conf file
-            List<AddedValueEnum> addedValuesToCompute = List.of(AddedValueEnum.CVE_AGGREGATED, AddedValueEnum.FRESHNESS_AGGREGATED);
+            Set<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
+            Set<AddedValueEnum> addedValuesToCompute = YmlConfReader.getInstance().getAddedValueEnumSet(); //TODO ICI metrics aggregated
             JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesRootedGraph(pomDependencies, addedValuesToCompute);
             // Transform Json to JgraphT graph
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();

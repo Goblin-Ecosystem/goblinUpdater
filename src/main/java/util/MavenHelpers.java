@@ -9,9 +9,9 @@ import java.util.*;
 
 public class MavenHelpers {
 
-    public static List<Dependency> getProjectDirectDependencies(String projectPath) throws IOException, XmlPullParserException {
+    public static Set<Dependency> getProjectDirectDependencies(String projectPath) throws IOException, XmlPullParserException {
         LoggerHelpers.info("Get pom direct dependencies");
-        List<Dependency> resultList = new ArrayList<>();
+        Set<Dependency> resultList = new HashSet<>();
         //TODO Windows specific
         List<String> lines = SystemHelpers.execCommand("cd /d "+projectPath.replace("/","\\")+ " && mvn dependency:list -DexcludeTransitive=true");
         Iterator<String> lineIterator = lines.iterator();

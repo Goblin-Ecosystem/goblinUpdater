@@ -8,20 +8,20 @@ import org.json.simple.JSONObject;
 import util.GoblinWeaverHelpers;
 import util.LoggerHelpers;
 import util.MavenHelpers;
+import util.YmlConfReader;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 public class Main {
 
     // Direct all possibilities & transitives dependencies
     public static void main(String[] args){
-        String projectPath = args[0];
+        String projectPath = System.getProperty("projectPath");
         try {
             // Get pom direct dependencies
-            List<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
-            // TODO addedValues via conf file
-            List<AddedValueEnum> addedValuesToCompute = List.of(AddedValueEnum.CVE, AddedValueEnum.FRESHNESS);
+            Set<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
+            Set<AddedValueEnum> addedValuesToCompute = YmlConfReader.getInstance().getAddedValueEnumSet();
             JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesWithTransitiveRootedGraph(pomDependencies, addedValuesToCompute);
             // Transform Json to JgraphT graph
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();

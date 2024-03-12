@@ -1,0 +1,5 @@
+metrics:
+  - metric: CVE
+    coef: 1
+  - metric: FRESHNESS
+    coef: 0.5

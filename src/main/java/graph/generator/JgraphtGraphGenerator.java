@@ -14,13 +14,13 @@ import org.json.simple.JSONObject;
 import util.LoggerHelpers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JgraphtGraphGenerator implements GraphGenerator{
 
     @Override
-    public GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute){
+    public GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, Set<AddedValueEnum> addedValuesToCompute){
         GraphStructure graph = new JgraphtGraphStructure();
         // Add nodes
         JSONArray nodesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("nodes");

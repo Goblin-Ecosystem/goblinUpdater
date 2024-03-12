@@ -4,8 +4,8 @@ import addedvalue.AddedValueEnum;
 import graph.structures.GraphStructure;
 import org.json.simple.JSONObject;
 
-import java.util.List;
+import java.util.Set;
 
 public interface GraphGenerator {
-    GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute);
+    GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, Set<AddedValueEnum> addedValuesToCompute);
 }
