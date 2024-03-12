@@ -22,7 +22,7 @@ public class MainDirectAggregatedValues {
         try {
             // Get pom direct dependencies
             Set<Dependency> pomDependencies = MavenHelpers.getProjectDirectDependencies(projectPath);
-            Set<AddedValueEnum> addedValuesToCompute = YmlConfReader.getInstance().getAddedValueEnumSet(); //TODO ICI metrics aggregated
+            Set<AddedValueEnum> addedValuesToCompute = YmlConfReader.getInstance().getAddedValueEnumSet(); //TODO here metrics aggregated
             JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesRootedGraph(pomDependencies, addedValuesToCompute);
             // Transform Json to JgraphT graph
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();
