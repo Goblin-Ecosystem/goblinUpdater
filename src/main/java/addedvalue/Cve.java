@@ -4,7 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Cve implements AddedValue{
-    JSONArray valueJsonArray;
+    private final JSONArray valueJsonArray;
 
     public Cve(JSONObject nodeJsonObject) {
         this.valueJsonArray = (JSONArray) nodeJsonObject.get(getAddedValueEnum().getJsonKey());

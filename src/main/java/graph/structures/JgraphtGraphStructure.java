@@ -6,19 +6,20 @@ import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.EdgeType;
 import graph.entities.nodes.ArtifactNode;
 import graph.entities.nodes.NodeObject;
+import graph.entities.nodes.NodeType;
 import graph.entities.nodes.ReleaseNode;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.w3c.dom.Node;
 import util.LoggerHelpers;
+import util.MaracasHelpers;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class JgraphtGraphStructure implements GraphStructure{
     private final Graph<NodeObject, CustomEdge> graph;
-    private Map<String, NodeObject> idToVertexMap = new HashMap<>();
+    private final Map<String, NodeObject> idToVertexMap = new HashMap<>();
 
     public JgraphtGraphStructure(){
         this.graph = new DefaultDirectedGraph<>(CustomEdge.class);
@@ -64,23 +65,37 @@ public class JgraphtGraphStructure implements GraphStructure{
     }
 
     @Override
-    public void generateChangeEdge() {
+    public void generateChangeEdge(String projectPath) {
         LoggerHelpers.info("Generate change edge");
         Graph<NodeObject, CustomEdge> graphCopy = new DefaultDirectedGraph<>(CustomEdge.class);
         Graphs.addGraph(graphCopy, graph);
         graphCopy.vertexSet().stream()
                 .filter(ReleaseNode.class::isInstance)
                 .map(ReleaseNode.class::cast)
-                .forEach(releaseNode -> {
-                    graphCopy.outgoingEdgesOf(releaseNode).stream()
-                            .filter(edge -> edge.getType().equals(EdgeType.DEPENDENCY))
-                            .map(graphCopy::getEdgeTarget)
-                            .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
-                                    .filter(edge -> edge.getType().equals(EdgeType.RELATIONSHIP_AR))
-                                    .map(graphCopy::getEdgeTarget)
-                                    .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new ChangeEdge())));
-                });
+                .forEach(releaseNode -> graphCopy.outgoingEdgesOf(releaseNode).stream()
+                        .filter(edge -> edge.getType().equals(EdgeType.DEPENDENCY))
+                        .map(graphCopy::getEdgeTarget)
+                        .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
+                                .filter(edge -> edge.getType().equals(EdgeType.RELATIONSHIP_AR))
+                                .map(graphCopy::getEdgeTarget)
+                                .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new ChangeEdge()))));
         logGraphSize();
+        LoggerHelpers.info("Compute change edge values");
+        // compute change link quality and cost
+        for(ReleaseNode sourceReleaseNode : graph.vertexSet().stream().filter(n -> n.getType().equals(NodeType.RELEASE)).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
+            double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
+            for(ChangeEdge changeEdge : getChangeEdgeOf(sourceReleaseNode)){
+                ReleaseNode targetReleaseNode = (ReleaseNode) graph.getEdgeTarget(changeEdge);
+                changeEdge.setQualityChange(targetReleaseNode.getNodeQuality() - sourceReleaseNodeQuality);
+                // Compute cost only for direct dependencies
+                if(sourceReleaseNode.getId().equals("ROOT")){
+                    changeEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa(), false)), targetReleaseNode));
+                }
+                else {
+                    changeEdge.setChangeCost(9999999.9);
+                }
+            }
+        }
     }
 
 
@@ -109,14 +124,8 @@ public class JgraphtGraphStructure implements GraphStructure{
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    public Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode){
+    private Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode){
         return graph.outgoingEdgesOf(releaseNode).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast).collect(Collectors.toSet());
-    }
-
-    @Override
-    public NodeObject getEdgeTarget(CustomEdge edge){
-        return graph.getEdgeTarget(edge);
     }
 
     @Override

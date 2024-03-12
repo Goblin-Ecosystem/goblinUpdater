@@ -1,6 +1,5 @@
 package graph.generator;
 
-import addedvalue.AddedValue;
 import addedvalue.AddedValueEnum;
 import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.EdgeType;
@@ -15,8 +14,6 @@ import org.json.simple.JSONObject;
 import util.LoggerHelpers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +23,6 @@ public class JgraphtGraphGenerator implements GraphGenerator{
     public GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, List<AddedValueEnum> addedValuesToCompute){
         GraphStructure graph = new JgraphtGraphStructure();
         // Add nodes
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         JSONArray nodesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("nodes");
         nodesArray.parallelStream().forEach(node -> {
             JSONObject nodeJson = (JSONObject) node;

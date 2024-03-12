@@ -40,10 +40,6 @@ public class ReleaseNode extends NodeObject {
         return splitedGav[0]+":"+splitedGav[1];
     }
 
-    public String getJarName(){
-        return getId().replaceAll(":","_")+".jar";
-    }
-
     public boolean dominates(ReleaseNode other) {
         return this.getNodeQuality() <= other.getNodeQuality() && this.changeCost <= other.changeCost && (this.getNodeQuality() < other.getNodeQuality() || this.changeCost < other.changeCost);
     }

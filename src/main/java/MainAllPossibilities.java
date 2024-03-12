@@ -1,6 +1,4 @@
 import addedvalue.AddedValueEnum;
-import graph.entities.nodes.ArtifactNode;
-import graph.entities.nodes.ReleaseNode;
 import graph.generator.GraphGenerator;
 import graph.generator.JgraphtGraphGenerator;
 import graph.structures.GraphStructure;
@@ -13,7 +11,6 @@ import util.MavenHelpers;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 public class MainAllPossibilities {
 
@@ -30,26 +27,7 @@ public class MainAllPossibilities {
             GraphGenerator graphGenerator = new JgraphtGraphGenerator();
             GraphStructure graph = graphGenerator.generateRootedGraphFromJsonObject(jsonAllPossibilitiesRootedGraph, addedValuesToCompute);
             // Create change edges
-            graph.generateChangeEdge();
-            // compute direct dep cost
-            LoggerHelpers.info("Compute cost");
-            Set<ArtifactNode> artifactDirectDeps = graph.getRootArtifactDirectDep();
-            for(ArtifactNode artifactDirectDep : artifactDirectDeps){
-                // Get current used version
-                ReleaseNode currentRelease = graph.getCurrentUseReleaseOfArtifact(artifactDirectDep);
-                Set<ReleaseNode> allArtifactRelease = graph.getAllArtifactRelease(artifactDirectDep);
-                for(ReleaseNode artifactRelease : allArtifactRelease){
-                    // If quality of current release > artifact release, delete node
-                    if(currentRelease.getNodeQuality() >= artifactRelease.getNodeQuality()){
-                        graph.removeVertex(artifactRelease);
-                    }
-                    // Else compute change cost
-                    else{
-                        //artifactRelease.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, currentRelease, artifactRelease));
-                        //System.out.println(dtf.format(LocalDateTime.now())+"  "+artifactRelease.getId()+" quality: "+artifactRelease.getNodeQuality()+" cost: "+artifactRelease.getChangeCost());
-                    }
-                }
-            }
+            graph.generateChangeEdge(projectPath);
             // Gurobi export
 
         } catch (IOException | XmlPullParserException e) {

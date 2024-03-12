@@ -3,7 +3,7 @@ package addedvalue;
 import org.json.simple.JSONObject;
 
 public class Freshness implements AddedValue{
-    JSONObject valueJsonObject;
+    private final JSONObject valueJsonObject;
 
     public Freshness(JSONObject nodeJsonObject) {
         this.valueJsonObject = (JSONObject) nodeJsonObject.get(getAddedValueEnum().getJsonKey());
