@@ -1,5 +1,6 @@
 package bazarRefonte;
 
+import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import io.vavr.Tuple;
@@ -12,6 +13,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
     @Override
     public <N extends UpdateNode, E extends UpdateEdge>Optional<Graphh> resolve(UpdateGraphh<N, E> updateGraph, UpdatePreferences updatePreferences) {
         //TODO
+        Loader.loadNativeLibraries();
         MPSolver problem = createProblem(updateGraph, updatePreferences);
         return solveProblem(problem, updateGraph, updatePreferences).flatMap(solution -> solutionToGraph(solution, updateGraph, updatePreferences));
     }
