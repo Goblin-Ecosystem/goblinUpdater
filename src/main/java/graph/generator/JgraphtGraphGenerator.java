@@ -3,12 +3,14 @@ package graph.generator;
 import addedvalue.AddedValueEnum;
 import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.EdgeType;
-import graph.entities.edges.RelationshipArEdge;
+import graph.entities.edges.JgraphtCustomEdge;
+import graph.entities.edges.VersionEdge;
 import graph.entities.nodes.ArtifactNode;
+import graph.entities.nodes.NodeObject;
 import graph.entities.nodes.NodeType;
 import graph.entities.nodes.ReleaseNode;
-import graph.structures.GraphStructure;
-import graph.structures.JgraphtGraphStructure;
+import graph.structures.UpdateGraph;
+import graph.structures.jgrapht.JgraphtUpdateGraph;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import util.LoggerHelpers;
@@ -17,13 +19,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JgraphtGraphGenerator implements GraphGenerator{
+public class JgraphtGraphGenerator{
 
-    @Override
-    public GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, Set<AddedValueEnum> addedValuesToCompute){
-        GraphStructure graph = new JgraphtGraphStructure();
+    public static UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute){
+        UpdateGraph<NodeObject, JgraphtCustomEdge> graph = new JgraphtUpdateGraph();
         // Add nodes
-        JSONArray nodesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("nodes");
+        JSONArray nodesArray = (JSONArray) weaverJsonGraph.get("nodes");
         nodesArray.parallelStream().forEach(node -> {
             JSONObject nodeJson = (JSONObject) node;
             String id = (String) nodeJson.get("id");
@@ -41,7 +42,7 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                         }
                     }
                     synchronized (graph) {
-                        graph.addVertex(newArtifact);
+                        graph.addNode(newArtifact);
                     }
                 }
                 case RELEASE -> {
@@ -57,13 +58,13 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                         }
                     }
                     synchronized (graph) {
-                        graph.addVertex(newRelease);
+                        graph.addNode(newRelease);
                     }
                 }
             }
         });
         // Add edges
-        JSONArray edgesArray = (JSONArray) jsonAllPossibilitiesRootedGraph.get("edges");
+        JSONArray edgesArray = (JSONArray) weaverJsonGraph.get("edges");
         edgesArray.parallelStream().forEach(edge -> {
             JSONObject edgeJson = (JSONObject) edge;
             String sourceId = (String) edgeJson.get("sourceId");
@@ -74,17 +75,17 @@ public class JgraphtGraphGenerator implements GraphGenerator{
                     String targetVersion = (String) edgeJson.get("targetVersion");
                     String scope = (String) edgeJson.get("scope");
                     synchronized (graph) {
-                        graph.addEdgeFromVertexId(sourceId, targetId, new DependencyEdge(targetVersion, scope));
+                        graph.addEdgeFromNodeId(sourceId, targetId, new DependencyEdge(targetVersion, scope));
                     }
                 }
                 case RELATIONSHIP_AR -> {
                     synchronized (graph) {
-                        graph.addEdgeFromVertexId(sourceId, targetId, new RelationshipArEdge());
+                        graph.addEdgeFromNodeId(sourceId, targetId, new VersionEdge());
                     }
                 }
             }
         });
-        graph.logGraphSize();
+        LoggerHelpers.info(graph.toString());
         return graph;
     }
 }

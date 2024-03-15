@@ -3,10 +3,10 @@ package graph.entities.edges;
 import org.jgrapht.graph.DefaultEdge;
 
 
-public abstract class CustomEdge extends DefaultEdge {
+public abstract class JgraphtCustomEdge extends DefaultEdge implements UpdateEdge{
     private final EdgeType type;
 
-    public CustomEdge(EdgeType type) {
+    public JgraphtCustomEdge(EdgeType type) {
         this.type = type;
     }
 
@@ -14,4 +14,7 @@ public abstract class CustomEdge extends DefaultEdge {
         return type;
     }
 
+    public String name(){
+        return type.toString();
+    }
 }

@@ -1,4 +1,4 @@
-package bazarRefonte;
+package graph.entities.edges;
 
 public interface UpdateEdge {
     String name();

@@ -7,4 +7,14 @@ public class ArtifactNode extends NodeObject {
         super(id, NodeType.ARTIFACT);
         this.found = found;
     }
+
+    @Override
+    public boolean isRelease() {
+        return false;
+    }
+
+    @Override
+    public boolean isLibrary() {
+        return true;
+    }
 }

@@ -1,4 +1,10 @@
-package bazarRefonte;
+package updater;
+
+import bazarRefonte.*;
+import graph.generator.GraphGenerator;
+import graph.structures.CustomGraph;
+import graph.structures.UpdateGraph;
+import project.Project;
 
 import java.util.Optional;
 
@@ -15,8 +21,8 @@ public class AbstractUpdater implements Updater {
 
     @Override
     public Optional<Project> update(Project project, UpdatePreferences updatePreferences) {
-        UpdateGraphh initialGraph = graphGenerator.computeUpdateGraph(project, updatePreferences);
-        Optional<Graphh> updatedGraph = solver.resolve(initialGraph, updatePreferences);
+        UpdateGraph initialGraph = graphGenerator.computeUpdateGraph(project, updatePreferences);
+        Optional<CustomGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
         return updatedGraph.map(ug -> projectUpdater.updateProject(project, initialGraph, ug));
     }
 }

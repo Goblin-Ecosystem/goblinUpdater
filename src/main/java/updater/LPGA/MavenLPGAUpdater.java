@@ -1,7 +1,7 @@
-package bazarRefonte;
+package updater.LPGA;
 
-import com.google.ortools.linearsolver.MPSolver;
-import org.checkerframework.checker.units.qual.A;
+import graph.generator.LPGAGraphGenerator;
+import updater.AbstractUpdater;
 
 /*
  LPGA (Local Possible, Global Analysis)
@@ -10,7 +10,7 @@ import org.checkerframework.checker.units.qual.A;
  */
 public class MavenLPGAUpdater extends AbstractUpdater {
 
-    protected MavenLPGAUpdater() {
+    public MavenLPGAUpdater() {
         super(new LPGAGraphGenerator(), new LPGAUpdateSolver(), new LPGAProjectUpdater());
     }
 }

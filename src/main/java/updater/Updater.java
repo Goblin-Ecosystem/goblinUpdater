@@ -1,4 +1,7 @@
-package bazarRefonte;
+package updater;
+
+import bazarRefonte.UpdatePreferences;
+import project.Project;
 
 import java.util.Optional;
 

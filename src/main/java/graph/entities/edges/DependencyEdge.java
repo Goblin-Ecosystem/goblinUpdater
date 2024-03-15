@@ -1,6 +1,6 @@
 package graph.entities.edges;
 
-public class DependencyEdge extends CustomEdge {
+public class DependencyEdge extends JgraphtCustomEdge {
     private final String targetVersion;
     private final String scope;
 
@@ -12,5 +12,20 @@ public class DependencyEdge extends CustomEdge {
 
     public String getTargetVersion() {
         return targetVersion;
+    }
+
+    @Override
+    public boolean isVersion() {
+        return false;
+    }
+
+    @Override
+    public boolean isDependency() {
+        return true;
+    }
+
+    @Override
+    public boolean isPossible() {
+        return false;
     }
 }

@@ -1,30 +1,36 @@
-package bazarRefonte;
+package updater.LPGA;
 
+import bazarRefonte.*;
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+import graph.entities.edges.UpdateEdge;
+import graph.entities.nodes.UpdateNode;
+import graph.structures.CustomGraph;
+import graph.structures.UpdateGraph;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import updater.UpdateSolver;
 
 import java.util.List;
 import java.util.Optional;
 
 public class LPGAUpdateSolver implements UpdateSolver {
     @Override
-    public <N extends UpdateNode, E extends UpdateEdge>Optional<Graphh> resolve(UpdateGraphh<N, E> updateGraph, UpdatePreferences updatePreferences) {
+    public <N extends UpdateNode, E extends UpdateEdge>Optional<CustomGraph> resolve(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences) {
         //TODO
         Loader.loadNativeLibraries();
         MPSolver problem = createProblem(updateGraph, updatePreferences);
         return solveProblem(problem, updateGraph, updatePreferences).flatMap(solution -> solutionToGraph(solution, updateGraph, updatePreferences));
     }
 
-    private Optional<Graphh> solutionToGraph(MPSolver solution, Graphh updateGraph, UpdatePreferences updatePreferences) {
+    private Optional<CustomGraph> solutionToGraph(MPSolver solution, CustomGraph updateGraph, UpdatePreferences updatePreferences) {
         OrLP.printSolution(solution);
         // TODO: JOYCE en second
         return Optional.empty();
     }
 
-    private Optional<MPSolver> solveProblem(MPSolver problem, Graphh updateGraph, UpdatePreferences updatePreferences) {
+    private Optional<MPSolver> solveProblem(MPSolver problem, CustomGraph updateGraph, UpdatePreferences updatePreferences) {
         MPSolver.ResultStatus result = problem.solve();
         if (result == MPSolver.ResultStatus.OPTIMAL || result == MPSolver.ResultStatus.FEASIBLE) {
             return Optional.of(problem);
@@ -35,10 +41,10 @@ public class LPGAUpdateSolver implements UpdateSolver {
         }
     }
 
-    private <N extends UpdateNode,E extends UpdateEdge> MPSolver createProblem(UpdateGraphh<N, E> updateGraph, UpdatePreferences updatePreferences) {
+    private <N extends UpdateNode,E extends UpdateEdge> MPSolver createProblem(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences) {
         MPSolver solver = MPSolver.createSolver("GLOP");
         // FIXME: moche et pas efficace !!
-        List<N> artifactNodes = updateGraph.artifactNodes();
+        List<N> artifactNodes = updateGraph.releaseNodes();
         List<N> libraryNodes = updateGraph.libraryNodes();
         List<E> versionEdges = updateGraph.versionEdges();
         List<E> dependencyEdges = updateGraph.dependencyEdges();
@@ -74,7 +80,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         for (Tuple2<String, Integer> t : testValues) {
             String e = t._1();
             Integer v = t._2();
-            N excludedNode = updateGraph.nodes(n -> n.name().equals(e)).stream().findFirst().orElse(null); // node should exists !
+            N excludedNode = updateGraph.nodes(n -> n.getId().equals(e)).stream().findFirst().orElse(null); // node should exists !
             MPVariable excludedVariable = GraphLP.artifactVariable(solver, excludedNode);
             OrLP.makeEqualityConstraint(solver, e + " not in solution", excludedVariable, v);
         }
@@ -100,7 +106,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                     .map(a -> GraphLP.artifactVariable(solver, a))
                     .toList();
             OrLP.makeEqualityWithSumConstraint(solver,
-                    "VERSION " + lib.name(),
+                    "VERSION " + lib.getId(),
                     artifacts,
                     1, vLib);
             List<MPVariable> dependants = dependencyEdges.stream()

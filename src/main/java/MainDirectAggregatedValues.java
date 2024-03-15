@@ -1,7 +1,6 @@
 import addedvalue.AddedValueEnum;
 import graph.entities.nodes.ArtifactNode;
 import graph.entities.nodes.ReleaseNode;
-import graph.generator.GraphGenerator;
 import graph.generator.JgraphtGraphGenerator;
 import graph.structures.GraphStructure;
 import org.apache.maven.model.Dependency;

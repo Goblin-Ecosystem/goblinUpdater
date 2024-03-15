@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class NodeObject {
+public abstract class NodeObject implements UpdateNode{
     private final String id;
     private final NodeType type;
     private final List<AddedValue> addedValues = new ArrayList<>();

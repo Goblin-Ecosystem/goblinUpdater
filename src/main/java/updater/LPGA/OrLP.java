@@ -1,4 +1,4 @@
-package bazarRefonte;
+package updater.LPGA;
 
 import java.util.List;
 

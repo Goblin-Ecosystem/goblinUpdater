@@ -1,7 +1,7 @@
 package graph.structures;
 
-import graph.entities.edges.ChangeEdge;
-import graph.entities.edges.CustomEdge;
+import graph.entities.edges.PossibleEdge;
+import graph.entities.edges.JgraphtCustomEdge;
 import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.EdgeType;
 import graph.entities.nodes.ArtifactNode;
@@ -18,11 +18,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JgraphtGraphStructure implements GraphStructure{
-    private final Graph<NodeObject, CustomEdge> graph;
+    private final Graph<NodeObject, JgraphtCustomEdge> graph;
     private final Map<String, NodeObject> idToVertexMap = new HashMap<>();
 
     public JgraphtGraphStructure(){
-        this.graph = new DefaultDirectedGraph<>(CustomEdge.class);
+        this.graph = new DefaultDirectedGraph<>(JgraphtCustomEdge.class);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class JgraphtGraphStructure implements GraphStructure{
     }
 
     @Override
-    public Set<CustomEdge> getEdgeSet() {
+    public Set<JgraphtCustomEdge> getEdgeSet() {
         return graph.edgeSet();
     }
 
@@ -42,7 +42,7 @@ public class JgraphtGraphStructure implements GraphStructure{
     }
 
     @Override
-    public void addEdgeFromVertexId(String fromId, String toId, CustomEdge customEdge) {
+    public void addEdgeFromVertexId(String fromId, String toId, JgraphtCustomEdge customEdge) {
         NodeObject vertexFrom = idToVertexMap.get(fromId);
         NodeObject vertexTo = idToVertexMap.get(toId);
         if(vertexFrom != null && vertexTo != null){
@@ -67,7 +67,7 @@ public class JgraphtGraphStructure implements GraphStructure{
     @Override
     public void generateChangeEdge(String projectPath) {
         LoggerHelpers.info("Generate change edge");
-        Graph<NodeObject, CustomEdge> graphCopy = new DefaultDirectedGraph<>(CustomEdge.class);
+        Graph<NodeObject, JgraphtCustomEdge> graphCopy = new DefaultDirectedGraph<>(JgraphtCustomEdge.class);
         Graphs.addGraph(graphCopy, graph);
         graphCopy.vertexSet().stream()
                 .filter(ReleaseNode.class::isInstance)
@@ -78,13 +78,13 @@ public class JgraphtGraphStructure implements GraphStructure{
                         .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
                                 .filter(edge -> edge.getType().equals(EdgeType.RELATIONSHIP_AR))
                                 .map(graphCopy::getEdgeTarget)
-                                .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new ChangeEdge()))));
+                                .forEach(possibleRelease -> graph.addEdge(releaseNode, possibleRelease, new PossibleEdge()))));
         logGraphSize();
         LoggerHelpers.info("Compute change edge values");
         // compute change link quality and cost
         for(ReleaseNode sourceReleaseNode : graph.vertexSet().stream().filter(n -> n.getType().equals(NodeType.RELEASE)).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
             double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
-            for(ChangeEdge changeEdge : getChangeEdgeOf(sourceReleaseNode)){
+            for(PossibleEdge changeEdge : getChangeEdgeOf(sourceReleaseNode)){
                 ReleaseNode targetReleaseNode = (ReleaseNode) graph.getEdgeTarget(changeEdge);
                 changeEdge.setQualityChange(targetReleaseNode.getNodeQuality() - sourceReleaseNodeQuality);
                 // Compute cost only for direct dependencies
@@ -124,8 +124,8 @@ public class JgraphtGraphStructure implements GraphStructure{
                 .collect(Collectors.toSet());
     }
 
-    private Set<ChangeEdge> getChangeEdgeOf(ReleaseNode releaseNode){
-        return graph.outgoingEdgesOf(releaseNode).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast).collect(Collectors.toSet());
+    private Set<PossibleEdge> getChangeEdgeOf(ReleaseNode releaseNode){
+        return graph.outgoingEdgesOf(releaseNode).stream().filter(PossibleEdge.class::isInstance).map(PossibleEdge.class::cast).collect(Collectors.toSet());
     }
 
     @Override

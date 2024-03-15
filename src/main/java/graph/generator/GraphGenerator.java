@@ -1,11 +1,11 @@
 package graph.generator;
 
-import addedvalue.AddedValueEnum;
-import graph.structures.GraphStructure;
-import org.json.simple.JSONObject;
+import graph.entities.edges.UpdateEdge;
+import graph.structures.UpdateGraph;
+import graph.entities.nodes.UpdateNode;
+import bazarRefonte.UpdatePreferences;
+import project.Project;
 
-import java.util.Set;
-
-public interface GraphGenerator {
-    GraphStructure generateRootedGraphFromJsonObject(JSONObject jsonAllPossibilitiesRootedGraph, Set<AddedValueEnum> addedValuesToCompute);
+public interface GraphGenerator<N extends UpdateNode, E extends UpdateEdge> {
+    UpdateGraph<N,E> computeUpdateGraph(Project project, UpdatePreferences updatePreferences);
 }

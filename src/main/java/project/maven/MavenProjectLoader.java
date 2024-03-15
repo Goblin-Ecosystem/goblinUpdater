@@ -1,19 +1,29 @@
-package util;
+package project.maven;
 
 import org.apache.maven.model.Dependency;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import project.Project;
+import project.ProjectLoader;
+import util.LoggerHelpers;
+import util.SystemHelpers;
 
-import java.io.IOException;
-import java.util.*;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
+public class MavenProjectLoader implements ProjectLoader {
 
-public class MavenHelpers {
+    public MavenProjectLoader() {
 
-    public static Set<Dependency> getProjectDirectDependencies(String projectPath) throws IOException, XmlPullParserException {
+    }
+
+    @Override
+    public Project load(Path projectPath) {
         LoggerHelpers.info("Get pom direct dependencies");
         Set<Dependency> resultList = new HashSet<>();
         //TODO Windows specific
-        List<String> lines = SystemHelpers.execCommand("cd /d "+projectPath.replace("/","\\")+ " && mvn dependency:list -DexcludeTransitive=true");
+        List<String> lines = SystemHelpers.execCommand("cd /d "+projectPath.toString().replace("/","\\")+ " && mvn dependency:list -DexcludeTransitive=true");
         Iterator<String> lineIterator = lines.iterator();
         String line = lineIterator.next();
         while(lineIterator.hasNext() && !line.contains("The following files have been resolved:")){
@@ -37,6 +47,6 @@ public class MavenHelpers {
             }
         }
         LoggerHelpers.info("Direct dependencies number: "+resultList.size());
-        return resultList;
+        return new MavenProject(resultList);
     }
 }

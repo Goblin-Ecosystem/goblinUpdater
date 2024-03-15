@@ -43,4 +43,14 @@ public class ReleaseNode extends NodeObject {
     public boolean dominates(ReleaseNode other) {
         return this.getNodeQuality() <= other.getNodeQuality() && this.changeCost <= other.changeCost && (this.getNodeQuality() < other.getNodeQuality() || this.changeCost < other.changeCost);
     }
+
+    @Override
+    public boolean isRelease() {
+        return true;
+    }
+
+    @Override
+    public boolean isLibrary() {
+        return false;
+    }
 }
