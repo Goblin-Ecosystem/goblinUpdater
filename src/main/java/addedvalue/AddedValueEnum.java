@@ -1,7 +1,6 @@
 package addedvalue;
 
 import graph.entities.nodes.NodeType;
-import util.YmlConfReader;
 
 public enum AddedValueEnum {
     CVE,
@@ -31,7 +30,4 @@ public enum AddedValueEnum {
         return this.name().toLowerCase();
     }
 
-    public double getCoef(){
-        return YmlConfReader.getInstance().getAddedValueCoef(this);
-    }
 }

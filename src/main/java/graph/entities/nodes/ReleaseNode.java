@@ -1,5 +1,7 @@
 package graph.entities.nodes;
 
+import updater.updatePreferences.UpdatePreferences;
+
 public class ReleaseNode extends NodeObject {
     private long timestamp = 0;
     private String version = "";
@@ -40,8 +42,8 @@ public class ReleaseNode extends NodeObject {
         return splitedGav[0]+":"+splitedGav[1];
     }
 
-    public boolean dominates(ReleaseNode other) {
-        return this.getNodeQuality() <= other.getNodeQuality() && this.changeCost <= other.changeCost && (this.getNodeQuality() < other.getNodeQuality() || this.changeCost < other.changeCost);
+    public boolean dominates(ReleaseNode other, UpdatePreferences updatePreferences) {
+        return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences) && this.changeCost <= other.changeCost && (this.getNodeQuality(updatePreferences) < other.getNodeQuality(updatePreferences) || this.changeCost < other.changeCost);
     }
 
     @Override

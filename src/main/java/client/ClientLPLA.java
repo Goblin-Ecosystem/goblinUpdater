@@ -1,6 +1,6 @@
 package client;
 
-import bazarRefonte.MavenPreferences;
+import updater.updatePreferences.MavenPreferences;
 import project.Project;
 import project.ProjectLoader;
 import project.maven.MavenProjectLoader;
@@ -19,8 +19,7 @@ public class ClientLPLA {
         ProjectLoader loader = new MavenProjectLoader();
         Project project = loader.load(Path.of(System.getProperty("projectPath")));
         Updater updater = new MavenLPLAUpdater();
-        //TODO: Paths
-        Optional<Project> updatedProject = updater.update(project, new MavenPreferences(Path.of("...")));
+        Optional<Project> updatedProject = updater.update(project, new MavenPreferences(Path.of(System.getProperty("confFile"))));
         updatedProject.ifPresent(up -> up.dump(Path.of("..")));
     }
 }

@@ -1,6 +1,7 @@
 package graph.entities.nodes;
 
 import addedvalue.AddedValue;
+import updater.updatePreferences.UpdatePreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +31,13 @@ public abstract class NodeObject implements UpdateNode{
         this.addedValues.add(addedValue);
     }
 
-    public double getNodeQuality(){
+    public double getNodeQuality(UpdatePreferences updatePreferences){
         if(this.quality != null){
             return this.quality;
         }
         this.quality = 0.0;
         for(AddedValue addedValue : addedValues){
-            this.quality += (addedValue.getQualityScore() * addedValue.getAddedValueEnum().getCoef()); //TODO normalize quality score
+            this.quality += (addedValue.getQualityScore() * updatePreferences.getAddedValueCoef(addedValue.getAddedValueEnum())); //TODO normalize quality score
         }
         return this.quality;
     }

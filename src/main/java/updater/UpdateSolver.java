@@ -1,6 +1,6 @@
 package updater;
 
-import bazarRefonte.*;
+import updater.updatePreferences.*;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.CustomGraph;

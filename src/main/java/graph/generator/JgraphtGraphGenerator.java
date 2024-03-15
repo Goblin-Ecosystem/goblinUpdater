@@ -1,6 +1,7 @@
 package graph.generator;
 
 import addedvalue.AddedValueEnum;
+import updater.updatePreferences.UpdatePreferences;
 import graph.entities.edges.*;
 import graph.entities.nodes.*;
 import graph.structures.CustomGraph;
@@ -87,7 +88,7 @@ public class JgraphtGraphGenerator{
         return graph;
     }
 
-    public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph){
+    public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph, UpdatePreferences updatePreferences){
         LoggerHelpers.info("Generate change edge");
         CustomGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         graphCopy.nodes().stream()
@@ -104,11 +105,11 @@ public class JgraphtGraphGenerator{
         LoggerHelpers.info("Compute change edge values");
         // compute change link quality and cost
         for(ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(UpdateNode::isRelease).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
-            double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
+            double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality(updatePreferences);
             for(UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)){
                 PossibleEdge possibleEdge = (PossibleEdge) changeEdge;
                 ReleaseNode targetReleaseNode = (ReleaseNode) graph.target(possibleEdge);
-                possibleEdge.setQualityChange(targetReleaseNode.getNodeQuality() - sourceReleaseNodeQuality);
+                possibleEdge.setQualityChange(targetReleaseNode.getNodeQuality(updatePreferences) - sourceReleaseNodeQuality);
                 // Compute cost only for direct dependencies
                 if(sourceReleaseNode.getId().equals("ROOT")){
                     possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa(), false)), targetReleaseNode));

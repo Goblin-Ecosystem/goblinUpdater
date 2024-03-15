@@ -1,8 +1,7 @@
 package updater;
 
-import bazarRefonte.*;
+import updater.updatePreferences.*;
 import graph.generator.GraphGenerator;
-import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import project.Project;
 
@@ -23,6 +22,6 @@ public class AbstractUpdater implements Updater {
     public Optional<Project> update(Project project, UpdatePreferences updatePreferences) {
         UpdateGraph initialGraph = graphGenerator.computeUpdateGraph(project, updatePreferences);
         Optional<UpdateGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
-        return updatedGraph.map(ug -> projectUpdater.updateProject(project, initialGraph, ug));
+        return updatedGraph.map(ug -> projectUpdater.updateProject(project, initialGraph, ug, updatePreferences));
     }
 }
