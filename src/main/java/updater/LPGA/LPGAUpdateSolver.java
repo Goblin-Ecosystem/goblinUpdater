@@ -14,6 +14,7 @@ import updater.UpdateSolver;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class LPGAUpdateSolver implements UpdateSolver {
     @Override
@@ -44,11 +45,11 @@ public class LPGAUpdateSolver implements UpdateSolver {
     private <N extends UpdateNode,E extends UpdateEdge> MPSolver createProblem(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences) {
         MPSolver solver = MPSolver.createSolver("GLOP");
         // FIXME: moche et pas efficace !!
-        List<N> artifactNodes = updateGraph.releaseNodes();
-        List<N> libraryNodes = updateGraph.libraryNodes();
-        List<E> versionEdges = updateGraph.versionEdges();
-        List<E> dependencyEdges = updateGraph.dependencyEdges();
-        List<E> possibilityEdges = updateGraph.possibleEdges();
+        Set<N> artifactNodes = updateGraph.releaseNodes();
+        Set<N> libraryNodes = updateGraph.libraryNodes();
+        Set<E> versionEdges = updateGraph.versionEdges();
+        Set<E> dependencyEdges = updateGraph.dependencyEdges();
+        Set<E> possibilityEdges = updateGraph.possibleEdges();
 
         // create a variable for each node in artifactNodes
         artifactNodes.forEach(n -> solver.makeBoolVar(GraphLP.artifactVariableName(n)));

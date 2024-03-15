@@ -6,9 +6,11 @@ import org.apache.maven.model.Dependency;
 import project.Project;
 
 public class MavenProject implements Project {
+    private final Path path;
     private final Set<Dependency> directDependencies;
 
-    public MavenProject(Set<Dependency> directDependencies) {
+    public MavenProject(Path path, Set<Dependency> directDependencies) {
+        this.path = path;
         this.directDependencies = directDependencies;
     }
 
@@ -20,5 +22,10 @@ public class MavenProject implements Project {
     @Override
     public Set<Dependency> getDirectDependencies() {
         return directDependencies;
+    }
+
+    @Override
+    public Path getPath() {
+        return path;
     }
 }

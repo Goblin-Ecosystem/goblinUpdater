@@ -30,4 +30,8 @@ public interface CustomGraph<N, E> {
     N target(E edge);
 
     Optional<N> rootNode();
+
+    CustomGraph<N, E> copy();
+
+    Set<E> outgoingEdgesOf(N node);
 }

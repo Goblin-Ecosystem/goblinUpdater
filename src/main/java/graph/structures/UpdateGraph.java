@@ -1,6 +1,8 @@
 package graph.structures;
 
 import graph.entities.edges.UpdateEdge;
+import graph.entities.nodes.ArtifactNode;
+import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 
 import java.util.Set;
@@ -18,4 +20,8 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     default Set<E> versionEdges(){ return this.edges(E::isVersion);}
     default Set<E> dependencyEdges(){ return this.edges(E::isDependency);}
     default Set<E> possibleEdges(){ return this.edges(E::isPossible);}
+
+    Set<E> getPossibleEdgesOf(N node);
+
+    N getCurrentUseReleaseOfArtifact(N artifact);
 }

@@ -1,21 +1,21 @@
 package graph.generator;
 
 import addedvalue.AddedValueEnum;
-import graph.entities.edges.DependencyEdge;
-import graph.entities.edges.EdgeType;
-import graph.entities.edges.JgraphtCustomEdge;
-import graph.entities.edges.VersionEdge;
+import graph.entities.edges.*;
 import graph.entities.nodes.ArtifactNode;
 import graph.entities.nodes.NodeObject;
 import graph.entities.nodes.NodeType;
 import graph.entities.nodes.ReleaseNode;
+import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import graph.structures.jgrapht.JgraphtUpdateGraph;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import util.LoggerHelpers;
+import util.MaracasHelpers;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,5 +87,38 @@ public class JgraphtGraphGenerator{
         });
         LoggerHelpers.info(graph.toString());
         return graph;
+    }
+
+    public static void generateChangeEdge(Path projectPath, UpdateGraph<NodeObject, UpdateEdge> graph){
+        LoggerHelpers.info("Generate change edge");
+        CustomGraph<NodeObject, UpdateEdge> graphCopy = graph.copy();
+        graphCopy.nodes().stream()
+                .filter(ReleaseNode.class::isInstance)
+                .map(ReleaseNode.class::cast)
+                .forEach(releaseNode -> graphCopy.outgoingEdgesOf(releaseNode).stream()
+                        .filter(UpdateEdge::isDependency)
+                        .map(graphCopy::target)
+                        .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
+                                .filter(UpdateEdge::isVersion)
+                                .map(graphCopy::target)
+                                .forEach(possibleRelease -> graph.addEdgeFromNodeId(releaseNode.getId(), possibleRelease.getId(), new PossibleEdge()))));
+        LoggerHelpers.info(graph.toString());
+        LoggerHelpers.info("Compute change edge values");
+        // compute change link quality and cost
+        for(ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(n -> n.getType().equals(NodeType.RELEASE)).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
+            double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
+            for(UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)){
+                PossibleEdge possibleEdge = (PossibleEdge) changeEdge;
+                ReleaseNode targetReleaseNode = (ReleaseNode) graph.target(possibleEdge);
+                possibleEdge.setQualityChange(targetReleaseNode.getNodeQuality() - sourceReleaseNodeQuality);
+                // Compute cost only for direct dependencies
+                if(sourceReleaseNode.getId().equals("ROOT")){
+                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa(), false)), targetReleaseNode));
+                }
+                else {
+                    possibleEdge.setChangeCost(9999999.9);
+                }
+            }
+        }
     }
 }

@@ -47,6 +47,6 @@ public class MavenProjectLoader implements ProjectLoader {
             }
         }
         LoggerHelpers.info("Direct dependencies number: "+resultList.size());
-        return new MavenProject(resultList);
+        return new MavenProject(projectPath, resultList);
     }
 }
