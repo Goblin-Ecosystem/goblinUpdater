@@ -20,8 +20,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JgraphtGraphGenerator{
+    // TODO Add interface
 
-    public static UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute){
+    public UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute){
         UpdateGraph<NodeObject, JgraphtCustomEdge> graph = new JgraphtUpdateGraph();
         // Add nodes
         JSONArray nodesArray = (JSONArray) weaverJsonGraph.get("nodes");
@@ -89,7 +90,7 @@ public class JgraphtGraphGenerator{
         return graph;
     }
 
-    public static void generateChangeEdge(Path projectPath, UpdateGraph<NodeObject, UpdateEdge> graph){
+    public void generateChangeEdge(Path projectPath, UpdateGraph<NodeObject, UpdateEdge> graph){
         LoggerHelpers.info("Generate change edge");
         CustomGraph<NodeObject, UpdateEdge> graphCopy = graph.copy();
         graphCopy.nodes().stream()

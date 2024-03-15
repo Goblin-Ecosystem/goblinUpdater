@@ -2,7 +2,6 @@ import addedvalue.AddedValueEnum;
 import graph.entities.nodes.ArtifactNode;
 import graph.entities.nodes.ReleaseNode;
 import graph.generator.JgraphtGraphGenerator;
-import graph.structures.GraphStructure;
 import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.json.simple.JSONObject;
