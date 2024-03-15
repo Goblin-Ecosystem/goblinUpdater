@@ -3,8 +3,10 @@ package graph.structures.jgrapht;
 import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.JgraphtCustomEdge;
 import graph.entities.edges.PossibleEdge;
+import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.NodeObject;
 import graph.entities.nodes.ReleaseNode;
+import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
 import util.LoggerHelpers;
 
@@ -19,8 +21,8 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
     }
 
     @Override
-    public NodeObject getCurrentUseReleaseOfArtifact(NodeObject artifact) {
-        DependencyEdge edge = graph.getAllEdges(new ReleaseNode("ROOT"), artifact)
+    public NodeObject getCurrentUseReleaseOfArtifact(UpdateNode artifact) {
+        DependencyEdge edge = graph.getAllEdges(new ReleaseNode("ROOT"), (NodeObject) artifact)
                 .stream().filter(e -> e instanceof DependencyEdge)
                 .map(e -> (DependencyEdge) e).findFirst().orElse(null);
         if(edge ==  null){
@@ -33,5 +35,22 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
                 .map(v -> (ReleaseNode) v)
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public Set<UpdateNode> getRootArtifactDirectDep() {
+        ReleaseNode root = new ReleaseNode("ROOT");
+        return graph.edgesOf(root).stream()
+                .filter(edge -> edge.isDependency() && graph.getEdgeSource(edge).equals(root))
+                .map(graph::getEdgeTarget)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<UpdateNode> getAllArtifactRelease(UpdateNode artifact) {
+        return graph.edgesOf((NodeObject) artifact).stream()
+                .filter(UpdateEdge::isVersion)
+                .map(edge -> (ReleaseNode) graph.getEdgeTarget(edge))
+                .collect(Collectors.toSet());
     }
 }

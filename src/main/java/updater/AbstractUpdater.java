@@ -22,7 +22,7 @@ public class AbstractUpdater implements Updater {
     @Override
     public Optional<Project> update(Project project, UpdatePreferences updatePreferences) {
         UpdateGraph initialGraph = graphGenerator.computeUpdateGraph(project, updatePreferences);
-        Optional<CustomGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
+        Optional<UpdateGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
         return updatedGraph.map(ug -> projectUpdater.updateProject(project, initialGraph, ug));
     }
 }

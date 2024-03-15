@@ -2,10 +2,7 @@ package graph.generator;
 
 import addedvalue.AddedValueEnum;
 import graph.entities.edges.*;
-import graph.entities.nodes.ArtifactNode;
-import graph.entities.nodes.NodeObject;
-import graph.entities.nodes.NodeType;
-import graph.entities.nodes.ReleaseNode;
+import graph.entities.nodes.*;
 import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import graph.structures.jgrapht.JgraphtUpdateGraph;
@@ -90,9 +87,9 @@ public class JgraphtGraphGenerator{
         return graph;
     }
 
-    public void generateChangeEdge(Path projectPath, UpdateGraph<NodeObject, UpdateEdge> graph){
+    public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph){
         LoggerHelpers.info("Generate change edge");
-        CustomGraph<NodeObject, UpdateEdge> graphCopy = graph.copy();
+        CustomGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         graphCopy.nodes().stream()
                 .filter(ReleaseNode.class::isInstance)
                 .map(ReleaseNode.class::cast)
@@ -106,7 +103,7 @@ public class JgraphtGraphGenerator{
         LoggerHelpers.info(graph.toString());
         LoggerHelpers.info("Compute change edge values");
         // compute change link quality and cost
-        for(ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(n -> n.getType().equals(NodeType.RELEASE)).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
+        for(ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(UpdateNode::isRelease).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
             double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality();
             for(UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)){
                 PossibleEdge possibleEdge = (PossibleEdge) changeEdge;

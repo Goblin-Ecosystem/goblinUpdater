@@ -42,6 +42,11 @@ public class JgraphtCustomGraph implements CustomGraph<NodeObject, JgraphtCustom
     }
 
     @Override
+    public void removeNode(NodeObject node) {
+        graph.removeVertex(node);
+    }
+
+    @Override
     public Set<NodeObject> nodes() {
         return graph.vertexSet();
     }

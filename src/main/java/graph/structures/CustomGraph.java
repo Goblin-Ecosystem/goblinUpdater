@@ -13,6 +13,8 @@ public interface CustomGraph<N, E> {
 
     void addEdgeFromNodeId(String fromId, String toId, E edge);
 
+    void removeNode(N node);
+
     Set<N> nodes();
 
     Set<E> edges();

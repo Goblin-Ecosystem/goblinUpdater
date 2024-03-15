@@ -4,6 +4,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 
 public abstract class JgraphtCustomEdge extends DefaultEdge implements UpdateEdge{
+    //TODO: deletes les types de edges, utiliser une seule impl
     private final EdgeType type;
 
     public JgraphtCustomEdge(EdgeType type) {

@@ -8,13 +8,14 @@ import com.github.maracas.brokenuse.DeltaImpact;
 import com.github.maracas.delta.Delta;
 import graph.entities.nodes.NodeObject;
 import graph.entities.nodes.ReleaseNode;
+import graph.entities.nodes.UpdateNode;
 
 import java.nio.file.Path;
 import java.util.Set;
 
 public class MaracasHelpers {
 
-    public static double computeChangeCost(Path projectPath, NodeObject currentRelease, ReleaseNode artifactRelease){
+    public static double computeChangeCost(Path projectPath, UpdateNode currentRelease, UpdateNode artifactRelease){
         try {
             Maracas maracas = new Maracas();
             // Setting up the library versions and clients
