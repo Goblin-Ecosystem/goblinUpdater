@@ -17,9 +17,9 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JgraphtGraphGenerator{
-    // TODO Add interface
+public class JgraphtRootedGraphGenerator implements RootedGraphGenerator{
 
+    @Override
     public UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute){
         UpdateGraph<NodeObject, JgraphtCustomEdge> graph = new JgraphtUpdateGraph();
         // Add nodes
@@ -85,6 +85,7 @@ public class JgraphtGraphGenerator{
         return graph;
     }
 
+    @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph, UpdatePreferences updatePreferences){
         LoggerHelpers.info("Generate change edge");
         CustomGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();

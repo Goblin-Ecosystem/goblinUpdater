@@ -16,7 +16,7 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
     public UpdateGraph<UpdateNode, UpdateEdge>  computeUpdateGraph(Project project, UpdatePreferences updatePreferences) {
         Set<AddedValueEnum> addedValuesToCompute = updatePreferences.getAddedValueEnumSet();
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
-        JgraphtGraphGenerator jgraphtGraphGenerator = new JgraphtGraphGenerator();
+        RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
         UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
         jgraphtGraphGenerator.generateChangeEdge(project.getPath(), updateGraph, updatePreferences);
         return updateGraph;
