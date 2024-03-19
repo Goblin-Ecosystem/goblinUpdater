@@ -34,7 +34,7 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
             double currentReleaseQuality = ((ReleaseNode) currentRelease).getNodeQuality(updatePreferences);
             for(UpdateNode artifactRelease : allArtifactRelease){
                 // If quality of current release < artifact release, delete node
-                if(currentReleaseQuality <= ((ReleaseNode) artifactRelease).getNodeQuality(updatePreferences)){
+                if(currentReleaseQuality <= ((ReleaseNode) artifactRelease).getNodeQuality(updatePreferences) && !currentRelease.equals(artifactRelease)){
                     updateGraph.removeNode(artifactRelease);
                 }
                 // Else compute change cost

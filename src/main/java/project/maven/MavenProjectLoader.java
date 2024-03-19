@@ -7,10 +7,7 @@ import util.LoggerHelpers;
 import util.SystemHelpers;
 
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MavenProjectLoader implements ProjectLoader {
 
@@ -24,8 +21,11 @@ public class MavenProjectLoader implements ProjectLoader {
         Set<Dependency> resultList = new HashSet<>();
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(projectPath.toFile());
-        //TODO: Windows specific
-        processBuilder.command("cmd", "/c", "mvn", "dependency:list", "-DexcludeTransitive=true");
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            processBuilder.command("cmd", "/c", "mvn", "dependency:list", "-DexcludeTransitive=true");
+        } else {
+            processBuilder.command("/bin/sh", "-c", "mvn", "dependency:list", "-DexcludeTransitive=true");
+        }
         List<String> lines = SystemHelpers.execCommand(processBuilder);
         Iterator<String> lineIterator = lines.iterator();
         String line = lineIterator.next();

@@ -1,5 +1,6 @@
 package updater;
 
+import graph.structures.CustomGraph;
 import updater.updatePreferences.*;
 import graph.generator.GraphGenerator;
 import graph.structures.UpdateGraph;
@@ -21,7 +22,7 @@ public class AbstractUpdater implements Updater {
     @Override
     public Optional<Project> update(Project project, UpdatePreferences updatePreferences) {
         UpdateGraph initialGraph = graphGenerator.computeUpdateGraph(project, updatePreferences);
-        Optional<UpdateGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
+        Optional<CustomGraph> updatedGraph = solver.resolve(initialGraph, updatePreferences);
         return updatedGraph.map(ug -> projectUpdater.updateProject(project, initialGraph, ug, updatePreferences));
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class NodeObject implements UpdateNode{
-    //TODO: deletes les types de nodes, utiliser une seule impl
+    //TODO: deletes les types de nodes, utiliser une seule impl ?
     private final String id;
     private final NodeType type;
     private final List<AddedValue> addedValues = new ArrayList<>();

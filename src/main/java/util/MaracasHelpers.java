@@ -16,6 +16,9 @@ import java.util.Set;
 public class MaracasHelpers {
 
     public static double computeChangeCost(Path projectPath, UpdateNode currentRelease, UpdateNode artifactRelease){
+        if(currentRelease.equals(artifactRelease)){
+            return 0.0;
+        }
         try {
             Maracas maracas = new Maracas();
             // Setting up the library versions and clients
