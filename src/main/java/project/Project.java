@@ -1,7 +1,5 @@
 package project;
 
-import org.apache.maven.model.Dependency;
-
 import java.nio.file.Path;
 import java.util.Set;
 

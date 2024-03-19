@@ -1,6 +1,6 @@
 package project.maven;
 
-import org.apache.maven.model.Dependency;
+import project.Dependency;
 import project.Project;
 import project.ProjectLoader;
 import util.LoggerHelpers;
@@ -38,11 +38,7 @@ public class MavenProjectLoader implements ProjectLoader {
                 String version = parts[3].trim();
                 String scope = parts[4].trim();
                 //TODO scope filter ???
-                Dependency dep = new Dependency();
-                dep.setGroupId(groupId);
-                dep.setArtifactId(artifactId);
-                dep.setVersion(version);
-                resultList.add(dep);
+                resultList.add(new Dependency(groupId, artifactId, version));
 
             }
         }

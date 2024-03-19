@@ -2,7 +2,8 @@ package project.maven;
 
 import java.nio.file.Path;
 import java.util.Set;
-import org.apache.maven.model.Dependency;
+
+import project.Dependency;
 import project.Project;
 
 public class MavenProject implements Project {

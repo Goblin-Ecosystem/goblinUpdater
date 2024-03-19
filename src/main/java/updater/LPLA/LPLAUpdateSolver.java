@@ -38,7 +38,11 @@ public class LPLAUpdateSolver  implements UpdateSolver {
                     isDominant = true;
                     break;
                 } else if (releaseCandidate.dominates(current, updatePreferences)) {
+                    System.out.println("-------------");
+                    System.out.println(updateGraph.nodes().size());
                     updateGraph.removeNode(current);
+                    System.out.println(updateGraph.nodes().size());
+                    System.out.println("-------------");
                 }
             }
             if (!isDominant) {

@@ -30,8 +30,7 @@ public class JgraphtGraphGenerator{
             NodeType nodeType = NodeType.valueOf((String) nodeJson.get("nodeType"));
             switch (nodeType) {
                 case ARTIFACT -> {
-                    boolean found = (boolean) nodeJson.get("found");
-                    ArtifactNode newArtifact = new ArtifactNode(id, found);
+                    ArtifactNode newArtifact = new ArtifactNode(id);
                     for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.ARTIFACT)).collect(Collectors.toSet())){
                         try {
                             newArtifact.addAddedValue(addedValueEnum.getAddedValueClass()
@@ -45,9 +44,7 @@ public class JgraphtGraphGenerator{
                     }
                 }
                 case RELEASE -> {
-                    long timestamp = (long) nodeJson.get("timestamp");
-                    String version = (String) nodeJson.get("version");
-                    ReleaseNode newRelease = new ReleaseNode(id, timestamp, version);
+                    ReleaseNode newRelease = new ReleaseNode(id);
                     for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.RELEASE)).collect(Collectors.toSet())){
                         try {
                             newRelease.addAddedValue(addedValueEnum.getAddedValueClass()
@@ -112,7 +109,7 @@ public class JgraphtGraphGenerator{
                 possibleEdge.setQualityChange(targetReleaseNode.getNodeQuality(updatePreferences) - sourceReleaseNodeQuality);
                 // Compute cost only for direct dependencies
                 if(sourceReleaseNode.getId().equals("ROOT")){
-                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa(), false)), targetReleaseNode));
+                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa())), targetReleaseNode));
                 }
                 else {
                     possibleEdge.setChangeCost(9999999.9);
