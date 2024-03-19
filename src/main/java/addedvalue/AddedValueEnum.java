@@ -26,6 +26,21 @@ public enum AddedValueEnum {
         };
     }
 
+    public boolean isAggregated(){
+        return switch (this.name()) {
+            case "CVE", "FRESHNESS"-> false;
+            case "CVE_AGGREGATED", "FRESHNESS_AGGREGATED" -> true;
+        };
+    }
+
+    public AddedValueEnum aggregatedVersion(){
+        return switch (this.name()) {
+            case "CVE"-> CVE_AGGREGATED;
+            case "FRESHNESS" -> FRESHNESS_AGGREGATED;
+            default -> this;
+        };
+    }
+
     public String getJsonKey(){
         return this.name().toLowerCase();
     }

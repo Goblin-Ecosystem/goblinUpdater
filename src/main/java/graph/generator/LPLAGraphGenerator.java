@@ -15,8 +15,7 @@ import java.util.Set;
 public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge> {
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> computeUpdateGraph(Project project, UpdatePreferences updatePreferences) {
-        //TODO get value as AGGREGATED values
-        Set<AddedValueEnum> addedValuesToCompute = updatePreferences.getAddedValueEnumSet();
+        Set<AddedValueEnum> addedValuesToCompute = updatePreferences.getAggregatedAddedValueEnumSet();
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
         JgraphtGraphGenerator jgraphtGraphGenerator = new JgraphtGraphGenerator();
         UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
@@ -43,7 +42,8 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
                     ((ReleaseNode) artifactRelease).setChangeCost(MaracasHelpers.computeChangeCost(project.getPath(), currentRelease, artifactRelease));
                 }
             }
-            MavenLocalRepository.getInstance().clearLocalRepo();
+            //TODO: clear ou pas clear
+            //MavenLocalRepository.getInstance().clearLocalRepo();
         }
     }
 }

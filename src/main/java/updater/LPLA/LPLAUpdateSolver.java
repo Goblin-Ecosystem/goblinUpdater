@@ -20,34 +20,37 @@ public class LPLAUpdateSolver  implements UpdateSolver {
         //TODO: PAS le bon résultat (return tout)
         Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
         for(UpdateNode artifactDirectDep : artifactDirectDeps){
-            UpdateNode currentRelease = updateGraph.getCurrentUseReleaseOfArtifact(artifactDirectDep);
             Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
-            findOptimals(allArtifactRelease, currentRelease, updateGraph, updatePreferences);
+            findOptimals(allArtifactRelease, (UpdateGraph<UpdateNode, UpdateEdge>) updateGraph, updatePreferences);
+            System.out.println("After find optimal: "+updateGraph.nodes().size());
         }
         return Optional.of(updateGraph);
     }
 
-    private static void findOptimals(Set<UpdateNode> allArtifactRelease, UpdateNode currentRelease, UpdateGraph updateGraph, UpdatePreferences updatePreferences) {
+    private void findOptimals(Set<UpdateNode> allArtifactRelease, UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
         List<ReleaseNode> optimals = new ArrayList<>();
 
         for (UpdateNode candidate : allArtifactRelease) {
             ReleaseNode releaseCandidate = (ReleaseNode) candidate;
             boolean isDominant = false;
+            List<ReleaseNode> toDelete = new ArrayList<>();
             for (ReleaseNode current : optimals) {
                 if (current.dominates(releaseCandidate, updatePreferences)) {
                     isDominant = true;
                     break;
                 } else if (releaseCandidate.dominates(current, updatePreferences)) {
-                    System.out.println("-------------");
-                    System.out.println(updateGraph.nodes().size());
                     updateGraph.removeNode(current);
-                    System.out.println(updateGraph.nodes().size());
-                    System.out.println("-------------");
+                    toDelete.add(current);
                 }
             }
+            optimals.removeAll(toDelete);
             if (!isDominant) {
                 optimals.add(releaseCandidate);
             }
+        }
+        System.out.println("Optimals for change: ");
+        for (ReleaseNode opti : optimals){
+            System.out.println("\t"+opti.getId() + " quality:"+opti.getNodeQuality(updatePreferences)+" cost:"+opti.getChangeCost());
         }
     }
 }
