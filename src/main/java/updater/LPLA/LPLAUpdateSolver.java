@@ -21,15 +21,12 @@ public class LPLAUpdateSolver  implements UpdateSolver {
             Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
             optimals.addAll(findOptimals(allArtifactRelease, updatePreferences));
         }
-        System.out.println("Optimal final size: "+optimals.size());
-        System.out.println("Graph size before: "+updateGraph.nodes().size());
         CustomGraph<UpdateNode, UpdateEdge> copyGraph = updateGraph.copy();
         for(UpdateNode updateNode : copyGraph.nodes()){
             if(updateNode.isRelease() && !updateNode.getId().equals("ROOT") && !optimals.contains(updateNode)){
                 updateGraph.removeNode(updateNode);
             }
         }
-        System.out.println("Graph size after: "+updateGraph.nodes().size());
         return Optional.of(updateGraph);
     }
 
