@@ -28,8 +28,8 @@ public enum AddedValueEnum {
 
     public boolean isAggregated(){
         return switch (this.name()) {
-            case "CVE", "FRESHNESS"-> false;
             case "CVE_AGGREGATED", "FRESHNESS_AGGREGATED" -> true;
+            default -> false;
         };
     }
 
@@ -37,6 +37,14 @@ public enum AddedValueEnum {
         return switch (this.name()) {
             case "CVE"-> CVE_AGGREGATED;
             case "FRESHNESS" -> FRESHNESS_AGGREGATED;
+            default -> this;
+        };
+    }
+
+    public AddedValueEnum notAggregatedVersion(){
+        return switch (this.name()) {
+            case "CVE_AGGREGATED"-> CVE;
+            case "FRESHNESS_AGGREGATED" -> FRESHNESS;
             default -> this;
         };
     }

@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SystemHelpers {
-    public static List<String> execCommand(String command) {
+    public static List<String> execCommand(ProcessBuilder processBuilder) {
         List<String> output = new ArrayList<>();
         try {
-            Process process = Runtime.getRuntime().exec(new String[]{"cmd","/c",command});
+            Process process = processBuilder.start();
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
             output = stdInput.lines().collect(Collectors.toList());
             // If no error
@@ -19,10 +19,10 @@ public class SystemHelpers {
                 stdInput.close();
             } else {
                 // Log command error
-                errorHandling(process, command);
+                errorHandling(process, String.join(" ", processBuilder.command()));
             }
         } catch (IOException e) {
-            LoggerHelpers.error("Unable to run command: " + command + "\n" + e.getMessage());
+            LoggerHelpers.error("Unable to run command: " + String.join(" ", processBuilder.command()) + "\n" + e.getMessage());
         }
         return output;
     }

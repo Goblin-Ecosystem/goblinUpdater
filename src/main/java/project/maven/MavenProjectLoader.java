@@ -22,8 +22,11 @@ public class MavenProjectLoader implements ProjectLoader {
     public Project load(Path projectPath) {
         LoggerHelpers.info("Get pom direct dependencies");
         Set<Dependency> resultList = new HashSet<>();
-        //TODO Windows specific
-        List<String> lines = SystemHelpers.execCommand("cd /d "+projectPath.toString().replace("/","\\")+ " && mvn dependency:list -DexcludeTransitive=true");
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.directory(projectPath.toFile());
+        //TODO: Windows specific
+        processBuilder.command("cmd", "/c", "mvn", "dependency:list", "-DexcludeTransitive=true");
+        List<String> lines = SystemHelpers.execCommand(processBuilder);
         Iterator<String> lineIterator = lines.iterator();
         String line = lineIterator.next();
         while(lineIterator.hasNext() && !line.contains("The following files have been resolved:")){
@@ -37,7 +40,7 @@ public class MavenProjectLoader implements ProjectLoader {
                 String artifactId = parts[1].trim();
                 String version = parts[3].trim();
                 String scope = parts[4].trim();
-                //TODO scope filter ???
+                //TODO: scope filter ???
                 resultList.add(new Dependency(groupId, artifactId, version));
 
             }

@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class LPGAUpdateSolver implements UpdateSolver {
     @Override
-    public <N extends UpdateNode, E extends UpdateEdge>Optional<CustomGraph> resolve(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences) {
+    public Optional<CustomGraph> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
         //TODO
         Loader.loadNativeLibraries();
         MPSolver problem = createProblem(updateGraph, updatePreferences);

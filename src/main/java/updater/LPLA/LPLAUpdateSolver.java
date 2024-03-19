@@ -8,49 +8,49 @@ import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import updater.UpdateSolver;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LPLAUpdateSolver  implements UpdateSolver {
 
     @Override
-    public <N extends UpdateNode, E extends UpdateEdge> Optional<CustomGraph> resolve(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences) {
+    public Optional<CustomGraph> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
         //TODO: PAS le bon résultat (return tout)
+        Set<UpdateNode> optimals = new HashSet<>();
         Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
         for(UpdateNode artifactDirectDep : artifactDirectDeps){
             Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
-            findOptimals(allArtifactRelease, (UpdateGraph<UpdateNode, UpdateEdge>) updateGraph, updatePreferences);
-            System.out.println("After find optimal: "+updateGraph.nodes().size());
+            optimals.addAll(findOptimals(allArtifactRelease, updatePreferences));
         }
-        return Optional.of(updateGraph);
+        CustomGraph<UpdateNode, UpdateEdge> resultGraph = updateGraph.copy();
+        for(UpdateNode updateNode : updateGraph.nodes()){
+            if(!optimals.contains(updateNode)){
+                resultGraph.removeNode(updateNode);
+            }
+        }
+        return Optional.of(resultGraph);
     }
 
-    private void findOptimals(Set<UpdateNode> allArtifactRelease, UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
-        List<ReleaseNode> optimals = new ArrayList<>();
+    private static List<UpdateNode> findOptimals(Set<UpdateNode> allArtifactRelease, UpdatePreferences updatePreferences) {
+        List<UpdateNode> optimals = new ArrayList<>();
 
-        for (UpdateNode candidate : allArtifactRelease) {
-            ReleaseNode releaseCandidate = (ReleaseNode) candidate;
+        for (ReleaseNode candidate : allArtifactRelease.stream().map(ReleaseNode.class::cast).collect(Collectors.toSet())) {
             boolean isDominant = false;
             List<ReleaseNode> toDelete = new ArrayList<>();
-            for (ReleaseNode current : optimals) {
-                if (current.dominates(releaseCandidate, updatePreferences)) {
+            for (ReleaseNode current : optimals.stream().map(ReleaseNode.class::cast).collect(Collectors.toSet())) {
+                if (current.dominates(candidate, updatePreferences)) {
                     isDominant = true;
                     break;
-                } else if (releaseCandidate.dominates(current, updatePreferences)) {
-                    updateGraph.removeNode(current);
+                } else if (candidate.dominates(current, updatePreferences)) {
                     toDelete.add(current);
                 }
             }
             optimals.removeAll(toDelete);
+
             if (!isDominant) {
-                optimals.add(releaseCandidate);
+                optimals.add(candidate);
             }
         }
-        System.out.println("Optimals for change: ");
-        for (ReleaseNode opti : optimals){
-            System.out.println("\t"+opti.getId() + " quality:"+opti.getNodeQuality(updatePreferences)+" cost:"+opti.getChangeCost());
-        }
+        return optimals;
     }
 }

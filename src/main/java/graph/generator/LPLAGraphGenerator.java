@@ -42,7 +42,7 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
                     ((ReleaseNode) artifactRelease).setChangeCost(MaracasHelpers.computeChangeCost(project.getPath(), currentRelease, artifactRelease));
                 }
             }
-            //TODO: clear ou pas clear
+            // TODO: clear or not clear
             //MavenLocalRepository.getInstance().clearLocalRepo();
         }
     }

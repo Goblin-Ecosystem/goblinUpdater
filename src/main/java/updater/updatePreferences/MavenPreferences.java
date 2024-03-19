@@ -37,6 +37,9 @@ public class MavenPreferences implements UpdatePreferences {
     }
 
     public double getAddedValueCoef(AddedValueEnum addedValueEnum){
+        if(metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()){
+            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
+        }
         return metricsAndCoefMap.get(addedValueEnum) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum);
     }
 

@@ -9,5 +9,5 @@ import graph.structures.UpdateGraph;
 import java.util.Optional;
 
 public interface UpdateSolver {
-    <N extends UpdateNode, E extends UpdateEdge> Optional<CustomGraph> resolve(UpdateGraph<N, E> updateGraph, UpdatePreferences updatePreferences);
+    Optional<CustomGraph> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences);
 }
