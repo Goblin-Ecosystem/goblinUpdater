@@ -30,6 +30,7 @@ public enum AddedValueEnum {
         return switch (this.name()) {
             case "CVE", "FRESHNESS"-> false;
             case "CVE_AGGREGATED", "FRESHNESS_AGGREGATED" -> true;
+            default -> false;
         };
     }
 
