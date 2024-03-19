@@ -30,7 +30,7 @@ public class MaracasHelpers {
             Delta delta = maracas.computeDelta(v1, v2);
             DeltaImpact deltaImpact = maracas.computeDeltaImpact(client, delta);
             Set<BrokenUse> brokenUses = deltaImpact.brokenUses();
-            //TODO fonction d'estimation de coût
+            //TODO: fonction d'estimation de coût
             return brokenUses.size();
         }catch (Exception e){
             LoggerHelpers.error("Maracas fail:\n"+e.getMessage());

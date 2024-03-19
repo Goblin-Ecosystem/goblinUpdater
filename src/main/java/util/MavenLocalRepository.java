@@ -50,7 +50,8 @@ public class MavenLocalRepository {
 
     private RepositorySystemSession newSession(RepositorySystem system) {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-        LocalRepository localRepo = new LocalRepository("workspace");
+        // TODO: local or .m2 ?
+        LocalRepository localRepo = new LocalRepository(localRepoPath);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
         return session;
     }

@@ -23,6 +23,7 @@ public class LPLAProjectUpdater implements ProjectUpdater {
                 System.out.println("\t"+release.getId()  + " quality: "+releaseNode.getNodeQuality(updatePreferences)+" cost: "+releaseNode.getChangeCost());
             }
         }
+        //TODO: Pas de print, mais un return des graphs
         return null;
     }
 }

@@ -15,7 +15,6 @@ public class LPLAUpdateSolver  implements UpdateSolver {
 
     @Override
     public Optional<CustomGraph> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
-        //TODO: PAS le bon résultat (return tout)
         Set<UpdateNode> optimals = new HashSet<>();
         Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
         for(UpdateNode artifactDirectDep : artifactDirectDeps){
