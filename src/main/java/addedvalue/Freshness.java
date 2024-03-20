@@ -2,7 +2,7 @@ package addedvalue;
 
 import org.json.simple.JSONObject;
 
-public class Freshness implements AddedValue{
+public class Freshness implements AddedValue {
     private final JSONObject valueJsonObject;
 
     public Freshness(JSONObject nodeJsonObject) {
@@ -10,12 +10,12 @@ public class Freshness implements AddedValue{
     }
 
     @Override
-    public AddedValueEnum getAddedValueEnum(){
+    public AddedValueEnum getAddedValueEnum() {
         return AddedValueEnum.FRESHNESS;
     }
 
     @Override
-    public double getQualityScore(){
+    public double getQualityScore() {
         return Double.parseDouble(valueJsonObject.get("numberMissedRelease").toString());
     }
 }

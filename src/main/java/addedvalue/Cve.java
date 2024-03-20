@@ -3,7 +3,7 @@ package addedvalue;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class Cve implements AddedValue{
+public class Cve implements AddedValue {
     private final JSONArray valueJsonArray;
 
     public Cve(JSONObject nodeJsonObject) {
@@ -11,14 +11,14 @@ public class Cve implements AddedValue{
     }
 
     @Override
-    public AddedValueEnum getAddedValueEnum(){
+    public AddedValueEnum getAddedValueEnum() {
         return AddedValueEnum.CVE;
     }
 
     @Override
-    public double getQualityScore(){
+    public double getQualityScore() {
         double score = 0;
-        for(Object cve : valueJsonArray){
+        for (Object cve : valueJsonArray) {
             JSONObject cveJson = (JSONObject) cve;
             score += 1 * getSeverityCoef(cveJson.get("severity").toString());
         }
