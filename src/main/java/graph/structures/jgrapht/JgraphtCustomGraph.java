@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+// FIXME: should use N extends Identifiable/E instead of UpdateNode/UpdateEdge
 public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
     protected final Graph<UpdateNode, UpdateEdge> graph; // FIXME: why not private?
     private final Map<String, UpdateNode> idToVertexMap = new HashMap<>();
