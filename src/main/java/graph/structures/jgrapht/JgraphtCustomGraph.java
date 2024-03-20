@@ -1,7 +1,7 @@
 package graph.structures.jgrapht;
 
-import graph.entities.edges.JgraphtCustomEdge;
-import graph.entities.nodes.NodeObject;
+import graph.entities.edges.AbstractEdge;
+import graph.entities.nodes.AbstractNode;
 import graph.entities.nodes.ReleaseNode;
 import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
@@ -14,72 +14,72 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class JgraphtCustomGraph implements CustomGraph<NodeObject, JgraphtCustomEdge> {
-    protected final Graph<NodeObject, JgraphtCustomEdge> graph;
-    private final Map<String, NodeObject> idToVertexMap = new HashMap<>();
+public class JgraphtCustomGraph implements CustomGraph<AbstractNode, AbstractEdge> {
+    protected final Graph<AbstractNode, AbstractEdge> graph;
+    private final Map<String, AbstractNode> idToVertexMap = new HashMap<>();
 
     public JgraphtCustomGraph(){
-        this.graph = new DefaultDirectedGraph<>(JgraphtCustomEdge.class);
+        this.graph = new DefaultDirectedGraph<>(AbstractEdge.class);
     }
 
-    public JgraphtCustomGraph(Graph<NodeObject, JgraphtCustomEdge> graph){
+    public JgraphtCustomGraph(Graph<AbstractNode, AbstractEdge> graph){
         this.graph = graph;
     }
 
     @Override
-    public void addNode(NodeObject node) {
-        idToVertexMap.put(node.getId(), node);
+    public void addNode(AbstractNode node) {
+        idToVertexMap.put(node.id(), node);
         graph.addVertex(node);
     }
 
     @Override
-    public void addEdgeFromNodeId(String fromId, String toId, JgraphtCustomEdge edge) {
-        NodeObject vertexFrom = idToVertexMap.get(fromId);
-        NodeObject vertexTo = idToVertexMap.get(toId);
+    public void addEdgeFromNodeId(String fromId, String toId, AbstractEdge edge) {
+        AbstractNode vertexFrom = idToVertexMap.get(fromId);
+        AbstractNode vertexTo = idToVertexMap.get(toId);
         if(vertexFrom != null && vertexTo != null){
             graph.addEdge(vertexFrom, vertexTo, edge);
         }
     }
 
     @Override
-    public void removeNode(NodeObject node) {
+    public void removeNode(AbstractNode node) {
         graph.removeVertex(node);
     }
 
     @Override
-    public Set<NodeObject> nodes() {
+    public Set<AbstractNode> nodes() {
         return graph.vertexSet();
     }
 
     @Override
-    public Set<JgraphtCustomEdge> edges() {
+    public Set<AbstractEdge> edges() {
         return graph.edgeSet();
     }
 
     @Override
-    public NodeObject source(JgraphtCustomEdge edge) {
+    public AbstractNode source(AbstractEdge edge) {
         return graph.getEdgeSource(edge);
     }
 
     @Override
-    public NodeObject target(JgraphtCustomEdge edge) {
+    public AbstractNode target(AbstractEdge edge) {
         return graph.getEdgeTarget(edge);
     }
 
     @Override
-    public Optional<NodeObject> rootNode() {
+    public Optional<AbstractNode> rootNode() {
         return graph.vertexSet().stream().filter(n -> n.equals(new ReleaseNode("ROOT"))).findFirst();
     }
 
     @Override
-    public CustomGraph<NodeObject, JgraphtCustomEdge> copy() {
-        Graph<NodeObject, JgraphtCustomEdge> graphCopy = new DefaultDirectedGraph<>(JgraphtCustomEdge.class);
+    public CustomGraph<AbstractNode, AbstractEdge> copy() {
+        Graph<AbstractNode, AbstractEdge> graphCopy = new DefaultDirectedGraph<>(AbstractEdge.class);
         Graphs.addGraph(graphCopy, graph);
         return new JgraphtCustomGraph(graphCopy);
     }
 
     @Override
-    public Set<JgraphtCustomEdge> outgoingEdgesOf(NodeObject node) {
+    public Set<AbstractEdge> outgoingEdgesOf(AbstractNode node) {
         return graph.outgoingEdgesOf(node);
     }
 

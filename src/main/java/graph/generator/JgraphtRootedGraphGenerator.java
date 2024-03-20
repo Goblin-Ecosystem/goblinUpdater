@@ -7,88 +7,156 @@ import graph.entities.nodes.*;
 import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import graph.structures.jgrapht.JgraphtUpdateGraph;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+
+import java.util.Optional;
+import java.util.HashSet;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import util.LoggerHelpers;
 import util.MaracasHelpers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class JgraphtRootedGraphGenerator implements RootedGraphGenerator{
+public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
+
+    final String EDGE_PREFIX = "e";
+
+    private UpdateGraph<AbstractNode, AbstractEdge> graph;
+
+    public JgraphtRootedGraphGenerator() {
+        graph = null;
+    }
+
+    private static final Optional<String> stringFromJSON(JSONObject object, String field) {
+        return Optional.ofNullable(object.get(field)).map(s -> (String) s);
+    }
+
+    private Optional<AbstractEdge> extractEdge(JSONObject edge) {
+        Optional<String> type = stringFromJSON(edge, "type");
+        if (type.isPresent()) {
+            return switch (type.get()) {
+                case "DEPENDENCY" -> extractDependencyEdge(edge);
+                case "RELATIONSHIP_AR" -> extractVersionEdge();
+                case "CHANGE" -> extractChangeEdge();
+                default -> Optional.empty();
+            };
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<AbstractEdge> extractVersionEdge() {
+        return Optional.of(new VersionEdge(IdGenerator.instance().nextId(EDGE_PREFIX)));
+    }
+
+    private Optional<AbstractEdge> extractChangeEdge() {
+        return Optional.of(new ChangeEdge(IdGenerator.instance().nextId(EDGE_PREFIX)));
+    }
+
+    private Optional<AbstractEdge> extractDependencyEdge(JSONObject edge) {
+        Optional<String> targetVersion = stringFromJSON(edge, "targetVersion");
+        Optional<String> scope = stringFromJSON(edge, "scope");
+        if (targetVersion.isPresent() && scope.isPresent()) {
+            return Optional
+                    .of(new DependencyEdge(IdGenerator.instance().nextId(EDGE_PREFIX), targetVersion.get(),
+                            scope.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private final Consumer<JSONObject> createEdge = edge -> {
+        Optional<String> sourceId = stringFromJSON(edge, "sourceId");
+        Optional<String> targetId = stringFromJSON(edge, "targetId");
+        if (sourceId.isPresent() && targetId.isPresent()) {
+            extractEdge(edge).ifPresent(e -> {
+                synchronized (graph) {
+                    graph.addEdgeFromNodeId(sourceId.get(), targetId.get(), e);
+                }
+            });
+        }
+    };
+
+    private final Function<Set<AddedValueEnum>, Consumer<JSONObject>> createNode = avs -> node -> extractNode(node)
+            .ifPresent(n -> {
+                Set<AddedValueEnum> effectiveAvs = new HashSet<>(avs);
+                effectiveAvs.retainAll(n.knownValues());
+                addValues(n, node, effectiveAvs);
+                synchronized (graph) {
+                    graph.addNode(n);
+                }
+            });
+
+    private Optional<AbstractNode> extractNode(JSONObject node) {
+        Optional<String> oType = stringFromJSON(node, "nodeType");
+        Optional<String> oId = stringFromJSON(node, "id");
+        if (oId.isPresent() && oType.isPresent()) {
+            String id = oId.get();
+            String type = oType.get();
+            return Optional.ofNullable(switch (type) {
+                case "ARTIFACT" -> new ArtifactNode(id);
+                case "RELEASE" -> new ReleaseNode(id);
+                default -> null;
+            });
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private void addValues(AbstractNode n, JSONObject node, Set<AddedValueEnum> avs) {
+        for (AddedValueEnum av : avs) {
+            try {
+                n.addAddedValue(av.getAddedValueClass()
+                        .getDeclaredConstructor(JSONObject.class)
+                        .newInstance(node));
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                LoggerHelpers.warning(e.getMessage());
+            }
+        }
+    }
 
     @Override
-    public UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute){
-        UpdateGraph<NodeObject, JgraphtCustomEdge> graph = new JgraphtUpdateGraph();
-        // Add nodes
-        JSONArray nodesArray = (JSONArray) weaverJsonGraph.get("nodes");
-        nodesArray.parallelStream().forEach(node -> {
-            JSONObject nodeJson = (JSONObject) node;
-            String id = (String) nodeJson.get("id");
-            NodeType nodeType = NodeType.valueOf((String) nodeJson.get("nodeType"));
-            switch (nodeType) {
-                case ARTIFACT -> {
-                    ArtifactNode newArtifact = new ArtifactNode(id);
-                    for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.ARTIFACT)).collect(Collectors.toSet())){
-                        try {
-                            newArtifact.addAddedValue(addedValueEnum.getAddedValueClass()
-                                    .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            LoggerHelpers.warning(e.getMessage());
-                        }
-                    }
-                    synchronized (graph) {
-                        graph.addNode(newArtifact);
-                    }
-                }
-                case RELEASE -> {
-                    ReleaseNode newRelease = new ReleaseNode(id);
-                    for(AddedValueEnum addedValueEnum : addedValuesToCompute.stream().filter(v -> v.getTargetNodeType().equals(NodeType.RELEASE)).collect(Collectors.toSet())){
-                        try {
-                            newRelease.addAddedValue(addedValueEnum.getAddedValueClass()
-                                    .getDeclaredConstructor(JSONObject.class).newInstance(nodeJson));
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            LoggerHelpers.warning(e.getMessage());
-                        }
-                    }
-                    synchronized (graph) {
-                        graph.addNode(newRelease);
-                    }
-                }
+    public UpdateGraph<AbstractNode, AbstractEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph,
+            Set<AddedValueEnum> addedValuesToCompute) {
+        graph = new JgraphtUpdateGraph();
+        // Add elements in graph
+        List<Tuple2<String, Consumer<JSONObject>>> creators = List.of(
+                Tuple.of("nodes", createNode.apply(addedValuesToCompute)),
+                Tuple.of("edges", createEdge));
+        creators.stream().forEach(t -> {
+            Object maybes = weaverJsonGraph.get(t._1());
+            if ((maybes != null) && (maybes instanceof JSONArray os)) {
+                os.parallelStream()
+                        .filter(JSONObject.class::isInstance)
+                        .forEach(n -> t._2().accept((JSONObject) n));
             }
         });
-        // Add edges
-        JSONArray edgesArray = (JSONArray) weaverJsonGraph.get("edges");
-        edgesArray.parallelStream().forEach(edge -> {
-            JSONObject edgeJson = (JSONObject) edge;
-            String sourceId = (String) edgeJson.get("sourceId");
-            String targetId = (String) edgeJson.get("targetId");
-            EdgeType edgeType = EdgeType.valueOf((String) edgeJson.get("type"));
-            switch (edgeType) {
-                case DEPENDENCY -> {
-                    String targetVersion = (String) edgeJson.get("targetVersion");
-                    String scope = (String) edgeJson.get("scope");
-                    synchronized (graph) {
-                        graph.addEdgeFromNodeId(sourceId, targetId, new DependencyEdge(targetVersion, scope));
-                    }
-                }
-                case RELATIONSHIP_AR -> {
-                    synchronized (graph) {
-                        graph.addEdgeFromNodeId(sourceId, targetId, new VersionEdge());
-                    }
-                }
-            }
-        });
+        // Log
         LoggerHelpers.info(graph.toString());
         return graph;
     }
 
     @Override
-    public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph, UpdatePreferences updatePreferences){
+    public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            UpdatePreferences updatePreferences) {
         LoggerHelpers.info("Generate change edge");
         CustomGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
+        IdGenerator generator = IdGenerator.instance();
         graphCopy.nodes().stream()
                 .filter(ReleaseNode.class::isInstance)
                 .map(ReleaseNode.class::cast)
@@ -98,21 +166,25 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator{
                         .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
                                 .filter(UpdateEdge::isVersion)
                                 .map(graphCopy::target)
-                                .forEach(possibleRelease -> graph.addEdgeFromNodeId(releaseNode.getId(), possibleRelease.getId(), new PossibleEdge()))));
+                                .forEach(possibleRelease -> graph.addEdgeFromNodeId(releaseNode.id(),
+                                        possibleRelease.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX))))));
         LoggerHelpers.info(graph.toString());
         LoggerHelpers.info("Compute change edge values");
         // compute change link quality and cost
-        for(ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(UpdateNode::isRelease).map(ReleaseNode.class::cast).collect(Collectors.toSet())){
+        for (ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(UpdateNode::isRelease)
+                .map(ReleaseNode.class::cast).collect(Collectors.toSet())) {
             double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality(updatePreferences);
-            for(UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)){
-                PossibleEdge possibleEdge = (PossibleEdge) changeEdge;
+            for (UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)) {
+                ChangeEdge possibleEdge = (ChangeEdge) changeEdge;
                 ReleaseNode targetReleaseNode = (ReleaseNode) graph.target(possibleEdge);
-                possibleEdge.setQualityChange(targetReleaseNode.getNodeQuality(updatePreferences) - sourceReleaseNodeQuality);
+                possibleEdge.setQualityChange(
+                        targetReleaseNode.getNodeQuality(updatePreferences) - sourceReleaseNodeQuality);
                 // Compute cost only for direct dependencies
-                if(sourceReleaseNode.getId().equals("ROOT")){
-                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath, graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa())), targetReleaseNode));
-                }
-                else {
+                if (sourceReleaseNode.id().equals("ROOT")) {
+                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath,
+                            graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa())),
+                            targetReleaseNode));
+                } else {
                     possibleEdge.setChangeCost(9999999.9);
                 }
             }

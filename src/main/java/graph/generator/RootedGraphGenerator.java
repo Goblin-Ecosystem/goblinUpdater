@@ -9,6 +9,7 @@ import updater.updatePreferences.UpdatePreferences;
 
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.Map;
 
 public interface RootedGraphGenerator {
     UpdateGraph generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<AddedValueEnum> addedValuesToCompute);

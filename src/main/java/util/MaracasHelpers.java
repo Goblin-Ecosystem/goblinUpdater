@@ -6,7 +6,7 @@ import com.github.maracas.SourcesDirectory;
 import com.github.maracas.brokenuse.BrokenUse;
 import com.github.maracas.brokenuse.DeltaImpact;
 import com.github.maracas.delta.Delta;
-import graph.entities.nodes.NodeObject;
+import graph.entities.nodes.AbstractNode;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 
@@ -23,8 +23,8 @@ public class MaracasHelpers {
             Maracas maracas = new Maracas();
             // Setting up the library versions and clients
             MavenLocalRepository mavenLocalRepository = MavenLocalRepository.getInstance();
-            LibraryJar v1 = LibraryJar.withoutSources(Path.of(mavenLocalRepository.downloadArtifact(currentRelease.getId())));
-            LibraryJar v2 = LibraryJar.withoutSources(Path.of(mavenLocalRepository.downloadArtifact(artifactRelease.getId())));
+            LibraryJar v1 = LibraryJar.withoutSources(Path.of(mavenLocalRepository.downloadArtifact(currentRelease.id())));
+            LibraryJar v2 = LibraryJar.withoutSources(Path.of(mavenLocalRepository.downloadArtifact(artifactRelease.id())));
             SourcesDirectory client = SourcesDirectory.of(projectPath);
 
             Delta delta = maracas.computeDelta(v1, v2);

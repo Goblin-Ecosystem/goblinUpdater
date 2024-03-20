@@ -1,9 +1,9 @@
 package graph.entities.edges;
 
-public class VersionEdge extends JgraphtCustomEdge {
+public class VersionEdge extends AbstractEdge {
 
-    public VersionEdge() {
-        super(EdgeType.RELATIONSHIP_AR);
+    public VersionEdge(String id) {
+        super(id);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class VersionEdge extends JgraphtCustomEdge {
     }
 
     @Override
-    public boolean isPossible() {
+    public boolean isChange() {
         return false;
     }
 }

@@ -46,31 +46,16 @@ public class LPGAUpdateSolver implements UpdateSolver {
         MPSolver solver = MPSolver.createSolver("GLOP");
         // FIXME: moche et pas efficace !!
         Set<N> artifactNodes = updateGraph.releaseNodes();
-        Set<N> libraryNodes = updateGraph.libraryNodes();
+        Set<N> libraryNodes = updateGraph.artifactNodes();
         Set<E> versionEdges = updateGraph.versionEdges();
         Set<E> dependencyEdges = updateGraph.dependencyEdges();
-        Set<E> possibilityEdges = updateGraph.possibleEdges();
+        Set<E> changeEdges = updateGraph.changeEdges();
 
         // create a variable for each node in artifactNodes
         artifactNodes.forEach(n -> solver.makeBoolVar(GraphLP.artifactVariableName(n)));
 
         // create a variable for each node in libraryNodes
         libraryNodes.forEach(n -> solver.makeBoolVar(GraphLP.libraryVariableName(n)));
-
-        // create a variable for each node in libraryNodes
-        // FIXME: this is costly ...
-        // libraryNodes.forEach(n -> {
-        //     long maxPossibleDependents = dependencyEdges.stream().filter(e -> graph.target(e).equals(n)).count();
-        //     solver.makeIntVar(0, maxPossibleDependents, GraphLP.libraryVariableName(n));
-        // });
-
-        // create a variable for each edge in dependencyEdges
-        // dependencyEdges.forEach(
-        //         e -> solver.makeBoolVar(GraphLP.dependencyVariableName(graph, e)));
-
-        // create a variable for each edge in possibilityEdges
-        // possibilityEdges.forEach(
-        //         e -> solver.makeBoolVar(GraphLP.possibilityVariableName(graph, e)));
 
         // testing constraints on artifact nodes
         // TODO: for tests only, to be removed later
@@ -81,7 +66,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         for (Tuple2<String, Integer> t : testValues) {
             String e = t._1();
             Integer v = t._2();
-            N excludedNode = updateGraph.nodes(n -> n.getId().equals(e)).stream().findFirst().orElse(null); // node should exists !
+            N excludedNode = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should exists !
             MPVariable excludedVariable = GraphLP.artifactVariable(solver, excludedNode);
             OrLP.makeEqualityConstraint(solver, e + " not in solution", excludedVariable, v);
         }
@@ -107,7 +92,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                     .map(a -> GraphLP.artifactVariable(solver, a))
                     .toList();
             OrLP.makeEqualityWithSumConstraint(solver,
-                    "VERSION " + lib.getId(),
+                    "VERSION " + lib.id(),
                     artifacts,
                     1, vLib);
             List<MPVariable> dependants = dependencyEdges.stream()
@@ -129,28 +114,6 @@ public class LPGAUpdateSolver implements UpdateSolver {
             MPVariable tVar = GraphLP.libraryVariable(solver, target);
             OrLP.makeSupEqualConstraint(solver, "DEP2 " + sName + "->" + tName, tVar, sVar);
         }
-
-        // create constraints for possibilities
-
-        // OPTION 1
-        // --------
-        //
-        // 1.1.) there is at most one possible arc for each dependency
-        // for all d=(s,t) in dependencyEdges, sum_{p in possibles(s,t)} (var_p) = var_s
-        // NOTE: this does not mean 1.2,
-        // e.g., if var_s=var_(s,v1)=var_v2=1 and var_(s,v2)=var_v1=0.
-        // (hence 1.2 is required)
-        //
-        // 1.2.) if there is a possible arc then its source and target are there
-        // for all p=(s,u) in possibilityEdges, var_s >= var_p and var_u >= var_p
-        // i.e., var_p => var_s and var_p => var_u
-        // NOTE: this does not mean that (var_s and var_u) => var_p, hence 1.1.
-
-        // OPTION 2
-        // --------
-        //
-        // for all d=(s,u) in possibilityEdges, (var_s and var_u) => var_p
-        // problem: how to express this in PL?
 
         // TODO: JOYCE partie qualitative
         return solver;

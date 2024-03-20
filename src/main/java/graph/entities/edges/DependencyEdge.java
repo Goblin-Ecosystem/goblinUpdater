@@ -1,17 +1,21 @@
 package graph.entities.edges;
 
-public class DependencyEdge extends JgraphtCustomEdge {
+public class DependencyEdge extends AbstractEdge {
     private final String targetVersion;
     private final String scope;
 
-    public DependencyEdge(String targetVersion, String scope) {
-        super(EdgeType.DEPENDENCY);
+    public DependencyEdge(String id, String targetVersion, String scope) {
+        super(id);
         this.targetVersion = targetVersion;
         this.scope = scope;
     }
 
-    public String getTargetVersion() {
+    public String targetVersion() {
         return targetVersion;
+    }
+
+    public String scope() {
+        return scope;
     }
 
     @Override
@@ -25,7 +29,7 @@ public class DependencyEdge extends JgraphtCustomEdge {
     }
 
     @Override
-    public boolean isPossible() {
+    public boolean isChange() {
         return false;
     }
 }

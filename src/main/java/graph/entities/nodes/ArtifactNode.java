@@ -1,9 +1,15 @@
 package graph.entities.nodes;
 
-public class ArtifactNode extends NodeObject {
+import java.util.Set;
+
+import addedvalue.AddedValueEnum;
+
+public class ArtifactNode extends AbstractNode {
+
+    private static final Set<AddedValueEnum> KNOWN_VALUES = Set.of();
 
     public ArtifactNode(String id) {
-        super(id, NodeType.ARTIFACT);
+        super(id);
     }
 
     @Override
@@ -12,7 +18,12 @@ public class ArtifactNode extends NodeObject {
     }
 
     @Override
-    public boolean isLibrary() {
+    public boolean isArtifact() {
         return true;
+    }
+
+    @Override
+    public Set<AddedValueEnum> knownValues() {
+        return KNOWN_VALUES;
     }
 }

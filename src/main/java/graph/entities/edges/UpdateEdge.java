@@ -1,8 +1,9 @@
 package graph.entities.edges;
 
-public interface UpdateEdge {
-    String name();
+import graph.structures.Identifiable;
+
+public interface UpdateEdge extends Identifiable<String> {
     boolean isVersion();
     boolean isDependency();
-    boolean isPossible(); // Change link
+    boolean isChange();
 }

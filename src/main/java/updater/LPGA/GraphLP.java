@@ -16,7 +16,7 @@ public class GraphLP {
     private static final String EP_PREFIX = "p_";
 
     public static <N extends UpdateNode> String nodeVariableName(N n, String prefix) {
-        return prefix + n.getId();
+        return prefix + n.id();
     }
 
     public static <N extends UpdateNode> String artifactVariableName(N n) {
@@ -36,7 +36,7 @@ public class GraphLP {
     }
 
     public static <N extends UpdateNode, E extends UpdateEdge> String edgeVariableName(CustomGraph<N, E> g, E e, String prefix) {
-        return prefix + e.name() + "_" + g.source(e).getId() + "->" + g.target(e).getId();
+        return prefix + e.id() + "_" + g.source(e).id() + "->" + g.target(e).id();
     }
 
     public static <N extends UpdateNode, E extends UpdateEdge>String dependencyVariableName(CustomGraph<N, E> g, E e) {

@@ -1,12 +1,19 @@
 package graph.entities.nodes;
 
+import java.util.Set;
+
+import addedvalue.AddedValueEnum;
+import static addedvalue.AddedValueEnum.*;
 import updater.updatePreferences.UpdatePreferences;
 
-public class ReleaseNode extends NodeObject {
+public class ReleaseNode extends AbstractNode {
+
+    private static final Set<AddedValueEnum> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED);
+
     private double changeCost = 0.0;
 
     public ReleaseNode(String id) {
-        super(id, NodeType.RELEASE);
+        super(id);
     }
 
     public double getChangeCost() {
@@ -17,13 +24,16 @@ public class ReleaseNode extends NodeObject {
         this.changeCost = changeCost;
     }
 
-    public String getGa(){
-        String[] splitedGav = getId().split(":");
-        return splitedGav[0]+":"+splitedGav[1];
+    public String getGa() {
+        String[] splitedGav = id().split(":");
+        return splitedGav[0] + ":" + splitedGav[1];
     }
 
     public boolean dominates(ReleaseNode other, UpdatePreferences updatePreferences) {
-        return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences) && this.changeCost <= other.changeCost && (this.getNodeQuality(updatePreferences) < other.getNodeQuality(updatePreferences) || this.changeCost < other.changeCost);
+        return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences)
+                && this.changeCost <= other.changeCost
+                && (this.getNodeQuality(updatePreferences) < other.getNodeQuality(updatePreferences)
+                        || this.changeCost < other.changeCost);
     }
 
     @Override
@@ -32,7 +42,12 @@ public class ReleaseNode extends NodeObject {
     }
 
     @Override
-    public boolean isLibrary() {
+    public boolean isArtifact() {
         return false;
+    }
+
+    @Override
+    public Set<AddedValueEnum> knownValues() {
+        return KNOWN_VALUES;
     }
 }

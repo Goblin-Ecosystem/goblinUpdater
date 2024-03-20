@@ -1,11 +1,11 @@
 package graph.entities.edges;
 
-public class PossibleEdge extends JgraphtCustomEdge {
-    public double qualityChange;
-    public double changeCost;
+public class ChangeEdge extends AbstractEdge {
+    private double qualityChange;
+    private double changeCost;
 
-    public PossibleEdge() {
-        super(EdgeType.CHANGE);
+    public ChangeEdge(String id) {
+        super(id);
     }
 
     public double getQualityChange() {
@@ -35,7 +35,7 @@ public class PossibleEdge extends JgraphtCustomEdge {
     }
 
     @Override
-    public boolean isPossible() {
+    public boolean isChange() {
         return true;
     }
 }

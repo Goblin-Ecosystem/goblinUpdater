@@ -1,7 +1,12 @@
 package graph.entities.nodes;
 
-public interface UpdateNode {
-    String getId();
+import graph.structures.Identifiable;
+import java.util.Set;
+
+import addedvalue.AddedValueEnum;
+
+public interface UpdateNode extends Identifiable<String> {
     boolean isRelease();
-    boolean isLibrary();
+    boolean isArtifact();
+    Set<AddedValueEnum> knownValues();
 }

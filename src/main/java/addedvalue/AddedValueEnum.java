@@ -1,55 +1,45 @@
 package addedvalue;
 
-import graph.entities.nodes.NodeType;
-
 public enum AddedValueEnum {
     CVE,
     CVE_AGGREGATED,
     FRESHNESS,
     FRESHNESS_AGGREGATED;
 
-
-    public Class<? extends AddedValue> getAddedValueClass(){
-        return switch (this.name()) {
-            case "CVE" -> Cve.class;
-            case "CVE_AGGREGATED" -> CveAggregated.class;
-            case "FRESHNESS" -> Freshness.class;
-            case "FRESHNESS_AGGREGATED" -> FreshnessAggregated.class;
+    public Class<? extends AddedValue> getAddedValueClass() {
+        return switch (this) {
+            case CVE -> Cve.class;
+            case CVE_AGGREGATED -> CveAggregated.class;
+            case FRESHNESS -> Freshness.class;
+            case FRESHNESS_AGGREGATED -> FreshnessAggregated.class;
             default -> null;
         };
     }
 
-    public NodeType getTargetNodeType(){
-        return switch (this.name()) {
-            case "CVE", "CVE_AGGREGATED", "FRESHNESS", "FRESHNESS_AGGREGATED" -> NodeType.RELEASE;
-            default -> null;
-        };
-    }
-
-    public boolean isAggregated(){
-        return switch (this.name()) {
-            case "CVE_AGGREGATED", "FRESHNESS_AGGREGATED" -> true;
+    public boolean isAggregated() {
+        return switch (this) {
+            case CVE_AGGREGATED, FRESHNESS_AGGREGATED -> true;
             default -> false;
         };
     }
 
-    public AddedValueEnum aggregatedVersion(){
-        return switch (this.name()) {
-            case "CVE"-> CVE_AGGREGATED;
-            case "FRESHNESS" -> FRESHNESS_AGGREGATED;
+    public AddedValueEnum aggregatedVersion() {
+        return switch (this) {
+            case CVE -> CVE_AGGREGATED;
+            case FRESHNESS -> FRESHNESS_AGGREGATED;
             default -> this;
         };
     }
 
-    public AddedValueEnum notAggregatedVersion(){
-        return switch (this.name()) {
-            case "CVE_AGGREGATED"-> CVE;
-            case "FRESHNESS_AGGREGATED" -> FRESHNESS;
+    public AddedValueEnum notAggregatedVersion() {
+        return switch (this) {
+            case CVE_AGGREGATED -> CVE;
+            case FRESHNESS_AGGREGATED -> FRESHNESS;
             default -> this;
         };
     }
 
-    public String getJsonKey(){
+    public String getJsonKey() {
         return this.name().toLowerCase();
     }
 

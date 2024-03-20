@@ -23,7 +23,7 @@ public class LPLAUpdateSolver  implements UpdateSolver {
         }
         CustomGraph<UpdateNode, UpdateEdge> copyGraph = updateGraph.copy();
         for(UpdateNode updateNode : copyGraph.nodes()){
-            if(updateNode.isRelease() && !updateNode.getId().equals("ROOT") && !optimals.contains(updateNode)){
+            if(updateNode.isRelease() && !updateNode.id().equals("ROOT") && !optimals.contains(updateNode)){
                 updateGraph.removeNode(updateNode);
             }
         }
