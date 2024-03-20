@@ -64,16 +64,16 @@ public class LPGAUpdateSolver implements UpdateSolver {
         // testing constraints on artifact nodes
         // TODO: for tests only, to be removed later
         List<Tuple2<String, Integer>> testValues = List.of(
-                Tuple.of("j", 0),
-                Tuple.of("d", 0),
-                Tuple.of("f", 1));
+                // Tuple.of("j", 0),
+                // Tuple.of("d", 0),
+                // Tuple.of("f", 1)
+        );
         for (Tuple2<String, Integer> t : testValues) {
             String e = t._1();
             Integer v = t._2();
-            N excludedNode = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should
-                                                                                                         // exists !
-            MPVariable excludedVariable = GraphLP.artifactVariable(solver, excludedNode);
-            OrLP.makeEqualityConstraint(solver, e + " not in solution", excludedVariable, v);
+            N node = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should exists
+            MPVariable excludedVariable = GraphLP.artifactVariable(solver, node);
+            OrLP.makeEqualityConstraint(solver, "constraint on " + e, excludedVariable, v);
         }
 
         // create a constraint stating that the variable for the root node equals 1

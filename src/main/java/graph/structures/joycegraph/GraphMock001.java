@@ -20,7 +20,7 @@ import static graph.structures.joycegraph.GraphMock001.EdgeType.*;
 
 import java.util.Optional;
 
-public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock001.Edge001> {
+public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     public enum NodeType {
         RELEASE, ARTIFACT;
@@ -53,7 +53,7 @@ public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock
 
     }
 
-    public record Edge001(String id, EdgeType type, Node001 source, Node001 target)
+    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target)
             implements UpdateEdge {
 
         @Override
@@ -73,39 +73,39 @@ public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock
 
     }
 
-    private Set<Node001> nodes;
-    private Set<Edge001> edges;
-    private Node001 root;
+    private Set<UpdateNode> nodes;
+    private Set<UpdateEdge> edges;
+    private UpdateNode root;
 
-    private Node001 addNode(String id, NodeType type) {
-        Node001 node = new Node001(id, type);
-        nodes.add(node);
+    private UpdateNode addNode(String id, NodeType type) {
+        UpdateNode node = new Node001(id, type);
+        addNode(node);
         return node;
     }
 
     @Override
-    public void addNode(Node001 node) {
-        addNode(node.id(), node.type());
+    public void addNode(UpdateNode node) {
+        nodes.add(node);
     }
 
-    private Edge001 addEdge(String id, EdgeType type, String source, String target) {
-        Optional<Node001> ns = getNodeById(source);
-        Optional<Node001> nt = getNodeById(target);
+    private UpdateEdge addEdge(String id, EdgeType type, String source, String target) {
+        Optional<UpdateNode> ns = getNodeById(source);
+        Optional<UpdateNode> nt = getNodeById(target);
         if (ns.isEmpty())
             throw new IllegalArgumentException("source node not found");
         if (nt.isEmpty())
             throw new IllegalArgumentException("target node not found");
-        Edge001 edge = new Edge001(id, type, ns.get(), nt.get());
-        edges.add(edge);
+        UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get());
+        addEdgeFromNodeId(ns.get().id(), nt.get().id(), edge);
         return edge;
     }
 
     @Override
-    public void addEdgeFromNodeId(String fromId, String toId, Edge001 edge) {
-        addEdge(edge.id(), edge.type(), fromId, toId);
+    public void addEdgeFromNodeId(String fromId, String toId, UpdateEdge edge) {
+        edges.add(edge);
     }
 
-    private void setRoot(Node001 root) {
+    private void setRoot(UpdateNode root) {
         this.root = root;
     }
 
@@ -116,36 +116,36 @@ public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock
     }
 
     @Override
-    public Set<Node001> nodes() {
+    public Set<UpdateNode> nodes() {
         return nodes;
     }
 
     @Override
-    public Set<Edge001> edges() {
+    public Set<UpdateEdge> edges() {
         return edges;
     }
 
-    private Optional<Node001> getNodeById(String id) {
+    private Optional<UpdateNode> getNodeById(String id) {
         return nodes.stream().filter(n -> n.id().equals(id)).findFirst();
     }
 
     @Override
-    public Node001 source(Edge001 e) {
-        return e.source();
+    public UpdateNode source(UpdateEdge e) {
+        return ((Edge001) e).source(); // FIXME: wrong
     }
 
     @Override
-    public Node001 target(Edge001 e) {
-        return e.target();
+    public UpdateNode target(UpdateEdge e) {
+        return ((Edge001) e).target(); // FIXME: wrong
     }
 
     @Override
-    public Optional<Node001> rootNode() {
+    public Optional<UpdateNode> rootNode() {
         return Optional.ofNullable(root);
     }
 
     // examples : make 1 static final method for each
-    public static final GraphMock001 example001() {
+    public static final UpdateGraph<UpdateNode, UpdateEdge> example001() {
         // CHANGE HERE
         GraphMock001 graph = new GraphMock001();
         String root = "a";
@@ -166,7 +166,7 @@ public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock
         // setup
         int idEdge = 0;
         // root
-        Node001 rootNode = graph.addNode(root, ARTIFACT);
+        UpdateNode rootNode = graph.addNode(root, ARTIFACT);
         graph.setRoot(rootNode);
         // other releases
         for (String r : releases) {
@@ -197,43 +197,43 @@ public class GraphMock001 implements UpdateGraph<GraphMock001.Node001, GraphMock
     }
 
     @Override
-    public void removeNode(Node001 node) {
+    public void removeNode(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'removeNode'");
     }
 
     @Override
-    public Set<Edge001> outgoingEdgesOf(Node001 node) {
+    public Set<UpdateEdge> outgoingEdgesOf(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'outgoingEdgesOf'");
     }
 
     @Override
-    public Set<Edge001> getPossibleEdgesOf(Node001 node) {
+    public Set<UpdateEdge> getPossibleEdgesOf(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getPossibleEdgesOf'");
     }
 
     @Override
-    public Node001 getCurrentUseReleaseOfArtifact(Node001 artifact) {
+    public Node001 getCurrentUseReleaseOfArtifact(UpdateNode artifact) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getCurrentUseReleaseOfArtifact'");
     }
 
     @Override
-    public Set<Node001> getRootArtifactDirectDep() {
+    public Set<UpdateNode> getRootArtifactDirectDep() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getRootArtifactDirectDep'");
     }
 
     @Override
-    public Set<Node001> getAllArtifactRelease(Node001 artifact) {
+    public Set<UpdateNode> getAllArtifactRelease(UpdateNode artifact) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAllArtifactRelease'");
     }
 
     @Override
-    public UpdateGraph<Node001, Edge001> copy() {
+    public UpdateGraph<UpdateNode, UpdateEdge> copy() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
