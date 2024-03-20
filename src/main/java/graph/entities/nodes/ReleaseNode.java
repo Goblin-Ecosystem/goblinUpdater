@@ -3,9 +3,8 @@ package graph.entities.nodes;
 import java.util.Set;
 
 import addedvalue.AddedValueEnum;
-import updater.preferences.UpdatePreferences;
-
 import static addedvalue.AddedValueEnum.*;
+import updater.preferences.UpdatePreferences;
 
 public class ReleaseNode extends AbstractNode {
 

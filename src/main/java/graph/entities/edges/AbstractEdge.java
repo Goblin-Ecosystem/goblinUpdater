@@ -2,7 +2,6 @@ package graph.entities.edges;
 
 import org.jgrapht.graph.DefaultEdge;
 
-
 public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
 
     private String id;
@@ -13,7 +12,7 @@ public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
     }
 
     @Override
-    public String id(){
+    public String id() {
         return this.id;
     }
 }
