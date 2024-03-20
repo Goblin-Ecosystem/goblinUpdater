@@ -51,13 +51,7 @@ public class GoblinWeaverHelpers {
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
-        for(Dependency directDependency : directDependencies) {
-            JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.groupId());
-            releaseJsonObject.put("artifactId", directDependency.artifactId());
-            releaseJsonObject.put("version", directDependency.version());
-            releasesArray.add(releaseJsonObject);
-        }
+        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
         JSONArray addedValuesArray = new JSONArray();
         addedValuesArray.addAll(addedValues.stream().map(AddedValueEnum::toString).collect(Collectors.toList()));
@@ -72,13 +66,7 @@ public class GoblinWeaverHelpers {
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
-        for(Dependency directDependency : directDependencies) {
-            JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.groupId());
-            releaseJsonObject.put("artifactId", directDependency.artifactId());
-            releaseJsonObject.put("version", directDependency.version());
-            releasesArray.add(releaseJsonObject);
-        }
+        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
         JSONArray addedValuesArray = new JSONArray();
         addedValuesArray.addAll(addedValues.stream().map(AddedValueEnum::toString).collect(Collectors.toList()));
@@ -93,17 +81,19 @@ public class GoblinWeaverHelpers {
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
-        for(Dependency directDependency : directDependencies) {
-            JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.groupId());
-            releaseJsonObject.put("artifactId", directDependency.artifactId());
-            releaseJsonObject.put("version", directDependency.version());
-            releasesArray.add(releaseJsonObject);
-        }
+        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
         JSONArray addedValuesArray = new JSONArray();
         addedValuesArray.addAll(addedValues.stream().map(AddedValueEnum::toString).collect(Collectors.toList()));
         bodyJsonObject.put("addedValues", addedValuesArray);
         return executeQuery(bodyJsonObject, apiRoute);
+    }
+
+    private static JSONObject getReleaseJsonObject(Dependency directDependency) {
+        JSONObject releaseJsonObject = new JSONObject();
+        releaseJsonObject.put("groupId", directDependency.groupId());
+        releaseJsonObject.put("artifactId", directDependency.artifactId());
+        releaseJsonObject.put("version", directDependency.version());
+        return releaseJsonObject;
     }
 }
