@@ -1,4 +1,4 @@
-package updater.LPGA;
+package updater.lpga;
 
 import graph.generator.LPGAGraphGenerator;
 import updater.AbstractUpdater;

@@ -1,4 +1,4 @@
-package updater.LPLA;
+package updater.lpla;
 
 import graph.generator.LPLAGraphGenerator;
 import updater.AbstractUpdater;

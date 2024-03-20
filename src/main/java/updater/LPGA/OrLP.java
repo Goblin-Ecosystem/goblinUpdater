@@ -1,4 +1,4 @@
-package updater.LPGA;
+package updater.lpga;
 
 import java.util.List;
 

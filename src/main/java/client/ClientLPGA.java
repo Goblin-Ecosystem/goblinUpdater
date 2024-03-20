@@ -3,9 +3,9 @@ package client;
 import project.maven.MavenProjectLoader;
 import project.Project;
 import project.ProjectLoader;
-import updater.LPGA.MavenLPGAUpdater;
 import updater.preferences.*;
 import updater.Updater;
+import updater.lpga.MavenLPGAUpdater;
 
 import java.nio.file.Path;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package updater.LPGA;
+package updater.lpga;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;
