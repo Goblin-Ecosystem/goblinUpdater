@@ -53,9 +53,9 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         for(Dependency directDependency : directDependencies) {
             JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.getGroupId());
-            releaseJsonObject.put("artifactId", directDependency.getArtifactId());
-            releaseJsonObject.put("version", directDependency.getVersion());
+            releaseJsonObject.put("groupId", directDependency.groupId());
+            releaseJsonObject.put("artifactId", directDependency.artifactId());
+            releaseJsonObject.put("version", directDependency.version());
             releasesArray.add(releaseJsonObject);
         }
         bodyJsonObject.put("releases", releasesArray);
@@ -74,9 +74,9 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         for(Dependency directDependency : directDependencies) {
             JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.getGroupId());
-            releaseJsonObject.put("artifactId", directDependency.getArtifactId());
-            releaseJsonObject.put("version", directDependency.getVersion());
+            releaseJsonObject.put("groupId", directDependency.groupId());
+            releaseJsonObject.put("artifactId", directDependency.artifactId());
+            releaseJsonObject.put("version", directDependency.version());
             releasesArray.add(releaseJsonObject);
         }
         bodyJsonObject.put("releases", releasesArray);
@@ -95,9 +95,9 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         for(Dependency directDependency : directDependencies) {
             JSONObject releaseJsonObject = new JSONObject();
-            releaseJsonObject.put("groupId", directDependency.getGroupId());
-            releaseJsonObject.put("artifactId", directDependency.getArtifactId());
-            releaseJsonObject.put("version", directDependency.getVersion());
+            releaseJsonObject.put("groupId", directDependency.groupId());
+            releaseJsonObject.put("artifactId", directDependency.artifactId());
+            releaseJsonObject.put("version", directDependency.version());
             releasesArray.add(releaseJsonObject);
         }
         bodyJsonObject.put("releases", releasesArray);
