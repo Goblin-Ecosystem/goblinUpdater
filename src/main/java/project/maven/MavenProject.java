@@ -17,7 +17,7 @@ public class MavenProject implements Project {
 
     @Override
     public void dump(Path path) {
-        //TODO: dump
+        // TODO: dump
     }
 
     @Override

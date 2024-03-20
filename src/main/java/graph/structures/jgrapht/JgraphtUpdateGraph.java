@@ -16,7 +16,8 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
 
     @Override
     public Set<UpdateEdge> getPossibleEdgesOf(UpdateNode node) {
-        return graph.outgoingEdgesOf(node).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast).collect(Collectors.toSet());
+        return graph.outgoingEdgesOf(node).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -24,11 +25,11 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
         DependencyEdge edge = graph.getAllEdges(new ReleaseNode("ROOT"), artifact)
                 .stream().filter(DependencyEdge.class::isInstance)
                 .map(e -> (DependencyEdge) e).findFirst().orElse(null);
-        if(edge ==  null){
-            LoggerHelpers.error("Fail to get current release of: "+artifact.id());
+        if (edge == null) {
+            LoggerHelpers.error("Fail to get current release of: " + artifact.id());
             return null;
         }
-        String releaseId = artifact.id()+":"+edge.targetVersion();
+        String releaseId = artifact.id() + ":" + edge.targetVersion();
         return graph.vertexSet().stream()
                 .filter(v -> v.id().equals(releaseId) && v instanceof ReleaseNode)
                 .map(v -> (ReleaseNode) v)
@@ -52,4 +53,10 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
                 .map(edge -> (ReleaseNode) graph.getEdgeTarget(edge))
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public UpdateGraph<UpdateNode, UpdateEdge> copy() {
+        return (UpdateGraph<UpdateNode, UpdateEdge>) super.copy();
+    }
+
 }

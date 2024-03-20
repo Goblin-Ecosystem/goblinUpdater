@@ -18,46 +18,48 @@ public class MavenPreferences implements UpdatePreferences {
         this.metricsAndCoefMap = generateMetricAndCoefMap(confMap);
     }
 
-    public Set<AddedValueEnum> getAddedValueEnumSet(){
-        return  metricsAndCoefMap.keySet();
+    public Set<AddedValueEnum> getAddedValueEnumSet() {
+        return metricsAndCoefMap.keySet();
     }
 
     @Override
     public Set<AddedValueEnum> getAggregatedAddedValueEnumSet() {
         Set<AddedValueEnum> aggregatedAddedValues = new HashSet<>();
-        for(AddedValueEnum addedValueEnum : metricsAndCoefMap.keySet()){
-            if(addedValueEnum.isAggregated()){
+        for (AddedValueEnum addedValueEnum : metricsAndCoefMap.keySet()) {
+            if (addedValueEnum.isAggregated()) {
                 aggregatedAddedValues.add(addedValueEnum);
-            }
-            else {
+            } else {
                 aggregatedAddedValues.add(addedValueEnum.aggregatedVersion());
             }
         }
         return aggregatedAddedValues;
     }
 
-    public double getAddedValueCoef(AddedValueEnum addedValueEnum){
-        if(metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()){
-            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
+    public double getAddedValueCoef(AddedValueEnum addedValueEnum) {
+        if (metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()) {
+            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0
+                    : metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
         }
         return metricsAndCoefMap.get(addedValueEnum) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum);
     }
 
-    private Map<AddedValueEnum, Double> generateMetricAndCoefMap(Map<String, Object> confMap){
+    private Map<AddedValueEnum, Double> generateMetricAndCoefMap(Map<String, Object> confMap) {
+        // FIXME: hides field at line 14.
         Map<AddedValueEnum, Double> metricsAndCoefMap = new HashMap<>();
-        for(Map<String, Object> map : (List<Map<String, Object>>) confMap.get("metrics")){
-            metricsAndCoefMap.put(AddedValueEnum.valueOf(map.get("metric").toString().toUpperCase()), Double.parseDouble(map.get("coef").toString()));
+        for (Map<String, Object> map : (List<Map<String, Object>>) confMap.get("metrics")) {
+            metricsAndCoefMap.put(AddedValueEnum.valueOf(map.get("metric").toString().toUpperCase()),
+                    Double.parseDouble(map.get("coef").toString()));
         }
         return metricsAndCoefMap;
     }
 
-    private Map<String, Object> getYmlMap(Path path){
+    private Map<String, Object> getYmlMap(Path path) {
         Yaml yaml = new Yaml();
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(path.toFile());
         } catch (FileNotFoundException e) {
-            LoggerHelpers.fatal("Fail to load the conf file:\n"+e.getMessage());
+            LoggerHelpers.fatal("Fail to load the conf file:\n" + e.getMessage());
         }
         return yaml.load(inputStream);
     }

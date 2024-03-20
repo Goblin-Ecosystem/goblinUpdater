@@ -3,7 +3,6 @@ package updater.LPLA;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
-import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import updater.UpdateSolver;
 import updater.preferences.UpdatePreferences;
@@ -14,14 +13,15 @@ import java.util.stream.Collectors;
 public class LPLAUpdateSolver  implements UpdateSolver {
 
     @Override
-    public Optional<CustomGraph> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
+    public Optional<UpdateGraph<UpdateNode, UpdateEdge>> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
         Set<UpdateNode> optimals = new HashSet<>();
         Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
         for(UpdateNode artifactDirectDep : artifactDirectDeps){
             Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
             optimals.addAll(findOptimals(allArtifactRelease, updatePreferences));
         }
-        CustomGraph<UpdateNode, UpdateEdge> copyGraph = updateGraph.copy();
+        // FIXME: is it working with a reference copy only?
+        UpdateGraph<UpdateNode, UpdateEdge> copyGraph = updateGraph.copy();
         for(UpdateNode updateNode : copyGraph.nodes()){
             if(updateNode.isRelease() && !updateNode.id().equals("ROOT") && !optimals.contains(updateNode)){
                 updateGraph.removeNode(updateNode);

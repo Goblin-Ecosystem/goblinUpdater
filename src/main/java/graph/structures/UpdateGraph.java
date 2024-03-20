@@ -21,9 +21,12 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
 
     Set<E> getPossibleEdgesOf(N node);
 
-    N getCurrentUseReleaseOfArtifact(UpdateNode artifact);
+    N getCurrentUseReleaseOfArtifact(N artifact);
 
-    Set<UpdateNode> getRootArtifactDirectDep();
+    Set<N> getRootArtifactDirectDep();
 
-    Set<UpdateNode> getAllArtifactRelease(UpdateNode artifact);
+    Set<N> getAllArtifactRelease(N artifact);
+
+    UpdateGraph<N, E> copy();
+
 }
