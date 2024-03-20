@@ -21,10 +21,12 @@ public abstract class AbstractNode implements UpdateNode {
         return id;
     }
 
+    // FIXME: should be private or in an interface
     public void addAddedValue(AddedValue addedValue) {
         this.addedValues.add(addedValue);
     }
 
+    // FIXME: should be private or in an interface
     public double getNodeQuality(UpdatePreferences updatePreferences) {
         if (this.quality != null) {
             return this.quality;

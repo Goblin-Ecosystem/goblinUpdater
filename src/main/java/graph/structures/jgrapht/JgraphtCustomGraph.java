@@ -1,10 +1,10 @@
 package graph.structures.jgrapht;
 
-import graph.entities.edges.AbstractEdge;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.CustomGraph;
+
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -15,21 +15,22 @@ import java.util.Optional;
 import java.util.Set;
 
 public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
-    protected final Graph<UpdateNode, UpdateEdge> graph;
+    protected final Graph<UpdateNode, UpdateEdge> graph; // FIXME: why not private?
     private final Map<String, UpdateNode> idToVertexMap = new HashMap<>();
 
     public JgraphtCustomGraph(){
-        this.graph = new DefaultDirectedGraph<>(AbstractEdge.class);
+        this.graph = new DefaultDirectedGraph<>(UpdateEdge.class);
     }
 
     public JgraphtCustomGraph(Graph<UpdateNode, UpdateEdge> graph){
-        this.graph = graph;
+        this.graph = graph; // FIXME: sure? different of copy.
     }
 
     @Override
     public void addNode(UpdateNode node) {
-        idToVertexMap.put(node.id(), node);
-        graph.addVertex(node);
+        if (graph.addVertex(node)) {
+            idToVertexMap.put(node.id(), node);
+        }
     }
 
     @Override
@@ -43,7 +44,9 @@ public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
 
     @Override
     public void removeNode(UpdateNode node) {
-        graph.removeVertex(node);
+        if (graph.removeVertex(node)) {
+            idToVertexMap.remove(node.id());
+        }
     }
 
     @Override
@@ -66,6 +69,10 @@ public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
         return graph.getEdgeTarget(edge);
     }
 
+    /**
+     * Returns the root of the graph is there is one.
+     * Redefines the version in CustomGraph to match only with a ReleaseNode.
+     */
     @Override
     public Optional<UpdateNode> rootNode() {
         return graph.vertexSet().stream().filter(n -> n.equals(new ReleaseNode("ROOT"))).findFirst();
@@ -73,7 +80,7 @@ public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
 
     @Override
     public CustomGraph<UpdateNode, UpdateEdge> copy() {
-        Graph<UpdateNode, UpdateEdge> graphCopy = new DefaultDirectedGraph<>(AbstractEdge.class);
+        Graph<UpdateNode, UpdateEdge> graphCopy = new DefaultDirectedGraph<>(UpdateEdge.class);
         Graphs.addGraph(graphCopy, graph);
         return new JgraphtCustomGraph(graphCopy);
     }

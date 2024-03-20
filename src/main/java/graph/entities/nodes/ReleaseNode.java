@@ -16,19 +16,23 @@ public class ReleaseNode extends AbstractNode {
         super(id);
     }
 
+    // FIXME: should be private or in an interface
     public double getChangeCost() {
         return changeCost;
     }
 
+    // FIXME: should be private or in an interface
     public void setChangeCost(double changeCost) {
         this.changeCost = changeCost;
     }
-
+    
+    // FIXME: should be private or in an interface
     public String getGa() {
         String[] splitedGav = id().split(":");
         return splitedGav[0] + ":" + splitedGav[1];
     }
 
+    // FIXME: should be private or in an interface
     public boolean dominates(ReleaseNode other, UpdatePreferences updatePreferences) {
         return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences)
                 && this.changeCost <= other.changeCost

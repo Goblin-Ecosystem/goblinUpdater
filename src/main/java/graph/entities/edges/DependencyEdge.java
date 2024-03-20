@@ -10,11 +10,12 @@ public class DependencyEdge extends AbstractEdge {
         this.scope = scope;
     }
 
+    // FIXME: should be private or in an interface
     public String targetVersion() {
         return targetVersion;
     }
 
-    public String scope() {
+    private String scope() {
         return scope;
     }
 

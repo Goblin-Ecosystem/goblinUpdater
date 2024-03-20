@@ -8,18 +8,20 @@ public class ChangeEdge extends AbstractEdge {
         super(id);
     }
 
-    public double getQualityChange() {
+    private double getQualityChange() {
         return qualityChange;
     }
 
+    // FIXME: should be private or in an interface
     public void setQualityChange(double qualityChange) {
         this.qualityChange = qualityChange;
     }
 
-    public double getChangeCost() {
+    private double getChangeCost() {
         return changeCost;
     }
 
+    // FIXME: should be private or in an interface
     public void setChangeCost(double changeCost) {
         this.changeCost = changeCost;
     }
