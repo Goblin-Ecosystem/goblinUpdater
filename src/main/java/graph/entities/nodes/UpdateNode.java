@@ -10,19 +10,17 @@ import addedvalue.AddedValueEnum;
  */
 public interface UpdateNode extends Identifiable<String> {
     /**
-     * @return true if the node represents a release (aka a version of an artifact),
-     *         false otherwise
+     * Returns true if the node represents a release (aka a version of an artifact), false otherwise
      */
     boolean isRelease();
 
     /**
-     * @return true if the node represents an artifact (aka a library), false
-     *         otherwise
+     * Returns true if the node represents an artifact (aka a library), false otherwise
      */
     boolean isArtifact();
 
     /**
-     * @return set of added value kinds that can be associated to this node
+     * Returns set of added value kinds that can be associated to this node
      */
     Set<AddedValueEnum> knownValues();
 }
