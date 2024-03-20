@@ -1,10 +1,10 @@
 package client;
 
-import updater.updatePreferences.*;
 import project.maven.MavenProjectLoader;
 import project.Project;
 import project.ProjectLoader;
 import updater.LPGA.MavenLPGAUpdater;
+import updater.preferences.*;
 import updater.Updater;
 
 import java.nio.file.Path;

@@ -1,4 +1,4 @@
-package updater.updatePreferences;
+package updater.preferences;
 
 import addedvalue.AddedValueEnum;
 import org.yaml.snakeyaml.Yaml;

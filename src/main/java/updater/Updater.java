@@ -1,7 +1,7 @@
 package updater;
 
-import updater.updatePreferences.UpdatePreferences;
 import project.Project;
+import updater.preferences.UpdatePreferences;
 
 import java.util.Optional;
 

@@ -1,8 +1,5 @@
 package graph.structures;
 
-import graph.entities.edges.AbstractEdge;
-import graph.entities.nodes.AbstractNode;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;

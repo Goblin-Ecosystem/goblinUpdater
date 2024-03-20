@@ -1,6 +1,5 @@
 package updater.LPGA;
 
-import updater.updatePreferences.*;
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
@@ -11,6 +10,7 @@ import graph.structures.UpdateGraph;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import updater.UpdateSolver;
+import updater.preferences.*;
 
 import java.util.List;
 import java.util.Optional;

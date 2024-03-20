@@ -9,7 +9,9 @@ import java.util.Comparator;
 
 public class FileHelpers {
 
-    public static void createDirectory(String directoryPath){
+    private FileHelpers() {}
+
+    public static void createDirectory(String directoryPath) {
         try {
             Path path = Paths.get(directoryPath);
             Files.createDirectories(path);
@@ -18,7 +20,7 @@ public class FileHelpers {
         }
     }
 
-    public static void deleteDirectoryIfExist(String directoryPath){
+    public static void deleteDirectoryIfExist(String directoryPath) {
         Path path = Paths.get(directoryPath);
         if (Files.exists(path)) {
             try {

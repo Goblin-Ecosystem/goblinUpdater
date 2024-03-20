@@ -16,11 +16,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GoblinWeaverHelpers {
+
+    private GoblinWeaverHelpers() {
+    }
+
     private static final String API_URL = System.getProperty("weaverUrl");
 
-    private static JSONObject executeQuery(JSONObject bodyJsonObject, String apiRoute){
+    private static JSONObject executeQuery(JSONObject bodyJsonObject, String apiRoute) {
         try {
-            URL url = new URL(API_URL+apiRoute);
+            URL url = new URL(API_URL + apiRoute);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod("POST");
             http.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -32,9 +36,9 @@ public class GoblinWeaverHelpers {
             OutputStream stream = http.getOutputStream();
             stream.write(out);
 
-            if(http.getResponseCode() == 200){
+            if (http.getResponseCode() == 200) {
                 JSONParser jsonParser = new JSONParser();
-                return (JSONObject)jsonParser.parse(
+                return (JSONObject) jsonParser.parse(
                         new InputStreamReader(http.getInputStream(), StandardCharsets.UTF_8));
             }
             http.disconnect();
@@ -45,7 +49,8 @@ public class GoblinWeaverHelpers {
     }
 
     // GPGA
-    public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
+    public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies,
+            Set<AddedValueEnum> addedValues) {
         LoggerHelpers.info("Get all possibilities graph");
         String apiRoute = "/graph/allPossibilitiesRooted";
 
@@ -59,8 +64,9 @@ public class GoblinWeaverHelpers {
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
-    //LPLA
-    public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
+    // LPLA
+    public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies,
+            Set<AddedValueEnum> addedValues) {
         LoggerHelpers.info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
 
@@ -74,8 +80,9 @@ public class GoblinWeaverHelpers {
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
-    //LPGA
-    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies, Set<AddedValueEnum> addedValues){
+    // LPGA
+    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
+            Set<AddedValueEnum> addedValues) {
         LoggerHelpers.info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 

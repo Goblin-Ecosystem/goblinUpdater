@@ -17,28 +17,28 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
 public class MavenLocalRepository {
-    private static MavenLocalRepository INSTANCE;
-    private final String localRepoPath = "workspace";
-    private final RemoteRepository centralRepo = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
+    private static MavenLocalRepository instance;
+    private static final String LOCAL_REPO_PATH = "workspace";
+    private final RemoteRepository centralRepo = new RemoteRepository.Builder("central", "default",
+            "https://repo1.maven.org/maven2/").build();
     private final DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
     private final RepositorySystem system = newRepositorySystem(locator);
     private final RepositorySystemSession session = newSession(system);
 
     private MavenLocalRepository() {
-        FileHelpers.createDirectory(localRepoPath);
+        FileHelpers.createDirectory(LOCAL_REPO_PATH);
     }
 
-    public static synchronized MavenLocalRepository getInstance()
-    {
-        if (INSTANCE == null)
-        {   INSTANCE = new MavenLocalRepository();
+    public static synchronized MavenLocalRepository getInstance() {
+        if (instance == null) {
+            instance = new MavenLocalRepository();
         }
-        return INSTANCE;
+        return instance;
     }
 
     public void clearLocalRepo() {
-        FileHelpers.deleteDirectoryIfExist(localRepoPath);
-        FileHelpers.createDirectory(localRepoPath);
+        FileHelpers.deleteDirectoryIfExist(LOCAL_REPO_PATH);
+        FileHelpers.createDirectory(LOCAL_REPO_PATH);
     }
 
     private RepositorySystem newRepositorySystem(DefaultServiceLocator locator) {
@@ -49,9 +49,10 @@ public class MavenLocalRepository {
     }
 
     private RepositorySystemSession newSession(RepositorySystem system) {
+        // FIXME: session hides field at line 26.
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
         // TODO: local or .m2 ?
-        LocalRepository localRepo = new LocalRepository(localRepoPath);
+        LocalRepository localRepo = new LocalRepository(LOCAL_REPO_PATH);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
         return session;
     }

@@ -1,10 +1,10 @@
 package updater;
 
-import updater.updatePreferences.*;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
+import updater.preferences.*;
 
 import java.util.Optional;
 

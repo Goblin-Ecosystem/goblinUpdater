@@ -1,7 +1,6 @@
 package graph.generator;
 
 import addedvalue.AddedValueEnum;
-import updater.updatePreferences.UpdatePreferences;
 import graph.entities.edges.*;
 import graph.entities.nodes.*;
 import graph.structures.CustomGraph;
@@ -9,14 +8,13 @@ import graph.structures.UpdateGraph;
 import graph.structures.jgrapht.JgraphtUpdateGraph;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import updater.preferences.UpdatePreferences;
 
 import java.util.Optional;
 import java.util.HashSet;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import util.LoggerHelpers;
 import util.MaracasHelpers;
@@ -26,16 +24,14 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
     final String EDGE_PREFIX = "e";
 
-    private UpdateGraph<AbstractNode, AbstractEdge> graph;
+    private UpdateGraph<UpdateNode, UpdateEdge> graph;
 
     public JgraphtRootedGraphGenerator() {
         graph = null;
@@ -131,7 +127,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     }
 
     @Override
-    public UpdateGraph<AbstractNode, AbstractEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph,
+    public UpdateGraph<UpdateNode, UpdateEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph,
             Set<AddedValueEnum> addedValuesToCompute) {
         graph = new JgraphtUpdateGraph();
         // Add elements in graph

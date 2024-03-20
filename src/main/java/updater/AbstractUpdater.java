@@ -1,10 +1,10 @@
 package updater;
 
 import graph.structures.CustomGraph;
-import updater.updatePreferences.*;
 import graph.generator.GraphGenerator;
 import graph.structures.UpdateGraph;
 import project.Project;
+import updater.preferences.*;
 
 import java.util.Optional;
 

@@ -1,8 +1,8 @@
 package updater.LPGA;
 
-import updater.updatePreferences.UpdatePreferences;
 import graph.structures.CustomGraph;
 import updater.ProjectUpdater;
+import updater.preferences.UpdatePreferences;
 import project.Project;
 
 public class LPGAProjectUpdater implements ProjectUpdater {

@@ -1,12 +1,12 @@
 package updater.LPLA;
 
-import updater.updatePreferences.UpdatePreferences;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.CustomGraph;
 import graph.structures.UpdateGraph;
 import updater.UpdateSolver;
+import updater.preferences.UpdatePreferences;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -4,9 +4,10 @@ import addedvalue.AddedValueEnum;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
-import updater.updatePreferences.UpdatePreferences;
+
 import org.json.simple.JSONObject;
 import project.Project;
+import updater.preferences.UpdatePreferences;
 import util.GoblinWeaverHelpers;
 
 import java.util.Set;

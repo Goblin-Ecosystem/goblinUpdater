@@ -1,13 +1,13 @@
 package graph.generator;
 
 import addedvalue.AddedValueEnum;
-import updater.updatePreferences.UpdatePreferences;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
 import org.json.simple.JSONObject;
 import project.Project;
+import updater.preferences.UpdatePreferences;
 import util.*;
 
 import java.util.Set;

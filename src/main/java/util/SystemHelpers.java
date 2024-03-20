@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SystemHelpers {
+
+    private SystemHelpers() {
+    }
+
     public static List<String> execCommand(ProcessBuilder processBuilder) {
         List<String> output = new ArrayList<>();
         try {
@@ -15,14 +19,15 @@ public class SystemHelpers {
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
             output = stdInput.lines().collect(Collectors.toList());
             // If no error
-            if (output.size() != 0) {
+            if (!output.isEmpty()) {
                 stdInput.close();
             } else {
                 // Log command error
                 errorHandling(process, String.join(" ", processBuilder.command()));
             }
         } catch (IOException e) {
-            LoggerHelpers.error("Unable to run command: " + String.join(" ", processBuilder.command()) + "\n" + e.getMessage());
+            LoggerHelpers.error(
+                    "Unable to run command: " + String.join(" ", processBuilder.command()) + "\n" + e.getMessage());
         }
         return output;
     }
@@ -38,7 +43,7 @@ public class SystemHelpers {
                 while ((line = stdError.readLine()) != null) {
                     errorSb.append(line).append("\n");
                 }
-                LoggerHelpers.error("Error on command: "+command+"\n Error output: \n"+errorSb);
+                LoggerHelpers.error("Error on command: " + command + "\n Error output: \n" + errorSb);
             }
             stdError.close();
         } catch (IOException e) {

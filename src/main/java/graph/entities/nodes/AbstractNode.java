@@ -1,7 +1,7 @@
 package graph.entities.nodes;
 
 import addedvalue.AddedValue;
-import updater.updatePreferences.UpdatePreferences;
+import updater.preferences.UpdatePreferences;
 
 import java.util.ArrayList;
 import java.util.List;
