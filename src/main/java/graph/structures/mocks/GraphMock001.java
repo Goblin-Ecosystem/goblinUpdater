@@ -7,6 +7,7 @@ import addedvalue.AddedValueEnum;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Map.Entry;
 
 import graph.entities.nodes.UpdateNode;
@@ -144,26 +145,9 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         return Optional.ofNullable(root);
     }
 
-    // examples : make 1 static final method for each
-    public static final UpdateGraph<UpdateNode, UpdateEdge> example001() {
-        // CHANGE HERE
+    private static final UpdateGraph<UpdateNode, UpdateEdge> generateGraph(String root, List<String> artifacts,
+            List<String> releases, Map<String, List<String>> versions, Map<String, List<String>> dependencies) {
         GraphMock001 graph = new GraphMock001();
-        String root = "a";
-        List<String> artifacts = List.of(
-                "b", "h", "e");
-        List<String> releases = List.of(
-                "c", "d", "i", "j", "f", "g");
-        Map<String, List<String>> versions = Map.of(
-                "b", List.of("c", "d"),
-                "h", List.of("i", "j"),
-                "e", List.of("f", "g"));
-        Map<String, List<String>> dependencies = Map.of(
-            "a", List.of("b"),
-             "c", List.of("h"),
-             "d", List.of("h", "e")
-        );
-        // DO NOT CHANGE BELOW (to be refactored to be reusable)
-        // setup
         int idEdge = 0;
         // root
         UpdateNode rootNode = graph.addNode(root, RELEASE);
@@ -193,6 +177,54 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         }
         // return
         return graph;
+    }
+
+    // examples : make 1 static final method for each
+    public static final UpdateGraph<UpdateNode, UpdateEdge> example001() {
+        String root = "a";
+        List<String> artifacts = List.of("b", "h", "e");
+        List<String> releases = List.of("c", "d", "i", "j", "f", "g");
+        Map<String, List<String>> versions = Map.of(
+                "b", List.of("c", "d"),
+                "h", List.of("i", "j"),
+                "e", List.of("f", "g"));
+        Map<String, List<String>> dependencies = Map.of(
+                "a", List.of("b"),
+                "c", List.of("h"),
+                "d", List.of("h", "e"));
+        return generateGraph(root, artifacts, releases, versions, dependencies);
+    }
+
+    public static final UpdateGraph<UpdateNode, UpdateEdge> example002() {
+        String root = "p";
+        List<String> artifacts = List.of("l1", "l2", "l3", "l4", "l5", "l6");
+        List<String> releases = List.of(
+                "l1-1", "l1-2", "l1-3",
+                "l2-1", "l2-2",
+                "l3-1",
+                "l4-1",
+                "l5-1",
+                "l6-1", "l6-2");
+        Map<String, List<String>> versions = Map.of(
+                "l1", List.of("l1-1", "l1-2", "l1-3"),
+                "l2", List.of("l2-1", "l2-2"),
+                "l3", List.of("l3-1"),
+                "l4", List.of("l4-1"),
+                "l5", List.of("l5-1"),
+                "l6", List.of("l6-1", "l6-2"));
+        Map<String, List<String>> dependencies = new HashMap<>();
+        dependencies.put("p", List.of("l1", "l2"));
+        dependencies.put("l1-1", List.of("l3", "l4"));
+        dependencies.put("l1-2", List.of("l4", "l5"));
+        dependencies.put("l1-3", List.of("l5", "l2"));
+        dependencies.put("l2-1", List.of());
+        dependencies.put("l2-2", List.of("l6"));
+        dependencies.put("l3-1", List.of());
+        dependencies.put("l4-1", List.of());
+        dependencies.put("l5-1", List.of("l6"));
+        dependencies.put("l6-1", List.of());
+        dependencies.put("l6-2", List.of());
+        return generateGraph(root, artifacts, releases, versions, dependencies);
     }
 
     @Override

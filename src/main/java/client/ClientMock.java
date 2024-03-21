@@ -25,11 +25,12 @@ public class ClientMock {
 
     public static void main(String[] args){
         // inputs
-        UpdateGraph<UpdateNode, UpdateEdge> g = GraphMock001.example001();
+        // UpdateGraph<UpdateNode, UpdateEdge> g = GraphMock001.example001();
+        UpdateGraph<UpdateNode, UpdateEdge> g = GraphMock001.example002();
         List<Tuple2<String, Integer>> constrainedValues = List.of(
-            Tuple.of("j", 1),
-            Tuple.of("d", 1),
-            Tuple.of("f", 1)
+            // Tuple.of("j", 1),
+            // Tuple.of("d", 1),
+            // Tuple.of("f", 1)
         );
         UpdatePreferences prefs = new MockPreferences(Map.of(
             CVE, 0.6,
