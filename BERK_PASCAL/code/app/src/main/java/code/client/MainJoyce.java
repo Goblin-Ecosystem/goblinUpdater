@@ -1,10 +1,8 @@
 package code.client;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.google.ortools.Loader;
-import com.google.ortools.linearsolver.MPVariable;
 
 import code.graphs.api.Graph;
 import code.graphs.impl.GraphMock001;

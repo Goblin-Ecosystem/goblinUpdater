@@ -9,6 +9,7 @@ import updater.preferences.UpdatePreferences;
 
 public class MockPreferences implements UpdatePreferences {
 
+    // FIXME: lots of duplication with MavenPreferences
     private Map<AddedValueEnum, Double> metricsAndCoefMap;
 
     public MockPreferences(Map<AddedValueEnum, Double> metricsAndCoefMap) {
