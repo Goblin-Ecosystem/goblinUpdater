@@ -1,11 +1,15 @@
 package graph.entities.edges;
 
+import java.util.Map;
+
+import addedvalue.AddedValueEnum;
+
 public class DependencyEdge extends AbstractEdge {
     private final String targetVersion;
     private final String scope;
 
-    public DependencyEdge(String id, String targetVersion, String scope) {
-        super(id);
+    public DependencyEdge(String id, String targetVersion, String scope, Map<AddedValueEnum, Double> metricMap) {
+        super(id, metricMap);
         this.targetVersion = targetVersion;
         this.scope = scope;
     }

@@ -1,9 +1,13 @@
 package graph.entities.edges;
 
+import java.util.Map;
+
+import addedvalue.AddedValueEnum;
+
 public class VersionEdge extends AbstractEdge {
 
-    public VersionEdge(String id) {
-        super(id);
+    public VersionEdge(String id, Map<AddedValueEnum, Double> metricMap) {
+        super(id, metricMap);
     }
 
     @Override

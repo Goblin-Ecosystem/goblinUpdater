@@ -4,11 +4,12 @@ import graph.structures.Identifiable;
 import java.util.Set;
 
 import addedvalue.AddedValueEnum;
+import addedvalue.MetricContainer;
 
 /**
  * Interface for nodes used in dependency update.
  */
-public interface UpdateNode extends Identifiable<String> {
+public interface UpdateNode extends Identifiable<String>, MetricContainer<AddedValueEnum> {
     /**
      * Returns true if the node represents a release (aka a version of an artifact), false otherwise
      */

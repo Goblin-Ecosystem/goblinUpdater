@@ -9,6 +9,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
+import addedvalue.MetricMap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +78,7 @@ public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
      */
     @Override
     public Optional<UpdateNode> rootNode() {
-        return graph.vertexSet().stream().filter(n -> n.equals(new ReleaseNode("ROOT"))).findFirst();
+        return nodes(UpdateNode::isRelease).stream().filter(n -> n.id().equals(ROOT_ID)).findFirst();
     }
 
     @Override

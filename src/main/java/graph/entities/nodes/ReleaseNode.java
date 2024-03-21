@@ -1,8 +1,10 @@
 package graph.entities.nodes;
 
 import java.util.Set;
+import java.util.Map;
 
 import addedvalue.AddedValueEnum;
+
 import static addedvalue.AddedValueEnum.*;
 import updater.preferences.UpdatePreferences;
 
@@ -16,8 +18,8 @@ public class ReleaseNode extends AbstractNode {
      * Constructor for release nodes. Assumes the id is of the form "g:a:v".
      * @param id the id of the node
      */
-    public ReleaseNode(String id) {
-        super(id);
+    public ReleaseNode(String id, Map<AddedValueEnum, Double> metricMap) {
+        super(id, metricMap);
     }
 
     private static final boolean isValidId(String id) {

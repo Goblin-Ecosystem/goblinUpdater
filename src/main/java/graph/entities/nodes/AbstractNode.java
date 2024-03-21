@@ -1,22 +1,31 @@
 package graph.entities.nodes;
 
 import addedvalue.AddedValue;
+import addedvalue.AddedValueEnum;
+import addedvalue.MetricContainer;
+import addedvalue.MetricMap;
 import updater.preferences.UpdatePreferences;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Map;
 
 public abstract class AbstractNode implements UpdateNode {
     private final String id;
+    private MetricContainer<AddedValueEnum> metricMap;
+    // FIXME: replaced by the MetricContainer API
     private final List<AddedValue> addedValues = new ArrayList<>();
     private Double quality = null;
 
-    protected AbstractNode(String id) {
+    protected AbstractNode(String id, Map<AddedValueEnum, Double> metricMap) {
         if (!hasValidId(id)) {
             throw new IllegalArgumentException("Invalid id: " + id);
         }
         this.id = id;
+        this.metricMap = new MetricMap<>(metricMap);
     }
 
     @Override
@@ -24,12 +33,29 @@ public abstract class AbstractNode implements UpdateNode {
         return id;
     }
 
+    @Override
+    public Set<AddedValueEnum> usedMetrics() {
+        return metricMap.usedMetrics();
+    }
+
+    @Override
+    public void addMetric(AddedValueEnum m, Double value) {
+        metricMap.addMetric(m, value);
+    }
+
+    @Override
+    public Optional<Double> getValue(AddedValueEnum m) {
+        return metricMap.getValue(m);
+    }
+
     // FIXME: should be private or in an interface
+    // FIXME: replaced by the MetricContainer API?
     public void addAddedValue(AddedValue addedValue) {
         this.addedValues.add(addedValue);
     }
 
     // FIXME: should be private or in an interface
+    // FIXME: replaced by the MetricContainer API?
     public double getNodeQuality(UpdatePreferences updatePreferences) {
         if (this.quality != null) {
             return this.quality;
@@ -57,4 +83,5 @@ public abstract class AbstractNode implements UpdateNode {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

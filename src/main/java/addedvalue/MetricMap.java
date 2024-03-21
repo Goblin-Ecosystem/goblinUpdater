@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class MetricMap<T> implements MetricContainer<T> {
+
     private Map<T, Double> map;
 
     public MetricMap(Map<T, Double> map) {
-        this.map = new HashMap<>(map);
+        map = new HashMap<>(map);
     }
 
     @Override
@@ -26,4 +27,5 @@ public class MetricMap<T> implements MetricContainer<T> {
     public Optional<Double> getValue(T metric) {
         return Optional.ofNullable(map.get(metric));
     }
+
 }

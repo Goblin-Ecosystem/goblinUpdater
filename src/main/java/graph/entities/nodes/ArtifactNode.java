@@ -1,6 +1,7 @@
 package graph.entities.nodes;
 
 import java.util.Set;
+import java.util.Map;
 
 import addedvalue.AddedValueEnum;
 
@@ -12,8 +13,8 @@ public class ArtifactNode extends AbstractNode {
      * Constructor for artifact nodes. Assumes the id is of the form "g:a".
      * @param id the id of the node
      */
-    public ArtifactNode(String id) {
-        super(id);
+    public ArtifactNode(String id, Map<AddedValueEnum, Double> metricMap) {
+        super(id, metricMap);
     }
 
     private static final boolean isValidId(String id) {

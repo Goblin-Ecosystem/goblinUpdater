@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import addedvalue.AddedValueEnum;
+import addedvalue.MetricContainer;
+import addedvalue.MetricMap;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -33,12 +35,29 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         VERSION, DEPENDENCY, CHANGE;
     }
 
-    public record Node001(String id, NodeType type) implements UpdateNode {
+    public record Node001(String id, NodeType type, MetricContainer<AddedValueEnum> metrics) implements UpdateNode {
 
-        public Node001(String id, NodeType type) {
+        public Node001(String id, NodeType type, MetricContainer<AddedValueEnum> metrics) {
             this.id = id;
             this.type = type;
-            if (!hasValidId(id)) throw new IllegalArgumentException("Invalid node id " + id);
+            this.metrics = metrics;
+            if (!hasValidId(id))
+                throw new IllegalArgumentException("Invalid node id " + id);
+        }
+
+        @Override
+        public Set<AddedValueEnum> usedMetrics() {
+            return metrics.usedMetrics();
+        }
+
+        @Override
+        public void addMetric(AddedValueEnum m, Double value) {
+            metrics.addMetric(m, value);
+        }
+
+        @Override
+        public Optional<Double> getValue(AddedValueEnum m) {
+            return metrics.getValue(m);
         }
 
         @Override
@@ -71,8 +90,24 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     }
 
-    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target, String targetVersion)
+    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target, String targetVersion, 
+            MetricContainer<AddedValueEnum> metrics)
             implements UpdateEdge {
+
+        @Override
+        public Set<AddedValueEnum> usedMetrics() {
+            return metrics.usedMetrics();
+        }
+
+        @Override
+        public void addMetric(AddedValueEnum m, Double value) {
+            metrics.addMetric(m, value);
+        }
+
+        @Override
+        public Optional<Double> getValue(AddedValueEnum m) {
+            return metrics.getValue(m);
+        }
 
         @Override
         public boolean isVersion() {
@@ -95,8 +130,8 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
     private Set<UpdateEdge> edges;
     private UpdateNode root;
 
-    private UpdateNode addNode(String id, NodeType type) {
-        UpdateNode node = new Node001(id, type);
+    private UpdateNode addNode(String id, NodeType type, MetricContainer<AddedValueEnum> metrics) {
+        UpdateNode node = new Node001(id, type, metrics);
         addNode(node);
         return node;
     }
@@ -106,14 +141,14 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         nodes.add(node);
     }
 
-    private UpdateEdge addEdge(String id, EdgeType type, String source, String target, String targetVersion) {
+    private UpdateEdge addEdge(String id, EdgeType type, String source, String target, String targetVersion, MetricContainer<AddedValueEnum> metrics) {
         Optional<UpdateNode> ns = getNodeById(source);
         Optional<UpdateNode> nt = getNodeById(target);
         if (ns.isEmpty())
             throw new IllegalArgumentException("source node not found");
         if (nt.isEmpty())
             throw new IllegalArgumentException("target node not found");
-        UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get(), targetVersion);
+        UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get(), targetVersion, metrics);
         addEdgeFromNodeId(ns.get().id(), nt.get().id(), edge);
         return edge;
     }
@@ -168,28 +203,28 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         GraphMock001 graph = new GraphMock001();
         int idEdge = 0;
         // root
-        UpdateNode rootNode = graph.addNode(root, RELEASE);
+        UpdateNode rootNode = graph.addNode(root, RELEASE, new MetricMap<>(Map.of()));
         graph.setRoot(rootNode);
         // other releases
         for (String r : releases) {
-            graph.addNode(r, RELEASE);
+            graph.addNode(r, RELEASE, new MetricMap<>(Map.of()));
         }
         // artifacts
         for (String a : artifacts) {
-            graph.addNode(a, ARTIFACT);
+            graph.addNode(a, ARTIFACT, new MetricMap<>(Map.of()));
         }
         // versions
         for (Entry<String, List<String>> e : versions.entrySet()) {
             for (String v : e.getValue()) {
-                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null);
+                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null, new MetricMap<>(Map.of()));
             }
         }
         // dependencies and possibles
         for (Entry<String, List<Tuple2<String, String>>> e : dependencies.entrySet()) {
             for (Tuple2<String, String> d : e.getValue()) {
-                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2());
+                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2(), new MetricMap<>(Map.of()));
                 for (String v : versions.get(d._1())) {
-                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null);
+                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, new MetricMap<>(Map.of()));
                 }
             }
         }
