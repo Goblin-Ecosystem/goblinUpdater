@@ -83,7 +83,7 @@ public interface CustomGraph<N extends Identifiable<String>, E> {
     }
 
     /**
-     * Returns the set of all outgoing edges from a given node.
+     * Returns the set of all outgoing edges from a given node. Empty set if the node does not exist.
      * @param node the node to get the outgoing edges for
      */
     Set<E> outgoingEdgesOf(N node);

@@ -12,6 +12,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import util.LoggerHelpers;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,11 +51,15 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
 
     @Override
     public Set<UpdateNode> getRootArtifactDirectDep() {
-        ReleaseNode root = new ReleaseNode("ROOT");
-        return graph.edgesOf(root).stream()
-                .filter(edge -> edge.isDependency() && graph.getEdgeSource(edge).equals(root))
-                .map(graph::getEdgeTarget)
-                .collect(Collectors.toSet());
+        Optional<UpdateNode> root = rootNode();
+        if (root.isPresent()) {
+            return outgoingEdgesOf(root.get()).stream()
+                    .filter(UpdateEdge::isDependency)
+                    .map(e -> target(e))
+                    .collect(Collectors.toSet());
+        } else {
+            return Set.of();
+        }
     }
 
     @Override
