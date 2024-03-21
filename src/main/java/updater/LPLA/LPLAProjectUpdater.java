@@ -15,10 +15,10 @@ public class LPLAProjectUpdater implements ProjectUpdater {
     public Project updateProject(Project project, UpdateGraph<UpdateNode, UpdateEdge> initialGraph,
             UpdateGraph<UpdateNode, UpdateEdge> updatedGraph, UpdatePreferences updatePreferences) {
         UpdateGraph<UpdateNode, UpdateEdge> updatedGraphCasted = updatedGraph;
-        Set<UpdateNode> rootDirectArtifactDependency = updatedGraphCasted.getRootArtifactDirectDep();
+        Set<UpdateNode> rootDirectArtifactDependency = updatedGraphCasted.rootDirectDependencies();
         for (UpdateNode artifact : rootDirectArtifactDependency) {
             System.out.println(artifact.id());
-            for (UpdateNode release : updatedGraphCasted.getAllArtifactRelease(artifact)) {
+            for (UpdateNode release : updatedGraphCasted.versions(artifact)) {
                 ReleaseNode releaseNode = (ReleaseNode) release;
                 System.out.println("\t" + release.id() + " quality: " + releaseNode.getNodeQuality(updatePreferences)
                         + " cost: " + releaseNode.getChangeCost());

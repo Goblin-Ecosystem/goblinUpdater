@@ -1,15 +1,12 @@
 package graph.structures.jgrapht;
 
 import graph.entities.edges.UpdateEdge;
-import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.CustomGraph;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
-
-import addedvalue.MetricMap;
 
 import java.util.HashMap;
 import java.util.Map;

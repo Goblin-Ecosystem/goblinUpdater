@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import graph.entities.nodes.UpdateNode;
 import graph.entities.edges.UpdateEdge;
@@ -281,44 +282,25 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
     }
 
     @Override
+    public Set<UpdateEdge> outgoingEdgesOf(UpdateNode node) {
+        return edges.stream().filter(e -> source(e) == node).collect(Collectors.toSet());
+    }
+
+    @Override
     public void removeNode(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'removeNode'");
-    }
-
-    @Override
-    public Set<UpdateEdge> outgoingEdgesOf(UpdateNode node) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'outgoingEdgesOf'");
-    }
-
-    @Override
-    public Set<UpdateEdge> getPossibleEdgesOf(UpdateNode node) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPossibleEdgesOf'");
-    }
-
-    @Override
-    public Node001 getCurrentUseReleaseOfArtifact(UpdateNode artifact) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCurrentUseReleaseOfArtifact'");
-    }
-
-    @Override
-    public Set<UpdateNode> getRootArtifactDirectDep() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRootArtifactDirectDep'");
-    }
-
-    @Override
-    public Set<UpdateNode> getAllArtifactRelease(UpdateNode artifact) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllArtifactRelease'");
-    }
+    }    
 
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> copy() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    }
+
+    @Override
+    public Optional<UpdateNode> currentDependencyRelease(UpdateNode release, UpdateNode artifact) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'currentDependencyRelease'");
     }
 }

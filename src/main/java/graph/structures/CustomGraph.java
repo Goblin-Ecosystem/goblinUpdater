@@ -76,10 +76,18 @@ public interface CustomGraph<N extends Identifiable<String>, E> {
     static final String ROOT_ID = "ROOT";
 
     /**
+     * Returns the first node with the given id, if it exists.
+     * @param id the id of the node to search for
+     */
+    default Optional<N> getNode(String id) {
+        return nodes().stream().filter(n -> n.id().equals(id)).findFirst();
+    }
+
+    /**
      * Returns the root of the graph is there is one. Default implementation uses the ROOT_ID constant and searches for the first node to have this as its id. Can be specialized in an implementation class.
      */
     default Optional<N> rootNode() {
-        return nodes().stream().filter(n -> n.id().equals(ROOT_ID)).findFirst();
+        return getNode(ROOT_ID);
     }
 
     /**

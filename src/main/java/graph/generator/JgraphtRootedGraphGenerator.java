@@ -25,11 +25,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
-    final String EDGE_PREFIX = "e";
+    static final String EDGE_PREFIX = "e";
 
     private UpdateGraph<UpdateNode, UpdateEdge> graph;
 
@@ -41,7 +42,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         return Optional.ofNullable(object.get(field)).map(s -> (String) s);
     }
 
-    private Optional<AbstractEdge> extractEdge(JSONObject edge) {
+    private Optional<UpdateEdge> extractEdge(JSONObject edge) {
         Optional<String> type = stringFromJSON(edge, "type");
         if (type.isPresent()) {
             return switch (type.get()) {
@@ -55,26 +56,27 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         }
     }
 
-    private Optional<AbstractEdge> extractVersionEdge() {
-        return Optional.of(new VersionEdge(IdGenerator.instance().nextId(EDGE_PREFIX)));
+    private Optional<UpdateEdge> extractVersionEdge() {
+        return Optional.of(new VersionEdge(IdGenerator.instance().nextId(EDGE_PREFIX), Map.of()));
     }
 
-    private Optional<AbstractEdge> extractChangeEdge() {
-        return Optional.of(new ChangeEdge(IdGenerator.instance().nextId(EDGE_PREFIX)));
+    private Optional<UpdateEdge> extractChangeEdge() {
+        return Optional.of(new ChangeEdge(IdGenerator.instance().nextId(EDGE_PREFIX), Map.of()));
     }
 
-    private Optional<AbstractEdge> extractDependencyEdge(JSONObject edge) {
+    private Optional<UpdateEdge> extractDependencyEdge(JSONObject edge) {
         Optional<String> targetVersion = stringFromJSON(edge, "targetVersion");
         Optional<String> scope = stringFromJSON(edge, "scope");
         if (targetVersion.isPresent() && scope.isPresent()) {
             return Optional
                     .of(new DependencyEdge(IdGenerator.instance().nextId(EDGE_PREFIX), targetVersion.get(),
-                            scope.get()));
+                            scope.get(), Map.of()));
         } else {
             return Optional.empty();
         }
     }
 
+    // FIXME: add added values here
     private final Consumer<JSONObject> createEdge = edge -> {
         Optional<String> sourceId = stringFromJSON(edge, "sourceId");
         Optional<String> targetId = stringFromJSON(edge, "targetId");
@@ -97,6 +99,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                 }
             });
 
+    // FIXME: add added values here
     private Optional<AbstractNode> extractNode(JSONObject node) {
         Optional<String> oType = stringFromJSON(node, "nodeType");
         Optional<String> oId = stringFromJSON(node, "id");
@@ -104,8 +107,8 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             String id = oId.get();
             String type = oType.get();
             return Optional.ofNullable(switch (type) {
-                case "ARTIFACT" -> new ArtifactNode(id);
-                case "RELEASE" -> new ReleaseNode(id);
+                case "ARTIFACT" -> new ArtifactNode(id, Map.of());
+                case "RELEASE" -> new ReleaseNode(id, Map.of());
                 default -> null;
             });
         } else {
@@ -147,43 +150,51 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         return graph;
     }
 
+    // FIXME: add added values here
     @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             UpdatePreferences updatePreferences) {
-        LoggerHelpers.info("Generate change edge");
-        CustomGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
+        // prepare things
+        UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         IdGenerator generator = IdGenerator.instance();
-        graphCopy.nodes().stream()
-                .filter(ReleaseNode.class::isInstance)
-                .map(ReleaseNode.class::cast)
-                .forEach(releaseNode -> graphCopy.outgoingEdgesOf(releaseNode).stream()
-                        .filter(UpdateEdge::isDependency)
-                        .map(graphCopy::target)
-                        .forEach(artifactDependency -> graphCopy.outgoingEdgesOf(artifactDependency).stream()
-                                .filter(UpdateEdge::isVersion)
-                                .map(graphCopy::target)
-                                .forEach(possibleRelease -> graph.addEdgeFromNodeId(releaseNode.id(),
-                                        possibleRelease.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX))))));
+        Set<ReleaseNode> releaseNodes = graphCopy.releaseNodes().stream()
+                .map(ReleaseNode.class::cast).collect(Collectors.toSet());
+        // step 1 : create change edges
+        LoggerHelpers.info("Generate change edge");
+        releaseNodes.forEach(
+                r -> graphCopy.directDependencies(r).forEach(
+                        a -> graphCopy.versions(a).forEach(
+                                v -> graph.addEdgeFromNodeId(
+                                        r.id(),
+                                        v.id(),
+                                        new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of())))));
         LoggerHelpers.info(graph.toString());
+        // step 2: compute change edge quality and cost
         LoggerHelpers.info("Compute change edge values");
-        // compute change link quality and cost
-        for (ReleaseNode sourceReleaseNode : graph.nodes().stream().filter(UpdateNode::isRelease)
-                .map(ReleaseNode.class::cast).collect(Collectors.toSet())) {
-            double sourceReleaseNodeQuality = sourceReleaseNode.getNodeQuality(updatePreferences);
-            for (UpdateEdge changeEdge : graph.getPossibleEdgesOf(sourceReleaseNode)) {
-                ChangeEdge possibleEdge = (ChangeEdge) changeEdge;
-                ReleaseNode targetReleaseNode = (ReleaseNode) graph.target(possibleEdge);
-                possibleEdge.setQualityChange(
-                        targetReleaseNode.getNodeQuality(updatePreferences) - sourceReleaseNodeQuality);
-                // Compute cost only for direct dependencies
-                if (sourceReleaseNode.id().equals("ROOT")) {
-                    possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath,
-                            graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.ga())),
-                            targetReleaseNode));
-                } else {
-                    possibleEdge.setChangeCost(9999999.9);
-                }
-            }
-        }
+        releaseNodes.forEach(
+                r -> {
+                    graph.possibles(r).forEach(
+                            e -> {
+                                ChangeEdge change = (ChangeEdge) e;
+                                ReleaseNode v = (ReleaseNode) graph.target(e);
+                                // compute quality change in any case
+                                change.setQualityChange(
+                                        v.getNodeQuality(updatePreferences) - r.getNodeQuality(updatePreferences));
+                                // compute cost only for direct dependencies of root
+                                if (r.id().equals(CustomGraph.ROOT_ID)) {
+                                    Optional<UpdateNode> or = graph.rootCurrentDependencyRelease(v);
+                                    if (or.isPresent()) {
+                                        change.setChangeCost(MaracasHelpers.computeChangeCost(
+                                                projectPath,
+                                                or.get(),
+                                                v));
+                                    } else {
+                                        change.setChangeCost(9999999.9); // FIXME: OK ?
+                                    }
+                                } else {
+                                    change.setChangeCost(9999999.9);
+                                }
+                            });
+                });
     }
 }

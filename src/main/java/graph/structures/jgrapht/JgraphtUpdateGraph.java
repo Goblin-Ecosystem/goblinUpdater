@@ -3,7 +3,6 @@ package graph.structures.jgrapht;
 import graph.entities.edges.DependencyEdge;
 import graph.entities.edges.ChangeEdge;
 import graph.entities.edges.UpdateEdge;
-import graph.entities.nodes.AbstractNode;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
@@ -27,47 +26,18 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
     }
 
     @Override
-    public Set<UpdateEdge> getPossibleEdgesOf(UpdateNode node) {
-        return graph.outgoingEdgesOf(node).stream().filter(ChangeEdge.class::isInstance).map(ChangeEdge.class::cast)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public AbstractNode getCurrentUseReleaseOfArtifact(UpdateNode artifact) {
-        DependencyEdge edge = graph.getAllEdges(new ReleaseNode("ROOT"), artifact)
-                .stream().filter(DependencyEdge.class::isInstance)
-                .map(e -> (DependencyEdge) e).findFirst().orElse(null);
+    public Optional<UpdateNode> currentDependencyRelease(UpdateNode release, UpdateNode artifact) {
+        UpdateEdge edge = outgoingEdgesOf(release).stream()
+               .filter(e -> e.isDependency())
+               .filter(e -> target(e).equals(artifact))
+               .findFirst().orElse(null);
         if (edge == null) {
             LoggerHelpers.error("Fail to get current release of: " + artifact.id());
             return null;
-        }
-        String releaseId = artifact.id() + ":" + edge.targetVersion();
-        return graph.vertexSet().stream()
-                .filter(v -> v.id().equals(releaseId) && v instanceof ReleaseNode)
-                .map(v -> (ReleaseNode) v)
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Override
-    public Set<UpdateNode> getRootArtifactDirectDep() {
-        Optional<UpdateNode> root = rootNode();
-        if (root.isPresent()) {
-            return outgoingEdgesOf(root.get()).stream()
-                    .filter(UpdateEdge::isDependency)
-                    .map(e -> target(e))
-                    .collect(Collectors.toSet());
         } else {
-            return Set.of();
+            String versionId = artifact.id() + ":" + edge.targetVersion();
+            return getNode(versionId);
         }
-    }
-
-    @Override
-    public Set<UpdateNode> getAllArtifactRelease(UpdateNode artifact) {
-        return graph.edgesOf(artifact).stream()
-                .filter(UpdateEdge::isVersion)
-                .map(edge -> (ReleaseNode) graph.getEdgeTarget(edge))
-                .collect(Collectors.toSet());
     }
 
     @Override

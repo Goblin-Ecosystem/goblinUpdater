@@ -15,9 +15,9 @@ public class LPLAUpdateSolver  implements UpdateSolver {
     @Override
     public Optional<UpdateGraph<UpdateNode, UpdateEdge>> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdatePreferences updatePreferences) {
         Set<UpdateNode> optimals = new HashSet<>();
-        Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
+        Set<UpdateNode> artifactDirectDeps = updateGraph.rootDirectDependencies();
         for(UpdateNode artifactDirectDep : artifactDirectDeps){
-            Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
+            Set<UpdateNode> allArtifactRelease = updateGraph.versions(artifactDirectDep);
             optimals.addAll(findOptimals(allArtifactRelease, updatePreferences));
         }
         // FIXME: is it working with a reference copy only?

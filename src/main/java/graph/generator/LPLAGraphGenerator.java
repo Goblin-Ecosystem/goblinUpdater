@@ -10,6 +10,7 @@ import project.Project;
 import updater.preferences.UpdatePreferences;
 import util.*;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge> {
@@ -30,22 +31,25 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
             UpdatePreferences updatePreferences) {
         // compute direct dep cost
         LoggerHelpers.info("Compute quality and cost");
-        Set<UpdateNode> artifactDirectDeps = updateGraph.getRootArtifactDirectDep();
+        Set<UpdateNode> artifactDirectDeps = updateGraph.rootDirectDependencies();
         for (UpdateNode artifactDirectDep : artifactDirectDeps) {
             // Get current used version
-            UpdateNode currentRelease = updateGraph.getCurrentUseReleaseOfArtifact(artifactDirectDep);
-            Set<UpdateNode> allArtifactRelease = updateGraph.getAllArtifactRelease(artifactDirectDep);
-            double currentReleaseQuality = ((ReleaseNode) currentRelease).getNodeQuality(updatePreferences);
-            for (UpdateNode artifactRelease : allArtifactRelease) {
-                // If quality of current release < artifact release, delete node
-                if (currentReleaseQuality <= ((ReleaseNode) artifactRelease).getNodeQuality(updatePreferences)
-                        && !currentRelease.equals(artifactRelease)) {
-                    updateGraph.removeNode(artifactRelease);
-                }
-                // Else compute change cost
-                else {
-                    ((ReleaseNode) artifactRelease).setChangeCost(
-                            MaracasHelpers.computeChangeCost(project.getPath(), currentRelease, artifactRelease));
+            Optional<UpdateNode> optCurrentRelease = updateGraph.rootCurrentDependencyRelease(artifactDirectDep);
+            if (optCurrentRelease.isPresent()) {
+                ReleaseNode currentRelease = (ReleaseNode) optCurrentRelease.get();
+                Set<UpdateNode> allArtifactRelease = updateGraph.versions(artifactDirectDep);
+                double currentReleaseQuality = currentRelease.getNodeQuality(updatePreferences);
+                for (UpdateNode artifactRelease : allArtifactRelease) {
+                    // If quality of current release < artifact release, delete node
+                    if (currentReleaseQuality <= ((ReleaseNode) artifactRelease).getNodeQuality(updatePreferences)
+                            && !currentRelease.equals(artifactRelease)) {
+                        updateGraph.removeNode(artifactRelease);
+                    }
+                    // Else compute change cost
+                    else {
+                        ((ReleaseNode) artifactRelease).setChangeCost(
+                                MaracasHelpers.computeChangeCost(project.getPath(), currentRelease, artifactRelease));
+                    }
                 }
             }
             // TODO: clear or not clear

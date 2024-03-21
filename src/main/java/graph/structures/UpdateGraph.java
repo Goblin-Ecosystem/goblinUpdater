@@ -3,7 +3,9 @@ package graph.structures;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends CustomGraph<N, E> {
 
@@ -27,13 +29,35 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
         return this.edges(E::isChange);
     }
 
-    Set<E> getPossibleEdgesOf(N node);
+    default Set<N> directDependencies(N node) {
+        return outgoingEdgesOf(node).stream()
+               .filter(UpdateEdge::isDependency)
+               .map(e -> target(e))
+               .collect(Collectors.toSet());
+    }
 
-    N getCurrentUseReleaseOfArtifact(N artifact);
+    default Set<N> rootDirectDependencies() {
+        return rootNode().map(this::directDependencies).orElse(Set.of());
+    }
 
-    Set<N> getRootArtifactDirectDep();
+    default Set<N> versions(N node) {
+        return outgoingEdgesOf(node).stream()
+               .filter(UpdateEdge::isVersion)
+               .map(e -> target(e))
+               .collect(Collectors.toSet());
+    }
 
-    Set<N> getAllArtifactRelease(N artifact);
+    default Set<E> possibles(N node) {
+        return outgoingEdgesOf(node).stream()
+               .filter(UpdateEdge::isChange)
+               .collect(Collectors.toSet());
+    }
+
+    Optional<N> currentDependencyRelease(N release, N artifact);
+
+    default Optional<N> rootCurrentDependencyRelease(N artifact) {
+        return rootNode().flatMap(r -> currentDependencyRelease(r, artifact));
+    }
 
     UpdateGraph<N, E> copy();
 
