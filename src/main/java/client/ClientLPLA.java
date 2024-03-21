@@ -3,9 +3,9 @@ package client;
 import project.Project;
 import project.ProjectLoader;
 import project.maven.MavenProjectLoader;
+import updater.LPLA.MavenLPLAUpdater;
 import updater.preferences.MavenPreferences;
 import updater.Updater;
-import updater.lpla.MavenLPLAUpdater;
 
 import java.nio.file.Path;
 import java.util.Optional;
