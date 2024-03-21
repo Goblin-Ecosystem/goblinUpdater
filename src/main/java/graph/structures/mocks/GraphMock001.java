@@ -35,6 +35,21 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     public record Node001(String id, NodeType type) implements UpdateNode {
 
+        public Node001(String id, NodeType type) {
+            this.id = id;
+            this.type = type;
+            if (!hasValidId(id)) throw new IllegalArgumentException("Invalid node id " + id);
+        }
+
+        @Override
+        public boolean hasValidId(String id) {
+            return id.split(":").length == switch (type) {
+                case RELEASE -> 3;
+                case ARTIFACT -> 2;
+                default -> 0;
+            };
+        }
+
         @Override
         public boolean isRelease() {
             return type == RELEASE;
@@ -184,49 +199,49 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     // examples : make 1 static final method for each
     public static final UpdateGraph<UpdateNode, UpdateEdge> example001() {
-        String root = "a";
-        List<String> artifacts = List.of("b", "h", "e");
-        List<String> releases = List.of("c", "d", "i", "j", "f", "g");
+        String root = "a:a:1";
+        List<String> artifacts = List.of("b:b", "h:h", "e:e");
+        List<String> releases = List.of("b:b:1", "b:b:2", "h:h:1", "h:h:2", "e:e:1", "e:e:2");
         Map<String, List<String>> versions = Map.of(
-                "b", List.of("c", "d"),
-                "h", List.of("i", "j"),
-                "e", List.of("f", "g"));
+                "b:b", List.of("b:b:1", "b:b:2"),
+                "h:h", List.of("h:h:1", "h:h:2"),
+                "e:e", List.of("e:e:1", "e:e:2"));
         Map<String, List<Tuple2<String, String>>> dependencies = Map.of(
-                "a", List.of(Tuple.of("b", "1")),
-                "c", List.of(Tuple.of("h", "1")),
-                "d", List.of(Tuple.of("h", "1"), Tuple.of("e", "1")));
+                "a:a:1", List.of(Tuple.of("b:b", "2")),
+                "b:b:1", List.of(Tuple.of("h:h", "1")),
+                "b:b:2", List.of(Tuple.of("h:h", "1"), Tuple.of("e:e", "1")));
         return generateGraph(root, artifacts, releases, versions, dependencies);
     }
 
     public static final UpdateGraph<UpdateNode, UpdateEdge> example002() {
-        String root = "p";
-        List<String> artifacts = List.of("l1", "l2", "l3", "l4", "l5", "l6");
+        String root = "p:p:1";
+        List<String> artifacts = List.of("x:l1", "x:l2", "x:l3", "x:l4", "x:l5", "x:l6");
         List<String> releases = List.of(
-                "l1-1", "l1-2", "l1-3",
-                "l2-1", "l2-2",
-                "l3-1",
-                "l4-1",
-                "l5-1",
-                "l6-1", "l6-2");
+                "x:l1:1", "x:l1:2", "x:l1:3",
+                "x:l2:1", "x:l2:2",
+                "x:l3:1",
+                "x:l4:1",
+                "x:l5:1",
+                "x:l6:1", "x:l6:2");
         Map<String, List<String>> versions = Map.of(
-                "l1", List.of("l1-1", "l1-2", "l1-3"),
-                "l2", List.of("l2-1", "l2-2"),
-                "l3", List.of("l3-1"),
-                "l4", List.of("l4-1"),
-                "l5", List.of("l5-1"),
-                "l6", List.of("l6-1", "l6-2"));
+                "x:l1", List.of("x:l1:1", "x:l1:2", "x:l1:3"),
+                "x:l2", List.of("x:l2:1", "x:l2:2"),
+                "x:l3", List.of("x:l3:1"),
+                "x:l4", List.of("x:l4:1"),
+                "x:l5", List.of("x:l5:1"),
+                "x:l6", List.of("x:l6:1", "x:l6:2"));
         Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
-        dependencies.put("p", List.of(Tuple.of("l1", "1"), Tuple.of("l2", "1")));
-        dependencies.put("l1-1", List.of(Tuple.of("l3", "1"), Tuple.of("l4", "1")));
-        dependencies.put("l1-2", List.of(Tuple.of("l4", "1"), Tuple.of("l5", "1")));
-        dependencies.put("l1-3", List.of(Tuple.of("l5", "2"), Tuple.of("l2", "2")));
-        dependencies.put("l2-1", List.of());
-        dependencies.put("l2-2", List.of(Tuple.of("l6", "1")));
-        dependencies.put("l3-1", List.of());
-        dependencies.put("l4-1", List.of());
-        dependencies.put("l5-1", List.of(Tuple.of("l6", "2")));
-        dependencies.put("l6-1", List.of());
-        dependencies.put("l6-2", List.of());
+        dependencies.put("p:p:1", List.of(Tuple.of("x:l1", "1"), Tuple.of("x:l2", "1")));
+        dependencies.put("x:l1:1", List.of(Tuple.of("x:l3", "1"), Tuple.of("x:l4", "1")));
+        dependencies.put("x:l1:2", List.of(Tuple.of("x:l4", "1"), Tuple.of("x:l5", "1")));
+        dependencies.put("x:l1:3", List.of(Tuple.of("x:l5", "2"), Tuple.of("x:l2", "2")));
+        dependencies.put("x:l2:1", List.of());
+        dependencies.put("x:l2:2", List.of(Tuple.of("x:l6", "1")));
+        dependencies.put("x:l3:1", List.of());
+        dependencies.put("x:l4:1", List.of());
+        dependencies.put("x:l5:1", List.of(Tuple.of("x:l6", "2")));
+        dependencies.put("x:l6:1", List.of());
+        dependencies.put("x:l6:2", List.of());
         return generateGraph(root, artifacts, releases, versions, dependencies);
     }
 

@@ -13,6 +13,9 @@ public abstract class AbstractNode implements UpdateNode {
     private Double quality = null;
 
     protected AbstractNode(String id) {
+        if (!hasValidId(id)) {
+            throw new IllegalArgumentException("Invalid id: " + id);
+        }
         this.id = id;
     }
 

@@ -178,7 +178,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                 // Compute cost only for direct dependencies
                 if (sourceReleaseNode.id().equals("ROOT")) {
                     possibleEdge.setChangeCost(MaracasHelpers.computeChangeCost(projectPath,
-                            graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.getGa())),
+                            graph.getCurrentUseReleaseOfArtifact(new ArtifactNode(targetReleaseNode.ga())),
                             targetReleaseNode));
                 } else {
                     possibleEdge.setChangeCost(9999999.9);

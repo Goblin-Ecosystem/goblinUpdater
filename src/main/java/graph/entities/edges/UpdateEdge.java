@@ -22,7 +22,7 @@ public interface UpdateEdge extends Identifiable<String> {
     boolean isChange();
 
     /**
-     * Returns the target version of the edge if it is a dependency, null otherwise.
+     * Returns the target version of the edge if it is a dependency, null otherwise. The isDependency method can be used to check beforehand if the edge represents a dependency or not.
      */
     String targetVersion();
 }

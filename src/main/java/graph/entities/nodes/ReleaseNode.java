@@ -12,8 +12,21 @@ public class ReleaseNode extends AbstractNode {
 
     private double changeCost = 0.0;
 
+    /**
+     * Constructor for release nodes. Assumes the id is of the form "g:a:v".
+     * @param id the id of the node
+     */
     public ReleaseNode(String id) {
         super(id);
+    }
+
+    private static final boolean isValidId(String id) {
+        return id.split(":").length == 3; // FIXME: check more thoroughly
+    }
+
+    @Override
+    public boolean hasValidId(String id) {
+        return ReleaseNode.isValidId(id);
     }
 
     // FIXME: should be private or in an interface
@@ -26,12 +39,6 @@ public class ReleaseNode extends AbstractNode {
         this.changeCost = changeCost;
     }
     
-    // FIXME: should be private or in an interface
-    public String getGa() {
-        String[] splitedGav = id().split(":");
-        return splitedGav[0] + ":" + splitedGav[1];
-    }
-
     // FIXME: should be private or in an interface
     public boolean dominates(ReleaseNode other, UpdatePreferences updatePreferences) {
         return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences)
