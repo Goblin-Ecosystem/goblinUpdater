@@ -8,7 +8,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class MavenPreferences implements UpdatePreferences {
     private final Map<AddedValueEnum, Double> metricsAndCoefMap;
@@ -25,17 +29,12 @@ public class MavenPreferences implements UpdatePreferences {
 
     @Override
     public Set<AddedValueEnum> getAggregatedAddedValueEnumSet() {
-        Set<AddedValueEnum> aggregatedAddedValues = new HashSet<>();
-        for (AddedValueEnum addedValueEnum : metricsAndCoefMap.keySet()) {
-            if (addedValueEnum.isAggregated()) {
-                aggregatedAddedValues.add(addedValueEnum);
-            } else {
-                aggregatedAddedValues.add(addedValueEnum.aggregatedVersion());
-            }
-        }
-        return aggregatedAddedValues;
+        return metricsAndCoefMap.keySet().stream()
+                .map(m -> m.isAggregated() ? m : m.aggregatedVersion())
+                .collect(Collectors.toSet());
     }
 
+    // FIXME: should this logic be here or in an updater?
     @Override
     public double getAddedValueCoef(AddedValueEnum addedValueEnum) {
         if (metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()) {

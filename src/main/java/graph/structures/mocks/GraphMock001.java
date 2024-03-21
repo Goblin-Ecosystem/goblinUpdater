@@ -1,4 +1,4 @@
-package graph.structures.joycegraph;
+package graph.structures.mocks;
 
 import java.util.List;
 import java.util.Set;
@@ -13,10 +13,10 @@ import graph.entities.nodes.UpdateNode;
 import graph.entities.edges.UpdateEdge;
 import graph.structures.UpdateGraph;
 
-import static graph.structures.joycegraph.GraphMock001.NodeType.*;
 import static addedvalue.AddedValueEnum.CVE;
 import static addedvalue.AddedValueEnum.FRESHNESS;
-import static graph.structures.joycegraph.GraphMock001.EdgeType.*;
+import static graph.structures.mocks.GraphMock001.EdgeType.*;
+import static graph.structures.mocks.GraphMock001.NodeType.*;
 
 import java.util.Optional;
 
