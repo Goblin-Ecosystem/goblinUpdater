@@ -7,12 +7,23 @@ import graph.entities.nodes.AbstractNode;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import util.LoggerHelpers;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGraph<UpdateNode, UpdateEdge> {
+
+    public JgraphtUpdateGraph() {
+        super();
+    }
+
+    public JgraphtUpdateGraph(Graph<UpdateNode, UpdateEdge> graphCopy) {
+        super(graphCopy);
+    }
 
     @Override
     public Set<UpdateEdge> getPossibleEdgesOf(UpdateNode node) {
@@ -56,7 +67,9 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
 
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> copy() {
-        return (UpdateGraph<UpdateNode, UpdateEdge>) super.copy();
+        Graph<UpdateNode, UpdateEdge> graphCopy = new DefaultDirectedGraph<>(UpdateEdge.class);
+        Graphs.addGraph(graphCopy, graph);
+            return new JgraphtUpdateGraph(graphCopy);
     }
 
 }

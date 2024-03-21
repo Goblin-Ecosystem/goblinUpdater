@@ -1,4 +1,4 @@
-package updater.lpla;
+package updater.LPLA;
 
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
