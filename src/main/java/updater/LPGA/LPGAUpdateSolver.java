@@ -6,7 +6,6 @@ import com.google.ortools.linearsolver.MPVariable;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
-import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import updater.UpdateSolver;
 import updater.preferences.*;
@@ -14,6 +13,7 @@ import updater.preferences.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LPGAUpdateSolver implements UpdateSolver {
     @Override
@@ -49,19 +49,19 @@ public class LPGAUpdateSolver implements UpdateSolver {
             UpdatePreferences updatePreferences) {
         MPSolver solver = MPSolver.createSolver("GLOP");
         // FIXME: moche et pas efficace !!
-        Set<N> artifactNodes = updateGraph.releaseNodes();
-        Set<N> libraryNodes = updateGraph.artifactNodes();
+        Set<N> artifactNodes = updateGraph.artifactNodes();
+        Set<N> releaseNodes = updateGraph.releaseNodes();
         Set<E> versionEdges = updateGraph.versionEdges();
         Set<E> dependencyEdges = updateGraph.dependencyEdges();
         Set<E> changeEdges = updateGraph.changeEdges();
 
+        // create a variable for each node in releaseNodes
+        releaseNodes.forEach(n -> solver.makeBoolVar(GraphLP.releaseVariableName(n)));
+
         // create a variable for each node in artifactNodes
         artifactNodes.forEach(n -> solver.makeBoolVar(GraphLP.artifactVariableName(n)));
 
-        // create a variable for each node in libraryNodes
-        libraryNodes.forEach(n -> solver.makeBoolVar(GraphLP.libraryVariableName(n)));
-
-        // testing constraints on artifact nodes
+        // testing constraints on release nodes
         // TODO: for tests only, to be removed later
         List<Tuple2<String, Integer>> testValues = List.of(
                 // Tuple.of("j", 0),
@@ -72,40 +72,40 @@ public class LPGAUpdateSolver implements UpdateSolver {
             String e = t._1();
             Integer v = t._2();
             N node = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should exists
-            MPVariable excludedVariable = GraphLP.artifactVariable(solver, node);
+            MPVariable excludedVariable = GraphLP.releaseVariable(solver, node);
             OrLP.makeEqualityConstraint(solver, "constraint on " + e, excludedVariable, v);
         }
 
         // create a constraint stating that the variable for the root node equals 1
         // (ROOT)
         updateGraph.rootNode().ifPresent(n -> OrLP.makeEqualityConstraint(solver,
-                "ROOT",
-                GraphLP.artifactVariable(solver, n),
+                "ROOT is " + n.id(),
+                GraphLP.releaseVariable(solver, n),
                 1));
 
         // create constraints for versions (VER)
-        // for all l in libraryNodes, sum_{a in versions(l)} (var_a) = var_l
+        // for all a in artifactNodes, sum_{r in versions(a)} (var_r) = var_a
         // and
         // create constraints for dependencies (DEP 1)
-        // for all l in libraryNodes, sum_{a in dependants(l)} (var_a) >= var_l
-        for (N lib : libraryNodes) {
-            String libName = GraphLP.libraryVariableName(lib);
-            MPVariable vLib = GraphLP.libraryVariable(solver, lib);
-            List<MPVariable> artifacts = versionEdges.stream()
-                    .filter(e -> updateGraph.source(e) == lib)
+        // for all a in artifactNodes, sum_{r in dependants(a)} (var_r) >= var_a
+        for (N a : artifactNodes) {
+            String aName = GraphLP.artifactVariableName(a);
+            MPVariable vA = GraphLP.artifactVariable(solver, a);
+            List<MPVariable> releases = versionEdges.stream()
+                    .filter(e -> updateGraph.source(e) == a)
                     .map(updateGraph::target)
-                    .map(a -> GraphLP.artifactVariable(solver, a))
+                    .map(r -> GraphLP.releaseVariable(solver, r))
                     .toList();
             OrLP.makeEqualityWithSumConstraint(solver,
-                    "VERSION " + lib.id(),
-                    artifacts,
-                    1, vLib);
+                    "VERSIONS " + GraphLP.artifactVariableName(a) + "->" + releases.stream().map(r -> r.name()).collect(Collectors.joining(", ")),
+                    releases,
+                    1, vA);
             List<MPVariable> dependants = dependencyEdges.stream()
-                    .filter(e -> updateGraph.target(e) == lib)
+                    .filter(e -> updateGraph.target(e) == a)
                     .map(updateGraph::source)
-                    .map(a -> GraphLP.artifactVariable(solver, a))
+                    .map(r -> GraphLP.releaseVariable(solver, r))
                     .toList();
-            OrLP.makeSupEqualWithSumConstraint(solver, "DEP1 " + libName, dependants, vLib);
+            OrLP.makeSupEqualWithSumConstraint(solver, "DEP1 " + aName, dependants, vA);
         }
 
         // create constraints for dependencies (DEP2)
@@ -113,10 +113,10 @@ public class LPGAUpdateSolver implements UpdateSolver {
         for (E d : dependencyEdges) {
             N source = updateGraph.source(d);
             N target = updateGraph.target(d);
-            String sName = GraphLP.artifactVariableName(source);
+            String sName = GraphLP.releaseVariableName(source);
             String tName = GraphLP.artifactVariableName(target);
-            MPVariable sVar = GraphLP.artifactVariable(solver, source);
-            MPVariable tVar = GraphLP.libraryVariable(solver, target);
+            MPVariable sVar = GraphLP.releaseVariable(solver, source);
+            MPVariable tVar = GraphLP.artifactVariable(solver, target);
             OrLP.makeSupEqualConstraint(solver, "DEP2 " + sName + "->" + tName, tVar, sVar);
         }
 

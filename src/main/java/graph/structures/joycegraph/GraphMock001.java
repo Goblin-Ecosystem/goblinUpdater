@@ -166,16 +166,15 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         // setup
         int idEdge = 0;
         // root
-        UpdateNode rootNode = graph.addNode(root, ARTIFACT);
+        UpdateNode rootNode = graph.addNode(root, RELEASE);
         graph.setRoot(rootNode);
         // other releases
         for (String r : releases) {
             graph.addNode(r, RELEASE);
         }
-        // other artifacts
+        // artifacts
         for (String a : artifacts) {
             graph.addNode(a, ARTIFACT);
-
         }
         // versions
         for (Entry<String, List<String>> e : versions.entrySet()) {

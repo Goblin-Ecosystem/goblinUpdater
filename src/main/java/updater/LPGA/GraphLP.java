@@ -10,10 +10,10 @@ public class GraphLP {
 
     private GraphLP() {}
 
-    private static final String NA_PREFIX = "x_";
-    private static final String NL_PREFIX = "y_";
-    private static final String ED_PREFIX = "d_";
-    private static final String EP_PREFIX = "p_";
+    private static final String NR_PREFIX = "rel_";
+    private static final String NA_PREFIX = "art_";
+    private static final String ED_PREFIX = "dep_";
+    private static final String EP_PREFIX = "pos_";
 
     public static <N extends UpdateNode> String nodeVariableName(N n, String prefix) {
         return prefix + n.id();
@@ -23,16 +23,16 @@ public class GraphLP {
         return nodeVariableName(n, NA_PREFIX);
     }
 
-    public static <N extends UpdateNode> String libraryVariableName(N n) {
-        return nodeVariableName(n, NL_PREFIX);
+    public static <N extends UpdateNode> String releaseVariableName(N n) {
+        return nodeVariableName(n, NR_PREFIX);
     }
 
     public static <N extends UpdateNode> MPVariable artifactVariable(MPSolver s, N n) {
         return s.lookupVariableOrNull(artifactVariableName(n));
     }
 
-    public static <N extends UpdateNode> MPVariable libraryVariable(MPSolver s, N n) {
-        return s.lookupVariableOrNull(libraryVariableName(n));
+    public static <N extends UpdateNode> MPVariable releaseVariable(MPSolver s, N n) {
+        return s.lookupVariableOrNull(releaseVariableName(n));
     }
 
     public static <N extends UpdateNode, E extends UpdateEdge> String edgeVariableName(CustomGraph<N, E> g, E e, String prefix) {
