@@ -15,4 +15,10 @@ public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
     public String id() {
         return this.id;
     }
+
+    @Override
+    public String targetVersion() {
+        return null;
+    }
+    
 }

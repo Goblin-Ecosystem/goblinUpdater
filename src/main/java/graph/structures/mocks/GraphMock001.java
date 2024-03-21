@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import graph.entities.nodes.UpdateNode;
 import graph.entities.edges.UpdateEdge;
 import graph.structures.UpdateGraph;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 
 import static addedvalue.AddedValueEnum.CVE;
 import static addedvalue.AddedValueEnum.FRESHNESS;
@@ -54,7 +56,7 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     }
 
-    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target)
+    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target, String targetVersion)
             implements UpdateEdge {
 
         @Override
@@ -89,14 +91,14 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         nodes.add(node);
     }
 
-    private UpdateEdge addEdge(String id, EdgeType type, String source, String target) {
+    private UpdateEdge addEdge(String id, EdgeType type, String source, String target, String targetVersion) {
         Optional<UpdateNode> ns = getNodeById(source);
         Optional<UpdateNode> nt = getNodeById(target);
         if (ns.isEmpty())
             throw new IllegalArgumentException("source node not found");
         if (nt.isEmpty())
             throw new IllegalArgumentException("target node not found");
-        UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get());
+        UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get(), targetVersion);
         addEdgeFromNodeId(ns.get().id(), nt.get().id(), edge);
         return edge;
     }
@@ -146,7 +148,8 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
     }
 
     private static final UpdateGraph<UpdateNode, UpdateEdge> generateGraph(String root, List<String> artifacts,
-            List<String> releases, Map<String, List<String>> versions, Map<String, List<String>> dependencies) {
+            List<String> releases, Map<String, List<String>> versions,
+            Map<String, List<Tuple2<String, String>>> dependencies) {
         GraphMock001 graph = new GraphMock001();
         int idEdge = 0;
         // root
@@ -163,15 +166,15 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         // versions
         for (Entry<String, List<String>> e : versions.entrySet()) {
             for (String v : e.getValue()) {
-                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v);
+                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null);
             }
         }
         // dependencies and possibles
-        for (Entry<String, List<String>> e : dependencies.entrySet()) {
-            for (String d : e.getValue()) {
-                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d);
-                for (String v : versions.get(d)) {
-                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v);
+        for (Entry<String, List<Tuple2<String, String>>> e : dependencies.entrySet()) {
+            for (Tuple2<String, String> d : e.getValue()) {
+                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2());
+                for (String v : versions.get(d._1())) {
+                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null);
                 }
             }
         }
@@ -188,10 +191,10 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
                 "b", List.of("c", "d"),
                 "h", List.of("i", "j"),
                 "e", List.of("f", "g"));
-        Map<String, List<String>> dependencies = Map.of(
-                "a", List.of("b"),
-                "c", List.of("h"),
-                "d", List.of("h", "e"));
+        Map<String, List<Tuple2<String, String>>> dependencies = Map.of(
+                "a", List.of(Tuple.of("b", "1")),
+                "c", List.of(Tuple.of("h", "1")),
+                "d", List.of(Tuple.of("h", "1"), Tuple.of("e", "1")));
         return generateGraph(root, artifacts, releases, versions, dependencies);
     }
 
@@ -212,16 +215,16 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
                 "l4", List.of("l4-1"),
                 "l5", List.of("l5-1"),
                 "l6", List.of("l6-1", "l6-2"));
-        Map<String, List<String>> dependencies = new HashMap<>();
-        dependencies.put("p", List.of("l1", "l2"));
-        dependencies.put("l1-1", List.of("l3", "l4"));
-        dependencies.put("l1-2", List.of("l4", "l5"));
-        dependencies.put("l1-3", List.of("l5", "l2"));
+        Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
+        dependencies.put("p", List.of(Tuple.of("l1", "1"), Tuple.of("l2", "1")));
+        dependencies.put("l1-1", List.of(Tuple.of("l3", "1"), Tuple.of("l4", "1")));
+        dependencies.put("l1-2", List.of(Tuple.of("l4", "1"), Tuple.of("l5", "1")));
+        dependencies.put("l1-3", List.of(Tuple.of("l5", "2"), Tuple.of("l2", "2")));
         dependencies.put("l2-1", List.of());
-        dependencies.put("l2-2", List.of("l6"));
+        dependencies.put("l2-2", List.of(Tuple.of("l6", "1")));
         dependencies.put("l3-1", List.of());
         dependencies.put("l4-1", List.of());
-        dependencies.put("l5-1", List.of("l6"));
+        dependencies.put("l5-1", List.of(Tuple.of("l6", "2")));
         dependencies.put("l6-1", List.of());
         dependencies.put("l6-2", List.of());
         return generateGraph(root, artifacts, releases, versions, dependencies);

@@ -20,4 +20,9 @@ public interface UpdateEdge extends Identifiable<String> {
      * Returns true if the edge represents a change (it should relate a release with a release dependency),
      */
     boolean isChange();
+
+    /**
+     * Returns the target version of the edge if it is a dependency, null otherwise.
+     */
+    String targetVersion();
 }
