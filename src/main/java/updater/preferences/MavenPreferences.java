@@ -18,6 +18,7 @@ public class MavenPreferences implements UpdatePreferences {
         this.metricsAndCoefMap = generateMetricAndCoefMap(confMap);
     }
 
+    @Override
     public Set<AddedValueEnum> getAddedValueEnumSet() {
         return metricsAndCoefMap.keySet();
     }
@@ -35,6 +36,7 @@ public class MavenPreferences implements UpdatePreferences {
         return aggregatedAddedValues;
     }
 
+    @Override
     public double getAddedValueCoef(AddedValueEnum addedValueEnum) {
         if (metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()) {
             return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0
