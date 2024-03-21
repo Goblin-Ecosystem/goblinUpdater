@@ -16,6 +16,7 @@ public enum AddedValueEnum {
     CVE_AGGREGATED,
     FRESHNESS,
     FRESHNESS_AGGREGATED;
+    // FIXME: add more AddedValue types (also in the Weaver)
 
     /**
      * Returns the class that implements AddedValue for this enum value
