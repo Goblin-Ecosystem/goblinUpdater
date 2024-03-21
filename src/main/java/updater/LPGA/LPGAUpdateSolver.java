@@ -16,12 +16,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LPGAUpdateSolver implements UpdateSolver {
+
+    private List<Tuple2<String, Integer>> constrainedValues;
+
+    public LPGAUpdateSolver() {
+    }
+
+    public LPGAUpdateSolver(List<Tuple2<String, Integer>> constrainedValues) {
+        this();
+        this.setConstrainedValues(constrainedValues);
+    }
+
+    private void setConstrainedValues(List<Tuple2<String, Integer>> constrainedValues) {
+        this.constrainedValues = constrainedValues;
+    }
+
     @Override
     public Optional<UpdateGraph<UpdateNode, UpdateEdge>> resolve(UpdateGraph<UpdateNode, UpdateEdge> updateGraph,
             UpdatePreferences updatePreferences) {
-        // TODO
         Loader.loadNativeLibraries();
         MPSolver problem = createProblem(updateGraph, updatePreferences);
+        integrateConstrainedValues(updateGraph, problem);
         return solveProblem(problem, updateGraph, updatePreferences)
                 .flatMap(solution -> solutionToGraph(solution, updateGraph, updatePreferences));
     }
@@ -37,11 +52,23 @@ public class LPGAUpdateSolver implements UpdateSolver {
             UpdatePreferences updatePreferences) {
         MPSolver.ResultStatus result = problem.solve();
         if (result == MPSolver.ResultStatus.OPTIMAL || result == MPSolver.ResultStatus.FEASIBLE) {
+            System.out.println("Problem solved");
+            OrLP.printProblem(problem);
             return Optional.of(problem);
         } else {
             System.out.println("Problem not solved");
             OrLP.printProblem(problem);
             return Optional.empty();
+        }
+    }
+
+    private <N extends UpdateNode, E extends UpdateEdge> void integrateConstrainedValues(UpdateGraph<N, E> updateGraph, MPSolver problem) {
+        for (Tuple2<String, Integer> t : constrainedValues) {
+            String e = t._1();
+            Integer v = t._2();
+            N node = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should exists
+            MPVariable excludedVariable = GraphLP.releaseVariable(problem, node);
+            OrLP.makeEqualityConstraint(problem, "constraint on " + e, excludedVariable, v);
         }
     }
 
@@ -53,28 +80,13 @@ public class LPGAUpdateSolver implements UpdateSolver {
         Set<N> releaseNodes = updateGraph.releaseNodes();
         Set<E> versionEdges = updateGraph.versionEdges();
         Set<E> dependencyEdges = updateGraph.dependencyEdges();
-        Set<E> changeEdges = updateGraph.changeEdges();
+        // Set<E> changeEdges = updateGraph.changeEdges();
 
         // create a variable for each node in releaseNodes
         releaseNodes.forEach(n -> solver.makeBoolVar(GraphLP.releaseVariableName(n)));
 
         // create a variable for each node in artifactNodes
         artifactNodes.forEach(n -> solver.makeBoolVar(GraphLP.artifactVariableName(n)));
-
-        // testing constraints on release nodes
-        // TODO: for tests only, to be removed later
-        List<Tuple2<String, Integer>> testValues = List.of(
-                // Tuple.of("j", 0),
-                // Tuple.of("d", 0),
-                // Tuple.of("f", 1)
-        );
-        for (Tuple2<String, Integer> t : testValues) {
-            String e = t._1();
-            Integer v = t._2();
-            N node = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node should exists
-            MPVariable excludedVariable = GraphLP.releaseVariable(solver, node);
-            OrLP.makeEqualityConstraint(solver, "constraint on " + e, excludedVariable, v);
-        }
 
         // create a constraint stating that the variable for the root node equals 1
         // (ROOT)
@@ -97,7 +109,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                     .map(r -> GraphLP.releaseVariable(solver, r))
                     .toList();
             OrLP.makeEqualityWithSumConstraint(solver,
-                    "VERSIONS " + GraphLP.artifactVariableName(a) + "->" + releases.stream().map(r -> r.name()).collect(Collectors.joining(", ")),
+                    "VERSIONS " + GraphLP.artifactVariableName(a) + "->"
+                            + releases.stream().map(r -> r.name()).collect(Collectors.joining(", ")),
                     releases,
                     1, vA);
             List<MPVariable> dependants = dependencyEdges.stream()
