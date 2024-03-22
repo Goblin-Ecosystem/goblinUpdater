@@ -24,7 +24,7 @@ public class ClientMock {
 
     public static void main(String[] args){
         // inputs
-        final int EXAMPLE = 1;
+        final int EXAMPLE = 2;
         UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
             case 1 -> GraphMock001.example001();
             case 2 -> GraphMock001.example002();

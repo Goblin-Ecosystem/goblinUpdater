@@ -3,6 +3,8 @@ package updater.lpga;
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+
+import addedvalue.AddedValueEnum;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
@@ -11,6 +13,7 @@ import updater.UpdateSolver;
 import updater.preferences.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -133,7 +136,83 @@ public class LPGAUpdateSolver implements UpdateSolver {
             OrLP.makeSupEqualConstraint(solver, "DEP2 " + sName + "->" + tName, tVar, sVar);
         }
 
-        // TODO: JOYCE partie qualitative
+        // optimization part
+        // FIXME: make it work with UpdatePreferences (choice of metrics + weights) not ad-hoc
+        // FIXME: CORRECT CODE
+
+        /*
+        // values on nodes (normalized) : CVE, FRESHNESS, POPULARITY
+        double[] cveMetrics;
+        double[] freshnessMetrics;
+        double[] popularityMetrics;
+
+        // values on change edges : COST (MARACAS)
+        double[][] costMetrics;
+
+        // weights
+        double[] weights;
+
+
+        // CVE aggregative variable
+        MPVariable totalQualityCVE = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityCVE");    
+        foreach (realsenode -> ) {
+                    solver.makeConstraint(0, Double.POSITIVE_INFINITY, "CVEConstraint[" + i + "]")
+                            .setCoefficient(Varnodes[i], cveMetrics[i]);
+                }
+        foreach (possibleupdateedge -> ) {
+                    solver.makeConstraint(0, Double.POSITIVE_INFINITY, "CVEConstraint[" + i + "]")
+                            .setCoefficient(Varnodes[i]*Varnodes[j], costMetrics[i][0]);
+                }
+        
+                           .setCoefficient(totalQualityCVE, -1);
+
+        // Freshness aggregative variable
+        MPVariable totalQualityFresh = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityFreshness");    
+foreach (releasenode -> ){
+            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "FreshConstraint")
+                    .setCoefficient(Varnodes[i], freshnessMetrics[i]);
+             }.setCoefficient(totalQualityFresh, -1);
+
+        // Popularity aggregative variable
+        // Definir la fonction aggregative pour la popularité
+MPVariable totalQualityPop = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityPopularity");
+foreach (releasenode -> ){
+            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "QualityConstraint[" + i + "]")
+                    .setCoefficient(nodes[i], popularityMetrics[i]);
+        }
+                   .setCoefficient(totalQualityPop, -graph.size());
+
+        // Quality aggregative variable
+for (int i = 0; i < 3; i++) {
+            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "TotalqualityConstraint")
+                    .setCoefficient(totalQualityCVE, weights[1]);
+                    .setCoefficient(totalQualityFresh, weights[2]);
+                    .setCoefficient(totalQualityPop, weights[3]);  
+             }.setCoefficient(totalQuality, -1);
+        
+        // Cost aggregative variable
+foreach (possibleupdateedge -> ) {
+            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "totalcostConstraint")
+                    .setCoefficient(varnodes[i]*varnode[j], costMetrics[i][1]);
+        }.setCoefficient(totalCost, -1);
+
+        */
+
+        // Aggregative variables
+        MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQuality");
+        MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalCost");
+
+        // FIXME: not compatible with UpdatePreferences (we have weigths for all AddedValueEnums, not weights for quality parts and additionnally the two scaling factors)
+        // FIXME: possibly compute them from UpdatePreferences?
+        // scaling factors for quality vs cost
+        double qualityScaleFactor = 0.5;
+        double costScaleFactor = 0.5;
+
+        // Objective function
+        solver.objective().setCoefficient(totalQuality, qualityScaleFactor);
+        solver.objective().setCoefficient(totalCost, costScaleFactor);
+        solver.objective().setMinimization();
+
         return solver;
     }
 }
