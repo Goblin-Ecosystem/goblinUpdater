@@ -11,7 +11,6 @@ import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
 import graph.structures.mocks.GraphMock001;
 import graph.structures.mocks.MockPreferences;
-import io.vavr.Tuple;
 import io.vavr.Tuple2;
 
 import java.util.List;
@@ -25,8 +24,12 @@ public class ClientMock {
 
     public static void main(String[] args){
         // inputs
-        // UpdateGraph<UpdateNode, UpdateEdge> g = GraphMock001.example001();
-        UpdateGraph<UpdateNode, UpdateEdge> g = GraphMock001.example002();
+        final int EXAMPLE = 1;
+        UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
+            case 1 -> GraphMock001.example001();
+            case 2 -> GraphMock001.example002();
+            default -> throw new IllegalArgumentException("Invalid example");
+        };
         List<Tuple2<String, Integer>> constrainedValues = List.of(
             // Tuple.of("e:e:1", 0),
             // Tuple.of("e:e:2", 0) //,
