@@ -17,7 +17,7 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> computeUpdateGraph(Project project,
             UpdatePreferences updatePreferences) {
-        Set<AddedValueEnum> addedValuesToCompute = updatePreferences.getAggregatedAddedValueEnumSet();
+        Set<AddedValueEnum> addedValuesToCompute = updatePreferences.qualityMetricsAggregated();
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers
                 .getDirectPossibilitiesRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
         RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();

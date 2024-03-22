@@ -15,11 +15,15 @@ public enum AddedValueEnum {
     CVE,
     CVE_AGGREGATED,
     FRESHNESS,
-    FRESHNESS_AGGREGATED;
-    // FIXME: add more AddedValue types (also in the Weaver)
+    FRESHNESS_AGGREGATED,
+    POPULARITY,
+    POPULARITY_AGGREGATED,
+    COST;
 
     /**
      * Returns the class that implements AddedValue for this enum value
+     * FIXME: add classes for missing enum values
+     * TODO: use prototype objects instead of classes
      */
     public Class<? extends AddedValue> getAddedValueClass() {
         return switch (this) {
@@ -37,7 +41,7 @@ public enum AddedValueEnum {
      */
     public boolean isAggregated() {
         return switch (this) {
-            case CVE_AGGREGATED, FRESHNESS_AGGREGATED -> true;
+            case CVE_AGGREGATED, FRESHNESS_AGGREGATED, POPULARITY_AGGREGATED -> true;
             default -> false;
         };
     }
@@ -50,6 +54,7 @@ public enum AddedValueEnum {
         return switch (this) {
             case CVE -> CVE_AGGREGATED;
             case FRESHNESS -> FRESHNESS_AGGREGATED;
+            case POPULARITY -> POPULARITY_AGGREGATED;
             default -> this;
         };
     }
@@ -62,8 +67,39 @@ public enum AddedValueEnum {
         return switch (this) {
             case CVE_AGGREGATED -> CVE;
             case FRESHNESS_AGGREGATED -> FRESHNESS;
+            case POPULARITY_AGGREGATED -> POPULARITY;
             default -> this;
         };
+    }
+
+    /**
+     * Returns true if the enum value corresponds to a quality metric.
+     */
+    public boolean isQualityMetric() {
+        return switch (this) {
+            case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY, POPULARITY_AGGREGATED -> true;
+            default -> false;
+         };
+    }
+
+    /**
+     * Returns true if the enum value corresponds to a cost metric.
+     */
+    public boolean isCostMetric() {
+        return switch (this) {
+            case COST -> true;
+            default -> false;
+         };
+    }
+
+    /**
+     * Returns true if the enum value has to be computed (false if one can get it from the Weaver)
+     */
+    public boolean isComputed() {
+        return switch (this) {
+            case COST -> true;
+            default -> false;
+         };
     }
 
     /**

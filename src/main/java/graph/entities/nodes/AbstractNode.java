@@ -63,7 +63,7 @@ public abstract class AbstractNode implements UpdateNode {
         this.quality = 0.0;
         for (AddedValue addedValue : addedValues) {
             this.quality += (addedValue.getQualityScore()
-                    * updatePreferences.getAddedValueCoef(addedValue.getAddedValueEnum())); // TODO: normalize quality
+                    * updatePreferences.coefficientFor(addedValue.getAddedValueEnum())); // TODO: normalize quality
                                                                                             // score
         }
         return this.quality;

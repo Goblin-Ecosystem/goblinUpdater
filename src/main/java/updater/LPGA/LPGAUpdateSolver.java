@@ -12,6 +12,7 @@ import io.vavr.Tuple2;
 import updater.UpdateSolver;
 import updater.preferences.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,8 +154,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         double[] weights;
 
 
-        // CVE aggregative variable
-        MPVariable totalQualityCVE = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityCVE");    
+        // CVE aggregative variable    
         foreach (realsenode -> ) {
                     solver.makeConstraint(0, Double.POSITIVE_INFINITY, "CVEConstraint[" + i + "]")
                             .setCoefficient(Varnodes[i], cveMetrics[i]);
@@ -167,7 +167,6 @@ public class LPGAUpdateSolver implements UpdateSolver {
                            .setCoefficient(totalQualityCVE, -1);
 
         // Freshness aggregative variable
-        MPVariable totalQualityFresh = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityFreshness");    
 foreach (releasenode -> ){
             solver.makeConstraint(0, Double.POSITIVE_INFINITY, "FreshConstraint")
                     .setCoefficient(Varnodes[i], freshnessMetrics[i]);
@@ -175,7 +174,6 @@ foreach (releasenode -> ){
 
         // Popularity aggregative variable
         // Definir la fonction aggregative pour la popularité
-MPVariable totalQualityPop = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQualityPopularity");
 foreach (releasenode -> ){
             solver.makeConstraint(0, Double.POSITIVE_INFINITY, "QualityConstraint[" + i + "]")
                     .setCoefficient(nodes[i], popularityMetrics[i]);
@@ -198,13 +196,18 @@ foreach (possibleupdateedge -> ) {
 
         */
 
+        // Metric variables
+        Map<AddedValueEnum, MPVariable> metricVariables = new HashMap<>();
+        for (AddedValueEnum addedValue : updatePreferences.metrics()) { // TODO: check somewhere that user preferences only use known metrics and have at least 1 quality metric + cost
+            metricVariables.put(addedValue, solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "Total[" + addedValue + "]"));
+        }
+
         // Aggregative variables
         MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQuality");
         MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalCost");
 
-        // FIXME: not compatible with UpdatePreferences (we have weigths for all AddedValueEnums, not weights for quality parts and additionnally the two scaling factors)
-        // FIXME: possibly compute them from UpdatePreferences?
         // scaling factors for quality vs cost
+        // TODO: use and compute from user preferences instead
         double qualityScaleFactor = 0.5;
         double costScaleFactor = 0.5;
 

@@ -23,12 +23,17 @@ public class MavenPreferences implements UpdatePreferences {
     }
 
     @Override
-    public Set<AddedValueEnum> getAddedValueEnumSet() {
-        return metricsAndCoefMap.keySet();
+    public Set<AddedValueEnum> qualityMetrics() {
+        return metricsAndCoefMap.keySet().stream().filter(AddedValueEnum::isQualityMetric).collect(Collectors.toSet());
     }
 
     @Override
-    public Set<AddedValueEnum> getAggregatedAddedValueEnumSet() {
+    public Set<AddedValueEnum> costMetrics() {
+        return metricsAndCoefMap.keySet().stream().filter(AddedValueEnum::isCostMetric).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<AddedValueEnum> qualityMetricsAggregated() {
         return metricsAndCoefMap.keySet().stream()
                 .map(m -> m.isAggregated() ? m : m.aggregatedVersion())
                 .collect(Collectors.toSet());
@@ -36,7 +41,7 @@ public class MavenPreferences implements UpdatePreferences {
 
     // FIXME: should this logic be here or in an updater?
     @Override
-    public double getAddedValueCoef(AddedValueEnum addedValueEnum) {
+    public double coefficientFor(AddedValueEnum addedValueEnum) {
         if (metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()) {
             return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0
                     : metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
