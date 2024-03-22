@@ -2,6 +2,7 @@ package updater.preferences;
 
 import addedvalue.AddedValueEnum;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public interface UpdatePreferences {
@@ -14,8 +15,7 @@ public interface UpdatePreferences {
     double coefficientFor(AddedValueEnum addedValueEnum);
 
     default Set<AddedValueEnum> metrics() {
-        Set<AddedValueEnum> metrics = Set.of();
-        metrics.addAll(qualityMetrics());
+        Set<AddedValueEnum> metrics = new HashSet<>(qualityMetrics());
         metrics.addAll(costMetrics());
         return metrics;
     }
