@@ -1,5 +1,6 @@
 package updater.api.metrics;
 
+// FIXME: abstraction depends on implementations
 import updater.impl.metrics.Cve;
 import updater.impl.metrics.CveAggregated;
 import updater.impl.metrics.Freshness;
