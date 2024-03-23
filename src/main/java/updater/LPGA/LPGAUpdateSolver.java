@@ -80,7 +80,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
     private <N extends UpdateNode, E extends UpdateEdge> MPSolver createProblem(UpdateGraph<N, E> updateGraph,
             UpdatePreferences updatePreferences) {
-        MPSolver solver = MPSolver.createSolver("GLOP"); // FIXME: cannot constraint a variable to be 0 or 1, not 0.5
+        MPSolver solver = MPSolver.createSolver("CBC"); // FIXME: cannot constraint a variable to be 0 or 1, not 0.5
         // FIXME: moche et pas efficace !!
         Set<N> artifactNodes = updateGraph.artifactNodes();
         Set<N> releaseNodes = updateGraph.releaseNodes();

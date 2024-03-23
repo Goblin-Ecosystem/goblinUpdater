@@ -36,8 +36,8 @@ public class ClientMock {
         );
         UpdatePreferences prefs = new MockPreferences(Map.of(
             CVE, 0.5,
-            FRESHNESS, 0.2,
-            POPULARITY, 0.3, 
+            FRESHNESS, 0.3,
+            POPULARITY, 0.2, 
             COST, 0.6
         ));
         // create solver and resolve update

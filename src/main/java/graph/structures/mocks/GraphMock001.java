@@ -300,7 +300,7 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         qualities.put("x:l2:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 5.0)));
         // l6 version 1 is less fresh but more popular than l2 version 2
         qualities.put("x:l6:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
-        qualities.put("x:l6:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 5.0)));
+        qualities.put("x:l6:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 2.8)));
         // neutral info for l3 version 1 (single version, end of graph)
         qualities.put("x:l3:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
         // neutral info for l4 version 1 (single version, end of graph)
