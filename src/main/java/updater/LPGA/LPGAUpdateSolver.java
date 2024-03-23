@@ -8,6 +8,7 @@ import addedvalue.AddedValueEnum;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
+import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import updater.UpdateSolver;
 import updater.preferences.*;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class LPGAUpdateSolver implements UpdateSolver {
 
@@ -66,7 +67,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
         }
     }
 
-    private <N extends UpdateNode, E extends UpdateEdge> void integrateConstrainedValues(UpdateGraph<N, E> updateGraph, MPSolver problem) {
+    private <N extends UpdateNode, E extends UpdateEdge> void integrateConstrainedValues(UpdateGraph<N, E> updateGraph,
+            MPSolver problem) {
         for (Tuple2<String, Integer> t : constrainedValues) {
             String e = t._1();
             Integer v = t._2();
@@ -84,7 +86,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         Set<N> releaseNodes = updateGraph.releaseNodes();
         Set<E> versionEdges = updateGraph.versionEdges();
         Set<E> dependencyEdges = updateGraph.dependencyEdges();
-        // Set<E> changeEdges = updateGraph.changeEdges();
+        Set<E> changeEdges = updateGraph.changeEdges();
 
         // create a variable for each node in releaseNodes
         releaseNodes.forEach(n -> solver.makeBoolVar(GraphLP.releaseVariableName(n)));
@@ -92,10 +94,13 @@ public class LPGAUpdateSolver implements UpdateSolver {
         // create a variable for each node in artifactNodes
         artifactNodes.forEach(n -> solver.makeBoolVar(GraphLP.artifactVariableName(n)));
 
+        // create variable for each change edge
+        changeEdges.forEach(e -> solver.makeBoolVar(GraphLP.changeVariableName(updateGraph, e)));
+
         // create a constraint stating that the variable for the root node equals 1
         // (ROOT)
         updateGraph.rootNode().ifPresent(n -> OrLP.makeEqualityConstraint(solver,
-                "ROOT is " + n.id(),
+                "ROOT",
                 GraphLP.releaseVariable(solver, n),
                 1));
 
@@ -113,8 +118,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                     .map(r -> GraphLP.releaseVariable(solver, r))
                     .toList();
             OrLP.makeEqualityWithSumConstraint(solver,
-                    "VERSIONS " + GraphLP.artifactVariableName(a) + "->"
-                            + releases.stream().map(r -> r.name()).collect(Collectors.joining(", ")),
+                    "VERSIONS of " + GraphLP.artifactVariableName(a),
                     releases,
                     1, vA);
             List<MPVariable> dependants = dependencyEdges.stream()
@@ -134,82 +138,57 @@ public class LPGAUpdateSolver implements UpdateSolver {
             String tName = GraphLP.artifactVariableName(target);
             MPVariable sVar = GraphLP.releaseVariable(solver, source);
             MPVariable tVar = GraphLP.artifactVariable(solver, target);
-            OrLP.makeSupEqualConstraint(solver, "DEP2 " + sName + "->" + tName, tVar, sVar);
+            OrLP.makeSupEqualConstraint(solver, "DEP2 " + sName + " " + tName, tVar, sVar);
         }
 
-        // optimization part
-        // FIXME: make it work with UpdatePreferences (choice of metrics + weights) not ad-hoc
-        // FIXME: CORRECT CODE
-
-        /*
-        // values on nodes (normalized) : CVE, FRESHNESS, POPULARITY
-        double[] cveMetrics;
-        double[] freshnessMetrics;
-        double[] popularityMetrics;
-
-        // values on change edges : COST (MARACAS)
-        double[][] costMetrics;
-
-        // weights
-        double[] weights;
-
-
-        // CVE aggregative variable    
-        foreach (realsenode -> ) {
-                    solver.makeConstraint(0, Double.POSITIVE_INFINITY, "CVEConstraint[" + i + "]")
-                            .setCoefficient(Varnodes[i], cveMetrics[i]);
-                }
-        foreach (possibleupdateedge -> ) {
-                    solver.makeConstraint(0, Double.POSITIVE_INFINITY, "CVEConstraint[" + i + "]")
-                            .setCoefficient(Varnodes[i]*Varnodes[j], costMetrics[i][0]);
-                }
-        
-                           .setCoefficient(totalQualityCVE, -1);
-
-        // Freshness aggregative variable
-foreach (releasenode -> ){
-            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "FreshConstraint")
-                    .setCoefficient(Varnodes[i], freshnessMetrics[i]);
-             }.setCoefficient(totalQualityFresh, -1);
-
-        // Popularity aggregative variable
-        // Definir la fonction aggregative pour la popularité
-foreach (releasenode -> ){
-            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "QualityConstraint[" + i + "]")
-                    .setCoefficient(nodes[i], popularityMetrics[i]);
+        // TODO: rather fail using Optional or Either, which means problem generation
+        // can fail too (not only solving it)
+        if (!updatePreferences.isValid()) {
+            throw new IllegalArgumentException("Update preferences are not valid");
         }
-                   .setCoefficient(totalQualityPop, -graph.size());
-
-        // Quality aggregative variable
-for (int i = 0; i < 3; i++) {
-            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "TotalqualityConstraint")
-                    .setCoefficient(totalQualityCVE, weights[1]);
-                    .setCoefficient(totalQualityFresh, weights[2]);
-                    .setCoefficient(totalQualityPop, weights[3]);  
-             }.setCoefficient(totalQuality, -1);
-        
-        // Cost aggregative variable
-foreach (possibleupdateedge -> ) {
-            solver.makeConstraint(0, Double.POSITIVE_INFINITY, "totalcostConstraint")
-                    .setCoefficient(varnodes[i]*varnode[j], costMetrics[i][1]);
-        }.setCoefficient(totalCost, -1);
-
-        */
-
-        // Metric variables
-        Map<AddedValueEnum, MPVariable> metricVariables = new HashMap<>();
-        for (AddedValueEnum addedValue : updatePreferences.metrics()) { // TODO: check somewhere that user preferences only use known metrics and have at least 1 quality metric + cost
-            metricVariables.put(addedValue, solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "Total[" + addedValue + "]"));
-        }
+        AddedValueEnum costAddedValue = updatePreferences.costMetrics().stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No cost added value defined"));
 
         // Aggregative variables
-        MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalQuality");
-        MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "TotalCost");
+        MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "QUALITY");
+        MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "COST");
+
+        // Quality variables
+        // and associated constraints (quality is only on release edges)
+        // TODO: check if it is always sum(...) = 1 * totalQuality
+        // if there is at least a metric for which it is not the case then a form of
+        // Strategy should be used.
+        Map<AddedValueEnum, MPVariable> qualityVariables = new HashMap<>();
+        Function<AddedValueEnum, Function<UpdateNode, Tuple2<MPVariable, Double>>> nq2t = q -> r -> Tuple.of(GraphLP.releaseVariable(solver, r), r
+        .getValue(q).orElseThrow(() -> new IllegalArgumentException("missing quality " + q + " on node " + r.id())));
+        for (AddedValueEnum q : updatePreferences.qualityMetrics()) {
+            qualityVariables.put(q,
+                    solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "Quality[" + q + "]"));
+            List<Tuple2<MPVariable, Double>> qualities = updateGraph.releaseNodes().stream()
+                    .map(nq2t.apply(q)).toList();
+            OrLP.makeEqualityWithWeightedSumConstraint(solver, "Quality[" + q + "] Constraint",
+                    qualities, 1.0, qualityVariables.get(q));
+        }
+
+        // Constraint for total quality
+        Function<AddedValueEnum, Tuple2<MPVariable, Double>> q2t = q -> Tuple.of(qualityVariables.get(q),
+                updatePreferences.coefficientFor(q));
+        List<Tuple2<MPVariable, Double>> qualities = updatePreferences.qualityMetrics().stream().map(q2t)
+                .toList();
+        OrLP.makeEqualityWithWeightedSumConstraint(solver, "QUALITY Constraint", qualities, 1.0, totalQuality);
+
+        // Constraint for total cost (cost is only on change edges)
+        // totalCost = sum_{d in changeEdges} (var_d * cost(d))
+        // TODO: by now only one cost metric is used
+        Function<E, Tuple2<MPVariable, Double>> ce2t = ce -> Tuple.of(
+                GraphLP.changeVariable(solver, updateGraph, ce),
+                0.0);
+        List<Tuple2<MPVariable, Double>> costs = updateGraph.changeEdges().stream().map(ce2t).toList();
+        OrLP.makeEqualityWithWeightedSumConstraint(solver, "COST Constraint", costs, 1.0, totalCost);
 
         // scaling factors for quality vs cost
-        // TODO: use and compute from user preferences instead
-        double qualityScaleFactor = 0.5;
-        double costScaleFactor = 0.5;
+        double costScaleFactor = updatePreferences.coefficientFor(costAddedValue);
+        double qualityScaleFactor = 1 - costScaleFactor;
 
         // Objective function
         solver.objective().setCoefficient(totalQuality, qualityScaleFactor);

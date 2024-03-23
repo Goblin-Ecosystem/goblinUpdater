@@ -2,6 +2,7 @@ package graph.structures.mocks;
 
 import java.util.Set;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import addedvalue.AddedValueEnum;
@@ -36,8 +37,9 @@ public class MockPreferences implements UpdatePreferences {
 
     @Override
     public double coefficientFor(AddedValueEnum addedValueEnum) {
-        return (addedValueEnum == null || metricsAndCoefMap.get(addedValueEnum) == null) ? 0.0
-                : metricsAndCoefMap.get(addedValueEnum);
+        if (addedValueEnum == null)
+            return 0.0;
+        return metricsAndCoefMap.get(addedValueEnum) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum);
     }
 
 }

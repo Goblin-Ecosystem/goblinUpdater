@@ -184,15 +184,15 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                                 if (r.id().equals(CustomGraph.ROOT_ID)) {
                                     Optional<UpdateNode> or = graph.rootCurrentDependencyRelease(v);
                                     if (or.isPresent()) {
-                                        change.setChangeCost(MaracasHelpers.computeChangeCost(
+                                        change.setCost(MaracasHelpers.computeChangeCost(
                                                 projectPath,
                                                 or.get(),
                                                 v));
                                     } else {
-                                        change.setChangeCost(9999999.9); // FIXME: OK ?
+                                        change.setCost(9999999.9); // FIXME: OK ?
                                     }
                                 } else {
-                                    change.setChangeCost(9999999.9);
+                                    change.setCost(9999999.9);
                                 }
                             });
                 });

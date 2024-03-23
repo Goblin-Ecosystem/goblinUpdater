@@ -1,6 +1,6 @@
 package updater.lpga;
 
-import graph.structures.CustomGraph;
+import graph.structures.UpdateGraph;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import com.google.ortools.linearsolver.MPSolver;
@@ -10,21 +10,21 @@ public class GraphLP {
 
     private GraphLP() {}
 
-    private static final String NR_PREFIX = "rel_";
-    private static final String NA_PREFIX = "art_";
-    private static final String ED_PREFIX = "dep_";
-    private static final String EP_PREFIX = "pos_";
+    private static final String NA_PATTERN = "[%s]";
+    private static final String NR_PATTERN = "(%s)";
+    private static final String ED_ARROW = "-->";
+    private static final String EC_ARROW = "==>";
 
-    public static <N extends UpdateNode> String nodeVariableName(N n, String prefix) {
-        return prefix + n.id();
+    public static <N extends UpdateNode> String nodeVariableName(N n, String pattern) {
+        return String.format(pattern, n.id());
     }
 
     public static <N extends UpdateNode> String artifactVariableName(N n) {
-        return nodeVariableName(n, NA_PREFIX);
+        return nodeVariableName(n, NA_PATTERN);
     }
 
     public static <N extends UpdateNode> String releaseVariableName(N n) {
-        return nodeVariableName(n, NR_PREFIX);
+        return nodeVariableName(n, NR_PATTERN);
     }
 
     public static <N extends UpdateNode> MPVariable artifactVariable(MPSolver s, N n) {
@@ -35,24 +35,24 @@ public class GraphLP {
         return s.lookupVariableOrNull(releaseVariableName(n));
     }
 
-    public static <N extends UpdateNode, E extends UpdateEdge> String edgeVariableName(CustomGraph<N, E> g, E e, String prefix) {
-        return prefix + e.id() + "_" + g.source(e).id() + "->" + g.target(e).id();
+    public static <N extends UpdateNode, E extends UpdateEdge> String edgeVariableName(UpdateGraph<N, E> g, E e, String arrow) {
+        return String.format("%s%s%s (%s)", g.source(e).id(), arrow, g.target(e).id(), e.id());
     }
 
-    public static <N extends UpdateNode, E extends UpdateEdge>String dependencyVariableName(CustomGraph<N, E> g, E e) {
-        return edgeVariableName(g, e, ED_PREFIX);
+    public static <N extends UpdateNode, E extends UpdateEdge>String dependencyVariableName(UpdateGraph<N, E> g, E e) {
+        return edgeVariableName(g, e, ED_ARROW);
     }
 
-    public static <N extends UpdateNode, E extends UpdateEdge>String possibilityVariableName(CustomGraph<N, E> g, E e) {
-        return edgeVariableName(g, e, EP_PREFIX);
+    public static <N extends UpdateNode, E extends UpdateEdge>String changeVariableName(UpdateGraph<N, E> g, E e) {
+        return edgeVariableName(g, e, EC_ARROW);
     }
 
-    public static <N extends UpdateNode, E extends UpdateEdge>MPVariable dependencyVariable(MPSolver s, CustomGraph<N, E> g, E e) {
+    public static <N extends UpdateNode, E extends UpdateEdge>MPVariable dependencyVariable(MPSolver s, UpdateGraph<N, E> g, E e) {
         return s.lookupVariableOrNull(dependencyVariableName(g, e));
     }
 
-    public static <N extends UpdateNode, E extends UpdateEdge>MPVariable possibilityVariable(MPSolver s, CustomGraph<N, E> g, E e) {
-        return s.lookupVariableOrNull(possibilityVariableName(g, e));
+    public static <N extends UpdateNode, E extends UpdateEdge>MPVariable changeVariable(MPSolver s, UpdateGraph<N, E> g, E e) {
+        return s.lookupVariableOrNull(changeVariableName(g, e));
     }
 
 }

@@ -2,6 +2,7 @@ package graph.entities.edges;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jgrapht.graph.DefaultEdge;
@@ -19,7 +20,10 @@ public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
     protected AbstractEdge(String id, Map<AddedValueEnum, Double> metricMap) {
         super();
         this.id = id;
-        this.metricMap = new MetricMap<>(metricMap);
+        if (metricMap!= null)
+            this.metricMap = new MetricMap<>(metricMap);
+        else
+            this.metricMap = new MetricMap<>(new HashMap<>());
     }
 
     @Override

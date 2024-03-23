@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -42,11 +43,13 @@ public class MavenPreferences implements UpdatePreferences {
     // FIXME: should this logic be here or in an updater?
     @Override
     public double coefficientFor(AddedValueEnum addedValueEnum) {
-        if (metricsAndCoefMap.get(addedValueEnum) == null && addedValueEnum.isAggregated()) {
-            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion()) == null ? 0.0
-                    : metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
-        }
-        return metricsAndCoefMap.get(addedValueEnum) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum);
+        if (addedValueEnum == null)
+            return 0.0;
+        if (metricsAndCoefMap.containsKey(addedValueEnum))
+            return metricsAndCoefMap.get(addedValueEnum);
+        if (addedValueEnum.isAggregated() && metricsAndCoefMap.containsKey(addedValueEnum.notAggregatedVersion()))
+            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
+        return 0.0;
     }
 
     private Map<AddedValueEnum, Double> generateMetricAndCoefMap(Map<String, Object> confMap) {

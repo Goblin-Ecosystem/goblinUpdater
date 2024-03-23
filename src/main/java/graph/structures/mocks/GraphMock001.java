@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import addedvalue.AddedValueEnum;
+import static addedvalue.AddedValueEnum.*;
 import addedvalue.MetricContainer;
 import addedvalue.MetricMap;
 
@@ -91,7 +92,7 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     }
 
-    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target, String targetVersion, 
+    public record Edge001(String id, EdgeType type, UpdateNode source, UpdateNode target, String targetVersion,
             MetricContainer<AddedValueEnum> metrics)
             implements UpdateEdge {
 
@@ -132,6 +133,9 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
     private UpdateNode root;
 
     private UpdateNode addNode(String id, NodeType type, MetricContainer<AddedValueEnum> metrics) {
+        if (metrics == null) {
+            metrics = new MetricMap<>(Map.of());
+        }
         UpdateNode node = new Node001(id, type, metrics);
         addNode(node);
         return node;
@@ -142,13 +146,17 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         nodes.add(node);
     }
 
-    private UpdateEdge addEdge(String id, EdgeType type, String source, String target, String targetVersion, MetricContainer<AddedValueEnum> metrics) {
+    private UpdateEdge addEdge(String id, EdgeType type, String source, String target, String targetVersion,
+            MetricContainer<AddedValueEnum> metrics) {
         Optional<UpdateNode> ns = getNodeById(source);
         Optional<UpdateNode> nt = getNodeById(target);
         if (ns.isEmpty())
             throw new IllegalArgumentException("source node not found");
         if (nt.isEmpty())
             throw new IllegalArgumentException("target node not found");
+        if (metrics == null) {
+            metrics = new MetricMap<>(Map.of());
+        }
         UpdateEdge edge = new Edge001(id, type, ns.get(), nt.get(), targetVersion, metrics);
         addEdgeFromNodeId(ns.get().id(), nt.get().id(), edge);
         return edge;
@@ -200,32 +208,33 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     private static final UpdateGraph<UpdateNode, UpdateEdge> generateGraph(String root, List<String> artifacts,
             List<String> releases, Map<String, List<String>> versions,
-            Map<String, List<Tuple2<String, String>>> dependencies) {
+            Map<String, List<Tuple2<String, String>>> dependencies,
+            Map<String, MetricContainer<AddedValueEnum>> metrics) {
         GraphMock001 graph = new GraphMock001();
         int idEdge = 0;
-        // root
-        UpdateNode rootNode = graph.addNode(root, RELEASE, new MetricMap<>(Map.of()));
+        // root (has no metrics)
+        UpdateNode rootNode = graph.addNode(root, RELEASE, metrics.get(root));
         graph.setRoot(rootNode);
         // other releases
         for (String r : releases) {
-            graph.addNode(r, RELEASE, new MetricMap<>(Map.of()));
+            graph.addNode(r, RELEASE, metrics.get(r));
         }
         // artifacts
         for (String a : artifacts) {
-            graph.addNode(a, ARTIFACT, new MetricMap<>(Map.of()));
+            graph.addNode(a, ARTIFACT, metrics.get(a));
         }
         // versions
         for (Entry<String, List<String>> e : versions.entrySet()) {
             for (String v : e.getValue()) {
-                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null, new MetricMap<>(Map.of()));
+                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null, null);
             }
         }
         // dependencies and possibles
         for (Entry<String, List<Tuple2<String, String>>> e : dependencies.entrySet()) {
             for (Tuple2<String, String> d : e.getValue()) {
-                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2(), new MetricMap<>(Map.of()));
+                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2(), null);
                 for (String v : versions.get(d._1())) {
-                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, new MetricMap<>(Map.of()));
+                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, null); // TODO: get metrics
                 }
             }
         }
@@ -246,7 +255,8 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
                 "a:a:1", List.of(Tuple.of("b:b", "2")),
                 "b:b:1", List.of(Tuple.of("h:h", "1")),
                 "b:b:2", List.of(Tuple.of("h:h", "1"), Tuple.of("e:e", "1")));
-        return generateGraph(root, artifacts, releases, versions, dependencies);
+        Map<String, MetricContainer<AddedValueEnum>> qualities = Map.of();
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
     }
 
     public static final UpdateGraph<UpdateNode, UpdateEdge> example002() {
@@ -278,7 +288,26 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
         dependencies.put("x:l5:1", List.of(Tuple.of("x:l6", "2")));
         dependencies.put("x:l6:1", List.of());
         dependencies.put("x:l6:2", List.of());
-        return generateGraph(root, artifacts, releases, versions, dependencies);
+        Map<String, MetricContainer<AddedValueEnum>> qualities = new HashMap<>();
+        // FIXME: root needs info too
+        qualities.put("p:p:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        // same all for l1 versions 1-2-3
+        qualities.put("x:l1:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 10.0, POPULARITY, 0.0)));
+        qualities.put("x:l1:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
+        qualities.put("x:l1:3", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        // l2 version 1 is less fresh but more popular than l2 version 2
+        qualities.put("x:l2:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
+        qualities.put("x:l2:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 5.0)));
+        // l6 version 1 is less fresh but more popular than l2 version 2
+        qualities.put("x:l6:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
+        qualities.put("x:l6:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 5.0)));
+        // neutral info for l3 version 1 (single version, end of graph)
+        qualities.put("x:l3:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        // neutral info for l4 version 1 (single version, end of graph)
+        qualities.put("x:l4:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        // neutral info for l5 version 1 (single version, end of graph)
+        qualities.put("x:l5:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
     }
 
     @Override
@@ -290,7 +319,7 @@ public class GraphMock001 implements UpdateGraph<UpdateNode, UpdateEdge> {
     public void removeNode(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'removeNode'");
-    }    
+    }
 
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> copy() {

@@ -10,7 +10,10 @@ public class MetricMap<T> implements MetricContainer<T> {
     private Map<T, Double> map;
 
     public MetricMap(Map<T, Double> map) {
-        map = new HashMap<>(map);
+        if (map == null)
+            this.map = new HashMap<>();
+        else
+            this.map = new HashMap<>(map);
     }
 
     @Override
@@ -18,7 +21,6 @@ public class MetricMap<T> implements MetricContainer<T> {
         return map.keySet();
     }
 
-    @Override
     public void addMetric(T m, Double value) {
         map.put(m, value);
     }

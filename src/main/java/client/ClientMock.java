@@ -4,8 +4,7 @@ import updater.preferences.*;
 import updater.UpdateSolver;
 import updater.lpga.LPGAUpdateSolver;
 
-import static addedvalue.AddedValueEnum.CVE;
-import static addedvalue.AddedValueEnum.FRESHNESS;
+import static addedvalue.AddedValueEnum.*;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
 import graph.structures.UpdateGraph;
@@ -36,8 +35,10 @@ public class ClientMock {
             // Tuple.of("f", 1)
         );
         UpdatePreferences prefs = new MockPreferences(Map.of(
-            CVE, 0.6,
-            FRESHNESS, 0.4
+            CVE, 0.5,
+            FRESHNESS, 0.2,
+            POPULARITY, 0.3, 
+            COST, 0.6
         ));
         // create solver and resolve update
         UpdateSolver solver = new LPGAUpdateSolver(constrainedValues);

@@ -12,6 +12,7 @@ import util.GoblinWeaverHelpers;
 
 import java.util.Set;
 
+// TODO: DRY ?
 public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge>  {
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge>  computeUpdateGraph(Project project, UpdatePreferences updatePreferences) {
