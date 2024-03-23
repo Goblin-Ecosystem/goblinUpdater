@@ -1,14 +1,14 @@
 package client;
 
-import graph.entities.edges.UpdateEdge;
-import graph.entities.nodes.UpdateNode;
 import io.vavr.Tuple2;
-import oldupdater.lpga.LPGAUpdateSolver;
 import updater.api.graph.UpdateGraph;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
+import updater.impl.graph.edges.UpdateEdge;
+import updater.impl.graph.nodes.UpdateNode;
 import updater.impl.mock.graph.GraphMock;
 import updater.impl.mock.preferences.PreferencesMock;
+import updater.impl.updater.process.graphbased.lpga.LPGAUpdateSolver;
 
 import static updater.api.metrics.MetricType.*;
 

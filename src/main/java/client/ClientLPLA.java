@@ -5,12 +5,11 @@ import updater.api.project.Project;
 import updater.api.project.ProjectLoader;
 import updater.impl.maven.project.MavenProjectLoader;
 import updater.impl.preferences.SimplePreferences;
-import util.helpers.LoggerHelpers;
+import updater.impl.updater.process.graphbased.lpla.LPLAUpdater;
+import util.helpers.system.LoggerHelpers;
 
 import java.nio.file.Path;
 import java.util.Optional;
-
-import oldupdater.lpla.MavenLPLAUpdater;
 
 /**
  * Basic client for LPLA project update in the Maven/Maven Central eco-system.
@@ -23,7 +22,7 @@ public class ClientLPLA {
         Path updatePath = Path.of("..");
 
         ProjectLoader loader = new MavenProjectLoader();
-        Updater updater = new MavenLPLAUpdater();
+        Updater updater = new LPLAUpdater();
 
         Optional<Project> updatedProject = loader
                 .load(projectPath)

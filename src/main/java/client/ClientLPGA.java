@@ -5,12 +5,11 @@ import updater.api.project.Project;
 import updater.api.project.ProjectLoader;
 import updater.impl.maven.project.MavenProjectLoader;
 import updater.impl.preferences.SimplePreferences;
-import util.helpers.LoggerHelpers;
+import updater.impl.updater.process.graphbased.lpga.LPGAUpdater;
+import util.helpers.system.LoggerHelpers;
 
 import java.nio.file.Path;
 import java.util.Optional;
-
-import oldupdater.lpga.MavenLPGAUpdater;
 
 /**
  * Basic client for LPGA project update in the Maven/Maven Central eco-system.
@@ -23,7 +22,7 @@ public class ClientLPGA {
         Path updatePath = Path.of("..");
 
         ProjectLoader loader = new MavenProjectLoader();
-        Updater updater = new MavenLPGAUpdater();
+        Updater updater = new LPGAUpdater();
 
         Optional<Project> updatedProject = loader
                 .load(projectPath)

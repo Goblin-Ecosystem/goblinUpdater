@@ -1,10 +1,10 @@
 package updater.api.process.graphbased;
 
-import graph.entities.edges.UpdateEdge;
 import updater.api.graph.UpdateGraph;
 import updater.api.preferences.Preferences;
 import updater.api.project.Project;
-import graph.entities.nodes.UpdateNode;
+import updater.impl.graph.edges.UpdateEdge;
+import updater.impl.graph.nodes.UpdateNode;
 
 /**
  * Interface for the generation of a graph from a project. This is the first

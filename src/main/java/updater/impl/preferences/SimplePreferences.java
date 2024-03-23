@@ -2,7 +2,7 @@ package updater.impl.preferences;
 
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
-import util.helpers.LoggerHelpers;
+import util.helpers.system.LoggerHelpers;
 
 import org.yaml.snakeyaml.Yaml;
 

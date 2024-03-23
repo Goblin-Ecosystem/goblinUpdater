@@ -1,11 +1,11 @@
 package updater.impl.updater.process.graphbased;
 
-import graph.entities.edges.UpdateEdge;
-import graph.entities.nodes.UpdateNode;
 import updater.api.process.graphbased.GraphBasedUpdater;
 import updater.api.process.graphbased.GraphGenerator;
 import updater.api.process.graphbased.ProjectUpdater;
 import updater.api.process.graphbased.UpdateSolver;
+import updater.impl.graph.edges.UpdateEdge;
+import updater.impl.graph.nodes.UpdateNode;
 
 /**
  * A basic implementation of the {@link GraphBasedUpdater} interface. It is

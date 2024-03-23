@@ -4,8 +4,8 @@ import updater.api.project.Dependency;
 import updater.api.project.Project;
 import updater.api.project.ProjectLoader;
 import updater.impl.project.SimpleProject;
-import util.helpers.LoggerHelpers;
-import util.helpers.SystemHelpers;
+import util.helpers.system.LoggerHelpers;
+import util.helpers.system.SystemHelpers;
 
 import java.nio.file.Path;
 import java.util.*;

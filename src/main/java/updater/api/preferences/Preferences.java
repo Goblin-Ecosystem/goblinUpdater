@@ -1,11 +1,10 @@
 package updater.api.preferences;
 
-import util.helpers.LoggerHelpers;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import updater.api.metrics.MetricType;
+import util.helpers.system.LoggerHelpers;
 
 /**
  * Interface for update preferences.

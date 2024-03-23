@@ -1,12 +1,13 @@
 package updater.api.graph;
 
-import graph.entities.edges.UpdateEdge;
-import graph.entities.nodes.UpdateNode;
 import util.api.CustomGraph;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import updater.impl.graph.edges.UpdateEdge;
+import updater.impl.graph.nodes.UpdateNode;
 
 public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends CustomGraph<N, E> {
 
