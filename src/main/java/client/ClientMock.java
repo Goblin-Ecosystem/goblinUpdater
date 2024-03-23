@@ -8,7 +8,7 @@ import updater.impl.graph.edges.UpdateEdge;
 import updater.impl.graph.nodes.UpdateNode;
 import updater.impl.mock.graph.GraphMock;
 import updater.impl.mock.preferences.PreferencesMock;
-import updater.impl.updater.process.graphbased.lpga.LPGAUpdateSolver;
+import updater.impl.process.graphbased.lpga.LPGAUpdateSolver;
 
 import static updater.api.metrics.MetricType.*;
 

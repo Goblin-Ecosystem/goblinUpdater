@@ -1,6 +1,6 @@
-package updater.impl.updater.process.graphbased.lpla;
+package updater.impl.process.graphbased.lpla;
 
-import updater.impl.updater.process.graphbased.AbstractUpdater;
+import updater.impl.process.graphbased.AbstractUpdater;
 
 public class LPLAUpdater extends AbstractUpdater {
 

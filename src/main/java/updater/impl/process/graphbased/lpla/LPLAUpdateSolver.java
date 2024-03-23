@@ -1,4 +1,4 @@
-package updater.impl.updater.process.graphbased.lpla;
+package updater.impl.process.graphbased.lpla;
 
 import updater.api.graph.UpdateGraph;
 import updater.api.preferences.Preferences;

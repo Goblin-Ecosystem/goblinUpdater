@@ -1,4 +1,4 @@
-package updater.impl.updater.process.graphbased;
+package updater.impl.process.graphbased;
 
 import updater.api.process.graphbased.GraphBasedUpdater;
 import updater.api.process.graphbased.GraphGenerator;

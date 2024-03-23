@@ -1,4 +1,4 @@
-package updater.impl.updater.process.graphbased.lpga;
+package updater.impl.process.graphbased.lpga;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPSolver;

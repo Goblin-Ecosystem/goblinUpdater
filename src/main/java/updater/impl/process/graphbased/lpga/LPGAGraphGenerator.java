@@ -1,4 +1,4 @@
-package updater.impl.updater.process.graphbased.lpga;
+package updater.impl.process.graphbased.lpga;
 
 import updater.api.graph.UpdateGraph;
 import updater.api.metrics.MetricType;

@@ -5,7 +5,7 @@ import updater.api.project.Project;
 import updater.api.project.ProjectLoader;
 import updater.impl.maven.project.MavenProjectLoader;
 import updater.impl.preferences.SimplePreferences;
-import updater.impl.updater.process.graphbased.lpla.LPLAUpdater;
+import updater.impl.process.graphbased.lpla.LPLAUpdater;
 import util.helpers.system.LoggerHelpers;
 
 import java.nio.file.Path;
