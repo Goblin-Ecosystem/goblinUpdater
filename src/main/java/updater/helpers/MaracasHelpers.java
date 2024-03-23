@@ -1,4 +1,4 @@
-package util.helpers.maracas;
+package updater.helpers;
 
 import com.github.maracas.LibraryJar;
 import com.github.maracas.Maracas;

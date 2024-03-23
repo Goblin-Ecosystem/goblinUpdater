@@ -1,10 +1,10 @@
 package util.helpers.or;
 
-import java.util.List;
-
 import com.google.ortools.linearsolver.MPConstraint;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+
+import java.util.List;
 
 import io.vavr.Tuple2;
 

@@ -8,6 +8,7 @@ import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.RootedGraphGenerator;
+import updater.helpers.MaracasHelpers;
 import updater.impl.graph.structure.edges.*;
 import updater.impl.graph.structure.nodes.*;
 
@@ -19,7 +20,6 @@ import org.json.simple.JSONObject;
 
 import util.IdGenerator;
 import util.api.CustomGraph;
-import util.helpers.maracas.MaracasHelpers;
 import util.helpers.system.LoggerHelpers;
 
 import java.lang.reflect.InvocationTargetException;

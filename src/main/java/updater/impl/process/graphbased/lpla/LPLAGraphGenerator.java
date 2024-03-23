@@ -8,13 +8,13 @@ import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.GraphGenerator;
 import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.api.project.Project;
+import updater.helpers.GoblinWeaverHelpers;
+import updater.helpers.MaracasHelpers;
 import updater.impl.graph.jgrapht.JgraphtRootedGraphGenerator;
 import updater.impl.graph.structure.nodes.ReleaseNode;
 
 import org.json.simple.JSONObject;
 
-import util.helpers.goblin.GoblinWeaverHelpers;
-import util.helpers.maracas.MaracasHelpers;
 import util.helpers.system.LoggerHelpers;
 
 import java.util.Optional;

@@ -1,3 +1,12 @@
+STRUCTURE:
+
+- client : clients
+- updater : Goblin updater
+  - api : API for the updater
+  - impl : implementation of the API
+  - helpers : helpers using the API
+- util : utilities that are not specific to Goblin updater
+
 GENERATE JAR:
 mvn clean package
 

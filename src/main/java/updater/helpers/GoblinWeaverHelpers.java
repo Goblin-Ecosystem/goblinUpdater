@@ -1,4 +1,4 @@
-package util.helpers.goblin;
+package updater.helpers;
 
 import updater.api.metrics.MetricType;
 import updater.api.project.Dependency;
