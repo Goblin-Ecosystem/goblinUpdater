@@ -83,7 +83,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         // FIXME: select the best solver. CBC, CLP, GLPK, CP-SAT, ... Taking care with the correct treatment for "binary" variables (that should be 0 or 1 not 0.5 for example)
         // GLOP is not working correctly with binary variables. Also all linear solvers?
         MPSolver solver = MPSolver.createSolver("CBC");
-        //solver.setNumThreads(8);
+        solver.setNumThreads(8);
         // FIXME: moche et pas efficace !!
         Set<N> artifactNodes = updateGraph.artifactNodes();
         Set<N> releaseNodes = updateGraph.releaseNodes();
@@ -131,6 +131,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                     .toList();
             OrLP.makeSupEqualWithSumConstraint(solver, "DEP1 " + aName, dependants, vA);
         }
+
+        // FIXME: create constraints on change edges
 
         // create constraints for dependencies (DEP2)
         // for all d=(s,t) in dependencyEdges, var_t >= var_s
