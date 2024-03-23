@@ -1,16 +1,17 @@
 package graph.entities.nodes;
 
 import java.util.Set;
+
+import static updater.api.metrics.MetricType.*;
+
 import java.util.Map;
 
-import addedvalue.AddedValueEnum;
-
-import static addedvalue.AddedValueEnum.*;
-import updater.preferences.UpdatePreferences;
+import updater.api.metrics.MetricType;
+import updater.api.preferences.Preferences;
 
 public class ReleaseNode extends AbstractNode {
 
-    private static final Set<AddedValueEnum> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED);
+    private static final Set<MetricType> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED);
 
     private double changeCost = 0.0;
 
@@ -18,7 +19,7 @@ public class ReleaseNode extends AbstractNode {
      * Constructor for release nodes. Assumes the id is of the form "g:a:v".
      * @param id the id of the node
      */
-    public ReleaseNode(String id, Map<AddedValueEnum, Double> metricMap) {
+    public ReleaseNode(String id, Map<MetricType, Double> metricMap) {
         super(id, metricMap);
     }
 
@@ -42,7 +43,7 @@ public class ReleaseNode extends AbstractNode {
     }
     
     // FIXME: should be private or in an interface
-    public boolean dominates(ReleaseNode other, UpdatePreferences updatePreferences) {
+    public boolean dominates(ReleaseNode other, Preferences updatePreferences) {
         return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences)
                 && this.changeCost <= other.changeCost
                 && (this.getNodeQuality(updatePreferences) < other.getNodeQuality(updatePreferences)
@@ -60,7 +61,7 @@ public class ReleaseNode extends AbstractNode {
     }
 
     @Override
-    public Set<AddedValueEnum> knownValues() {
+    public Set<MetricType> knownValues() {
         return KNOWN_VALUES;
     }
 }

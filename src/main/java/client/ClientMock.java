@@ -1,23 +1,24 @@
 package client;
 
-import updater.preferences.*;
-import updater.UpdateSolver;
-import updater.lpga.LPGAUpdateSolver;
-
-import static addedvalue.AddedValueEnum.*;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
-import graph.structures.UpdateGraph;
-import graph.structures.mocks.GraphMock001;
-import graph.structures.mocks.MockPreferences;
 import io.vavr.Tuple2;
+import oldupdater.lpga.LPGAUpdateSolver;
+import updater.api.graph.UpdateGraph;
+import updater.api.preferences.Preferences;
+import updater.api.process.graphbased.UpdateSolver;
+import updater.impl.mock.graph.GraphMock;
+import updater.impl.mock.preferences.PreferencesMock;
+
+import static updater.api.metrics.MetricType.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/*
-    LPGA (Local Possible, Global Analysis)
+/**
+ * Basic client for LPGA project update in the Maven/Maven Central eco-system.
+ * This is a mock client for testing purposes only. It may not run the whole update process.
  */
 public class ClientMock {
 
@@ -25,8 +26,8 @@ public class ClientMock {
         // inputs
         final int EXAMPLE = 2;
         UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
-            case 1 -> GraphMock001.example001();
-            case 2 -> GraphMock001.example002();
+            case 1 -> GraphMock.example001();
+            case 2 -> GraphMock.example002();
             default -> throw new IllegalArgumentException("Invalid example");
         };
         List<Tuple2<String, Integer>> constrainedValues = List.of(
@@ -34,7 +35,7 @@ public class ClientMock {
             // Tuple.of("e:e:2", 0) //,
             // Tuple.of("f", 1)
         );
-        UpdatePreferences prefs = new MockPreferences(Map.of(
+        Preferences prefs = new PreferencesMock(Map.of(
             CVE, 0.5,
             FRESHNESS, 0.3,
             POPULARITY, 0.2, 

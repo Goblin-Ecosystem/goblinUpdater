@@ -2,13 +2,13 @@ package graph.entities.edges;
 
 import java.util.Map;
 
-import addedvalue.AddedValueEnum;
+import updater.api.metrics.MetricType;
 
 public class ChangeEdge extends AbstractEdge {
     private double qualityChange;
     private double changeCost;
 
-    public ChangeEdge(String id, Map<AddedValueEnum, Double> metricMap) {
+    public ChangeEdge(String id, Map<MetricType, Double> metricMap) {
         super(id, metricMap);
     }
 

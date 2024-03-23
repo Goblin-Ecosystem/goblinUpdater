@@ -1,23 +1,30 @@
 package graph.generator;
 
-import addedvalue.AddedValueEnum;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
-import graph.structures.UpdateGraph;
+import updater.api.graph.UpdateGraph;
+import updater.api.metrics.MetricType;
+import updater.api.preferences.Preferences;
+import updater.api.process.graphbased.GraphGenerator;
+import updater.api.project.Project;
+
 import org.json.simple.JSONObject;
-import project.Project;
-import updater.preferences.UpdatePreferences;
+
 import util.*;
+import util.helpers.GoblinWeaverHelpers;
+import util.helpers.LoggerHelpers;
+import util.helpers.MaracasHelpers;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge> {
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> computeUpdateGraph(Project project,
-            UpdatePreferences updatePreferences) {
-        Set<AddedValueEnum> addedValuesToCompute = updatePreferences.qualityMetricsAggregated();
+            Preferences updatePreferences) {
+        Set<MetricType> addedValuesToCompute = updatePreferences.qualityMetrics().stream().filter(MetricType::isAggregated).collect(Collectors.toSet());
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers
                 .getDirectPossibilitiesRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
         RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
@@ -28,7 +35,7 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
     }
 
     private void computeQualityAndCost(Project project, UpdateGraph<UpdateNode, UpdateEdge> updateGraph,
-            UpdatePreferences updatePreferences) {
+            Preferences updatePreferences) {
         // compute direct dep cost
         LoggerHelpers.info("Compute quality and cost");
         Set<UpdateNode> artifactDirectDeps = updateGraph.rootDirectDependencies();

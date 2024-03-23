@@ -1,19 +1,20 @@
 package graph.entities.nodes;
 
 import java.util.Set;
-import java.util.Map;
 
-import addedvalue.AddedValueEnum;
+import updater.api.metrics.MetricType;
+
+import java.util.Map;
 
 public class ArtifactNode extends AbstractNode {
 
-    private static final Set<AddedValueEnum> KNOWN_VALUES = Set.of();
+    private static final Set<MetricType> KNOWN_VALUES = Set.of();
 
     /**
      * Constructor for artifact nodes. Assumes the id is of the form "g:a".
      * @param id the id of the node
      */
-    public ArtifactNode(String id, Map<AddedValueEnum, Double> metricMap) {
+    public ArtifactNode(String id, Map<MetricType, Double> metricMap) {
         super(id, metricMap);
     }
 
@@ -37,7 +38,7 @@ public class ArtifactNode extends AbstractNode {
     }
 
     @Override
-    public Set<AddedValueEnum> knownValues() {
+    public Set<MetricType> knownValues() {
         return KNOWN_VALUES;
     }
 }

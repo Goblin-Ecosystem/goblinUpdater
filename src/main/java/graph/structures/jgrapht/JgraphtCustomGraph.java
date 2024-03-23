@@ -2,7 +2,7 @@ package graph.structures.jgrapht;
 
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.UpdateNode;
-import graph.structures.CustomGraph;
+import util.api.CustomGraph;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;

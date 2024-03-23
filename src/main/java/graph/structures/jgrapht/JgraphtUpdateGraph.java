@@ -5,11 +5,12 @@ import graph.entities.edges.ChangeEdge;
 import graph.entities.edges.UpdateEdge;
 import graph.entities.nodes.ReleaseNode;
 import graph.entities.nodes.UpdateNode;
-import graph.structures.UpdateGraph;
+import updater.api.graph.UpdateGraph;
+import util.helpers.LoggerHelpers;
+
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import util.LoggerHelpers;
 
 import java.util.Optional;
 import java.util.Set;

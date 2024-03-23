@@ -1,15 +1,15 @@
 package graph.entities.nodes;
 
-import graph.structures.Identifiable;
 import java.util.Set;
 
-import addedvalue.AddedValueEnum;
-import addedvalue.MetricContainer;
+import updater.api.metrics.MetricContainer;
+import updater.api.metrics.MetricType;
+import util.api.Identifiable;
 
 /**
  * Interface for nodes used in dependency update.
  */
-public interface UpdateNode extends Identifiable<String>, MetricContainer<AddedValueEnum> {
+public interface UpdateNode extends Identifiable<String>, MetricContainer<MetricType> {
     /**
      * Returns true if the node represents a release (aka a version of an artifact), false otherwise
      */
@@ -23,7 +23,7 @@ public interface UpdateNode extends Identifiable<String>, MetricContainer<AddedV
     /**
      * Returns set of added value kinds that can be associated to this node
      */
-    Set<AddedValueEnum> knownValues();
+    Set<MetricType> knownValues();
 
     /**
      * Checks if the id of the edge is valid.

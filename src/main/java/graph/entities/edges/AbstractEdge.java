@@ -7,17 +7,17 @@ import java.util.Map;
 
 import org.jgrapht.graph.DefaultEdge;
 
-import addedvalue.AddedValueEnum;
-import addedvalue.MetricContainer;
-import addedvalue.MetricMap;
+import updater.api.metrics.MetricContainer;
+import updater.api.metrics.MetricType;
+import updater.impl.metrics.MetricMap;
 
 public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
 
     private String id;
     // FIXME: not DRY wrt AbstractNode, can be extracted in a AbstractGraphElementWithMetricContainer.
-    private MetricContainer<AddedValueEnum> metricMap;
+    private MetricContainer<MetricType> metricMap;
 
-    protected AbstractEdge(String id, Map<AddedValueEnum, Double> metricMap) {
+    protected AbstractEdge(String id, Map<MetricType, Double> metricMap) {
         super();
         this.id = id;
         if (metricMap!= null)
@@ -32,18 +32,18 @@ public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
     }
 
     @Override
-    public Set<AddedValueEnum> usedMetrics() {
-        return metricMap.usedMetrics();
+    public Set<MetricType> contentTypes() {
+        return metricMap.contentTypes();
     }
 
     @Override
-    public void addMetric(AddedValueEnum m, Double value) {
-        metricMap.addMetric(m, value);
+    public void put(MetricType m, Double value) {
+        metricMap.put(m, value);
     }
 
     @Override
-    public Optional<Double> getValue(AddedValueEnum m) {
-        return metricMap.getValue(m);
+    public Optional<Double> get(MetricType m) {
+        return metricMap.get(m);
     }
 
     @Override

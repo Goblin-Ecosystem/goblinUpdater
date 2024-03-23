@@ -1,13 +1,13 @@
 package graph.entities.edges;
 
-import addedvalue.AddedValueEnum;
-import addedvalue.MetricContainer;
-import graph.structures.Identifiable;
+import updater.api.metrics.MetricContainer;
+import updater.api.metrics.MetricType;
+import util.api.Identifiable;
 
 /**
  * Interface for edges used in dependency update.
  */
-public interface UpdateEdge extends Identifiable<String>, MetricContainer<AddedValueEnum> {
+public interface UpdateEdge extends Identifiable<String>, MetricContainer<MetricType> {
     /**
      * Returns true if the edge represents a version (it should relate an artifact with a release), false otherwise
      */

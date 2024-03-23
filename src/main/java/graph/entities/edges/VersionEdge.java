@@ -2,11 +2,11 @@ package graph.entities.edges;
 
 import java.util.Map;
 
-import addedvalue.AddedValueEnum;
+import updater.api.metrics.MetricType;
 
 public class VersionEdge extends AbstractEdge {
 
-    public VersionEdge(String id, Map<AddedValueEnum, Double> metricMap) {
+    public VersionEdge(String id, Map<MetricType, Double> metricMap) {
         super(id, metricMap);
     }
 

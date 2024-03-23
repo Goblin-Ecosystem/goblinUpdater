@@ -1,14 +1,13 @@
 package graph.generator;
 
-import addedvalue.AddedValueEnum;
 import graph.entities.edges.*;
 import graph.entities.nodes.*;
-import graph.structures.CustomGraph;
-import graph.structures.UpdateGraph;
 import graph.structures.jgrapht.JgraphtUpdateGraph;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import updater.preferences.UpdatePreferences;
+import updater.api.graph.UpdateGraph;
+import updater.api.metrics.MetricType;
+import updater.api.preferences.Preferences;
 
 import java.util.Optional;
 import java.util.HashSet;
@@ -16,8 +15,10 @@ import java.util.HashSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import util.LoggerHelpers;
-import util.MaracasHelpers;
+import util.api.CustomGraph;
+import util.helpers.IdGenerator;
+import util.helpers.LoggerHelpers;
+import util.helpers.MaracasHelpers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
@@ -89,9 +90,9 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         }
     };
 
-    private final Function<Set<AddedValueEnum>, Consumer<JSONObject>> createNode = avs -> node -> extractNode(node)
+    private final Function<Set<MetricType>, Consumer<JSONObject>> createNode = avs -> node -> extractNode(node)
             .ifPresent(n -> {
-                Set<AddedValueEnum> effectiveAvs = new HashSet<>(avs);
+                Set<MetricType> effectiveAvs = new HashSet<>(avs);
                 effectiveAvs.retainAll(n.knownValues());
                 addValues(n, node, effectiveAvs);
                 synchronized (graph) {
@@ -116,10 +117,10 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         }
     }
 
-    private void addValues(AbstractNode n, JSONObject node, Set<AddedValueEnum> avs) {
-        for (AddedValueEnum av : avs) {
+    private void addValues(AbstractNode n, JSONObject node, Set<MetricType> avs) {
+        for (MetricType av : avs) {
             try {
-                n.addAddedValue(av.getAddedValueClass()
+                n.addAddedValue(av.metricClass()
                         .getDeclaredConstructor(JSONObject.class)
                         .newInstance(node));
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -131,7 +132,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph,
-            Set<AddedValueEnum> addedValuesToCompute) {
+            Set<MetricType> addedValuesToCompute) {
         graph = new JgraphtUpdateGraph();
         // Add elements in graph
         List<Tuple2<String, Consumer<JSONObject>>> creators = List.of(
@@ -153,7 +154,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     // FIXME: add added values here
     @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
-            UpdatePreferences updatePreferences) {
+            Preferences updatePreferences) {
         // prepare things
         UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         IdGenerator generator = IdGenerator.instance();

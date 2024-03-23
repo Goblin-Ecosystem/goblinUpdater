@@ -1,25 +1,38 @@
 package client;
 
-import project.Project;
-import project.ProjectLoader;
-import project.maven.MavenProjectLoader;
-import updater.lpla.MavenLPLAUpdater;
-import updater.preferences.MavenPreferences;
-import updater.Updater;
+import updater.api.process.Updater;
+import updater.api.project.Project;
+import updater.api.project.ProjectLoader;
+import updater.impl.maven.project.MavenProjectLoader;
+import updater.impl.preferences.SimplePreferences;
+import util.helpers.LoggerHelpers;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-/*
-    LPLA (Local Possible, Local Analysis)
+import oldupdater.lpla.MavenLPLAUpdater;
+
+/**
+ * Basic client for LPLA project update in the Maven/Maven Central eco-system.
  */
 public class ClientLPLA {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
+        Path projectPath = Path.of(System.getProperty("projectPath"));
+        Path preferencesPath = Path.of(System.getProperty("confFile"));
+        Path updatePath = Path.of("..");
+
         ProjectLoader loader = new MavenProjectLoader();
-        Project project = loader.load(Path.of(System.getProperty("projectPath")));
         Updater updater = new MavenLPLAUpdater();
-        Optional<Project> updatedProject = updater.update(project, new MavenPreferences(Path.of(System.getProperty("confFile"))));
-        updatedProject.ifPresent(up -> up.dump(Path.of("..")));
+
+        Optional<Project> updatedProject = loader
+                .load(projectPath)
+                .flatMap(project -> updater.update(project,
+                        new SimplePreferences(preferencesPath)));
+
+        if (updatedProject.isPresent())
+            updatedProject.get().dump(updatePath);
+        else
+            LoggerHelpers.error("Could not update project");
     }
 }

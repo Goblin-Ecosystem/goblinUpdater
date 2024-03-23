@@ -1,25 +1,38 @@
 package client;
 
-import project.maven.MavenProjectLoader;
-import project.Project;
-import project.ProjectLoader;
-import updater.preferences.*;
-import updater.Updater;
-import updater.lpga.MavenLPGAUpdater;
+import updater.api.process.Updater;
+import updater.api.project.Project;
+import updater.api.project.ProjectLoader;
+import updater.impl.maven.project.MavenProjectLoader;
+import updater.impl.preferences.SimplePreferences;
+import util.helpers.LoggerHelpers;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-/*
-    LPGA (Local Possible, Global Analysis)
+import oldupdater.lpga.MavenLPGAUpdater;
+
+/**
+ * Basic client for LPGA project update in the Maven/Maven Central eco-system.
  */
 public class ClientLPGA {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
+        Path projectPath = Path.of(System.getProperty("projectPath"));
+        Path preferencesPath = Path.of(System.getProperty("confFile"));
+        Path updatePath = Path.of("..");
+
         ProjectLoader loader = new MavenProjectLoader();
-        Project project = loader.load(Path.of(System.getProperty("projectPath")));
         Updater updater = new MavenLPGAUpdater();
-        Optional<Project> updatedProject = updater.update(project, new MavenPreferences(Path.of(System.getProperty("confFile"))));
-        updatedProject.ifPresent(up -> up.dump(Path.of("..")));
+
+        Optional<Project> updatedProject = loader
+                .load(projectPath)
+                .flatMap(project -> updater.update(project,
+                        new SimplePreferences(preferencesPath)));
+
+        if (updatedProject.isPresent())
+            updatedProject.get().dump(updatePath);
+        else
+            LoggerHelpers.error("Could not update project");
     }
 }
