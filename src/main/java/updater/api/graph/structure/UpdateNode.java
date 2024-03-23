@@ -1,4 +1,4 @@
-package updater.impl.graph.nodes;
+package updater.api.graph.structure;
 
 import java.util.Set;
 

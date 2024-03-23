@@ -1,11 +1,11 @@
 package updater.impl.process.graphbased.lpga;
 
-import updater.api.graph.UpdateGraph;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
-
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 
 public class GraphLP {
 

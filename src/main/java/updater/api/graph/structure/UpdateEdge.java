@@ -1,4 +1,4 @@
-package updater.impl.graph.edges;
+package updater.api.graph.structure;
 
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;

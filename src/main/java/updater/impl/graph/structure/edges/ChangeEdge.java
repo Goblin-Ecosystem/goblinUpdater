@@ -1,4 +1,4 @@
-package updater.impl.graph.edges;
+package updater.impl.graph.structure.edges;
 
 import java.util.Map;
 

@@ -6,12 +6,12 @@ import com.google.ortools.linearsolver.MPVariable;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
 import util.helpers.or.OrHelpers;
 
 import java.util.HashMap;

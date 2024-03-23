@@ -1,4 +1,4 @@
-package updater.impl.graph.edges;
+package updater.impl.graph.structure.edges;
 
 import java.util.Optional;
 import java.util.Set;
@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jgrapht.graph.DefaultEdge;
 
+import updater.api.graph.structure.UpdateEdge;
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
 import updater.impl.metrics.MetricMap;

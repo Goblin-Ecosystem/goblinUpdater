@@ -1,11 +1,11 @@
 package updater.impl.process.graphbased.lpga;
 
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.ProjectUpdater;
 import updater.api.project.Project;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
 
 public class LPGAProjectUpdater implements ProjectUpdater {
     @Override

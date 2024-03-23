@@ -1,11 +1,11 @@
 package updater.impl.graph.jgrapht;
 
-import updater.api.graph.UpdateGraph;
-import updater.impl.graph.edges.ChangeEdge;
-import updater.impl.graph.edges.DependencyEdge;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.ReleaseNode;
-import updater.impl.graph.nodes.UpdateNode;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
+import updater.impl.graph.structure.edges.ChangeEdge;
+import updater.impl.graph.structure.edges.DependencyEdge;
+import updater.impl.graph.structure.nodes.ReleaseNode;
 import util.helpers.system.LoggerHelpers;
 
 import org.jgrapht.Graph;

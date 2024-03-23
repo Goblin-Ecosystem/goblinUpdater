@@ -1,5 +1,6 @@
-package updater.impl.graph.nodes;
+package updater.impl.graph.structure.nodes;
 
+import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.Metric;
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;

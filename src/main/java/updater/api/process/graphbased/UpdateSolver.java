@@ -1,9 +1,9 @@
 package updater.api.process.graphbased;
 
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
 
 import java.util.Optional;
 

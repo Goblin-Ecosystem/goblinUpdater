@@ -1,15 +1,15 @@
 package updater.impl.process.graphbased.lpla;
 
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.GraphGenerator;
+import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.api.project.Project;
-import updater.impl.graph.RootedGraphGenerator;
-import updater.impl.graph.edges.UpdateEdge;
 import updater.impl.graph.jgrapht.JgraphtRootedGraphGenerator;
-import updater.impl.graph.nodes.ReleaseNode;
-import updater.impl.graph.nodes.UpdateNode;
+import updater.impl.graph.structure.nodes.ReleaseNode;
 
 import org.json.simple.JSONObject;
 

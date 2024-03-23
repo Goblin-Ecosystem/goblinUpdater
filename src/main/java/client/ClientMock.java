@@ -1,11 +1,11 @@
 package client;
 
 import io.vavr.Tuple2;
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
 import updater.impl.mock.graph.GraphMock;
 import updater.impl.mock.preferences.PreferencesMock;
 import updater.impl.process.graphbased.lpga.LPGAUpdateSolver;

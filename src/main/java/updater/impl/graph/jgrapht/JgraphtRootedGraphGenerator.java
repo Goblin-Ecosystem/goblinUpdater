@@ -2,12 +2,14 @@ package updater.impl.graph.jgrapht;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
-import updater.impl.graph.RootedGraphGenerator;
-import updater.impl.graph.edges.*;
-import updater.impl.graph.nodes.*;
+import updater.api.process.graphbased.RootedGraphGenerator;
+import updater.impl.graph.structure.edges.*;
+import updater.impl.graph.structure.nodes.*;
 
 import java.util.Optional;
 import java.util.HashSet;

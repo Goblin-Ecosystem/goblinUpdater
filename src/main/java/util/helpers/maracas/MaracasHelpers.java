@@ -7,7 +7,7 @@ import com.github.maracas.brokenuse.BrokenUse;
 import com.github.maracas.brokenuse.DeltaImpact;
 import com.github.maracas.delta.Delta;
 
-import updater.impl.graph.nodes.UpdateNode;
+import updater.api.graph.structure.UpdateNode;
 import util.helpers.maven.MavenLocalRepository;
 import util.helpers.system.LoggerHelpers;
 

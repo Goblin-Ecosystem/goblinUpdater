@@ -2,12 +2,12 @@ package updater.api.process.graphbased;
 
 import java.util.Optional;
 
-import updater.api.graph.UpdateGraph;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateGraph;
+import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
 import updater.api.process.Updater;
 import updater.api.project.Project;
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
 
 /**
  * A refined interface for a project updater ({@link Updater}). It relies on

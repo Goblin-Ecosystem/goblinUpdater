@@ -6,8 +6,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
-import updater.impl.graph.edges.UpdateEdge;
-import updater.impl.graph.nodes.UpdateNode;
+import updater.api.graph.structure.UpdateEdge;
+import updater.api.graph.structure.UpdateNode;
 
 import java.util.HashMap;
 import java.util.Map;
