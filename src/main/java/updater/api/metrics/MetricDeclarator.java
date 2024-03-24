@@ -15,4 +15,21 @@ public interface MetricDeclarator {
      *         otherwise.
      */
     Optional<Class<? extends Metric>> metric(MetricType type);
+
+    /**
+     * Returns the JSON key corresponding to the given metric type.
+     * @param jsonKey
+     * @return The JSON key corresponding to the given metric type.
+     */
+    default String toJsonKey(MetricType type) {
+        return type.toJsonKey();
+    }
+
+    /**
+     * Returns the metric type corresponding to the given JSON key, if any.
+     * @param jsonKey The JSON key of the metric type to look for.
+     * @return The metric type corresponding to the given JSON key or empty
+     */
+    Optional<MetricType> fromJsonKey(String jsonKey);
+
 }

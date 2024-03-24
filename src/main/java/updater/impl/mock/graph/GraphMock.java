@@ -17,7 +17,7 @@ import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
 import updater.impl.metrics.MetricMap;
 
-import static updater.api.metrics.MetricType.*;
+import static updater.impl.metrics.SimpleMetricType.*;
 import static updater.impl.mock.graph.GraphMock.EdgeType.*;
 import static updater.impl.mock.graph.GraphMock.NodeType.*;
 

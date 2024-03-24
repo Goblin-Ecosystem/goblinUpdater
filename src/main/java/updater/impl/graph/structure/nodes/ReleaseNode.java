@@ -2,7 +2,7 @@ package updater.impl.graph.structure.nodes;
 
 import java.util.Set;
 
-import static updater.api.metrics.MetricType.*;
+import static updater.impl.metrics.SimpleMetricType.*;
 
 import java.util.Map;
 

@@ -5,17 +5,18 @@ import org.json.simple.JSONObject;
 
 import updater.api.metrics.Metric;
 import updater.api.metrics.MetricType;
+import static updater.impl.metrics.SimpleMetricType.*;
 
 public class Cve implements Metric {
     private final JSONArray valueJsonArray;
 
     public Cve(JSONObject nodeJsonObject) {
-        this.valueJsonArray = (JSONArray) nodeJsonObject.get(type().getJsonKey());
+        this.valueJsonArray = (JSONArray) nodeJsonObject.get(type().toJsonKey());
     }
 
     @Override
     public MetricType type() {
-        return MetricType.CVE;
+        return CVE;
     }
 
     @Override

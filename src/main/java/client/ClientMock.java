@@ -5,7 +5,7 @@ import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
-import static updater.api.metrics.MetricType.*;
+import static updater.impl.metrics.SimpleMetricType.*;
 import updater.impl.mock.graph.GraphMock;
 import updater.impl.mock.preferences.PreferencesMock;
 import updater.impl.process.graphbased.lpga.LPGAUpdateSolver;

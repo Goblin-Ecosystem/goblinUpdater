@@ -3,6 +3,7 @@ package updater.impl.metrics;
 import org.json.simple.JSONObject;
 
 import updater.api.metrics.MetricType;
+import static updater.impl.metrics.SimpleMetricType.*;
 
 public class FreshnessAggregated extends Freshness {
     public FreshnessAggregated(JSONObject nodeJsonObject) {
@@ -11,6 +12,6 @@ public class FreshnessAggregated extends Freshness {
 
     @Override
     public MetricType type() {
-        return MetricType.FRESHNESS_AGGREGATED;
+        return FRESHNESS_AGGREGATED;
     }
 }

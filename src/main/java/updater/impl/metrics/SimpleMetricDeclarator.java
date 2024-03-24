@@ -3,7 +3,7 @@ package updater.impl.metrics;
 import updater.api.metrics.Metric;
 import updater.api.metrics.MetricDeclarator;
 import updater.api.metrics.MetricType;
-import static updater.api.metrics.MetricType.*;
+import static updater.impl.metrics.SimpleMetricType.*;
 
 import java.util.Optional;
 import java.util.Map;
@@ -34,6 +34,15 @@ public class SimpleMetricDeclarator implements MetricDeclarator {
     @Override
     public Optional<Class<? extends Metric>> metric(MetricType type) {
         return Optional.ofNullable(metrics.get(type));
+    }
+
+    @Override
+    public Optional<MetricType> fromJsonKey(String jsonKey) {
+        try {
+            return Optional.of(SimpleMetricType.valueOf(jsonKey));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
 }

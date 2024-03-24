@@ -2,6 +2,7 @@ package updater.impl.preferences;
 
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
+import updater.impl.metrics.SimpleMetricDeclarator;
 import util.helpers.system.LoggerHelpers;
 
 import org.yaml.snakeyaml.Yaml;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -44,17 +46,19 @@ public class SimplePreferences implements Preferences {
             return 0.0;
         if (metricsAndCoefMap.containsKey(addedValueEnum))
             return metricsAndCoefMap.get(addedValueEnum);
-        if (addedValueEnum.isAggregated() && metricsAndCoefMap.containsKey(addedValueEnum.notAggregatedVersion()))
-            return metricsAndCoefMap.get(addedValueEnum.notAggregatedVersion());
+        if (addedValueEnum.isAggregated() && metricsAndCoefMap.containsKey(addedValueEnum.nonAggregatedVersion()))
+            return metricsAndCoefMap.get(addedValueEnum.nonAggregatedVersion());
         return 0.0;
     }
 
     private Map<MetricType, Double> generateMetricAndCoefMap(Map<String, Object> confMap) {
-        // FIXME: hides field at line 14.
+        // FIXME: hides field at line 24.
         Map<MetricType, Double> metricsAndCoefMap = new HashMap<>();
         for (Map<String, Object> map : (List<Map<String, Object>>) confMap.get("metrics")) {
-            metricsAndCoefMap.put(MetricType.valueOf(map.get("metric").toString().toUpperCase()),
-                    Double.parseDouble(map.get("coef").toString()));
+            Optional<MetricType> metric = SimpleMetricDeclarator.instance().fromJsonKey(map.get("metric").toString().toUpperCase());
+            if (metric.isPresent()) {
+                metricsAndCoefMap.put(metric.get(), Double.parseDouble(map.get("coef").toString()));
+            }
         }
         return metricsAndCoefMap;
     }
