@@ -8,7 +8,7 @@ import java.util.Optional;
  */
 public interface MetricContainer<T> {
     /**
-     * Returns the set of all metrics types in this container.
+     * Returns the set of all metrics types in this container. Empty set if there are none.
      * 
      * @return the set of all metrics types in this container
      */

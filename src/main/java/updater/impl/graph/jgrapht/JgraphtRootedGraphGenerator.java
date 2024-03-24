@@ -11,6 +11,7 @@ import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.helpers.MaracasHelpers;
 import updater.impl.graph.structure.edges.*;
 import updater.impl.graph.structure.nodes.*;
+import updater.impl.metrics.SimpleMetricDeclarator;
 
 import java.util.Optional;
 import java.util.HashSet;
@@ -122,11 +123,11 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     private void addValues(AbstractNode n, JSONObject node, Set<MetricType> avs) {
         for (MetricType av : avs) {
             try {
-                n.addAddedValue(av.metricClass()
+                n.addAddedValue(SimpleMetricDeclarator.instance().metric(av)
+                        .orElseThrow(() -> new RuntimeException("No metric for " + av))
                         .getDeclaredConstructor(JSONObject.class)
                         .newInstance(node));
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            } catch (Exception e) {
                 LoggerHelpers.warning(e.getMessage());
             }
         }

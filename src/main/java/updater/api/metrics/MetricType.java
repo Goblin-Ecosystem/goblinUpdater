@@ -1,20 +1,13 @@
 package updater.api.metrics;
 
-// FIXME: abstraction depends on implementations
-import updater.impl.metrics.Cve;
-import updater.impl.metrics.CveAggregated;
-import updater.impl.metrics.Freshness;
-import updater.impl.metrics.FreshnessAggregated;
-
 /**
  * Enum for metric types. Adding a new enum value will require adding:
  * <OL>
  * <LI>A new enum value to the enum
- * <LI>A new class that implements {@link Metric} and update metricClass
- * accordingly
+ * <LI>A new class that implements {@link Metric} and update a
+ * {@link MetricDeclarator} accordingly
  * <LI>Update the code for other methods too, accordingly
  * </OL>
- * This should be done in concordance with Goblin's Weaver code for metrics that are not computed (but obtained from a weaving).
  */
 public enum MetricType {
     CVE,
@@ -24,21 +17,6 @@ public enum MetricType {
     POPULARITY,
     POPULARITY_AGGREGATED,
     COST;
-
-    /**
-     * Returns the class that implements {@link Metric} for this enum value and can be used to compute its value.
-     * FIXME: add classes for missing enum values
-     * TODO: use prototype objects instead of classes
-     */
-    public Class<? extends Metric> metricClass() {
-        return switch (this) {
-            case CVE -> Cve.class;
-            case CVE_AGGREGATED -> CveAggregated.class;
-            case FRESHNESS -> Freshness.class;
-            case FRESHNESS_AGGREGATED -> FreshnessAggregated.class;
-            default -> null;
-        };
-    }
 
     /**
      * Returns true if the enum value corresponds to an aggregated value, false
@@ -84,7 +62,7 @@ public enum MetricType {
         return switch (this) {
             case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY, POPULARITY_AGGREGATED -> true;
             default -> false;
-         };
+        };
     }
 
     /**
@@ -94,7 +72,7 @@ public enum MetricType {
         return switch (this) {
             case COST -> true;
             default -> false;
-         };
+        };
     }
 
     /**
