@@ -69,7 +69,7 @@ public class SimplePreferences implements Preferences {
         try {
             inputStream = new FileInputStream(path.toFile());
         } catch (FileNotFoundException e) {
-            LoggerHelpers.fatal("Fail to load the conf file:\n" + e.getMessage());
+            LoggerHelpers.instance().fatal("Fail to load the conf file:\n" + e.getMessage());
         }
         return yaml.load(inputStream);
     }

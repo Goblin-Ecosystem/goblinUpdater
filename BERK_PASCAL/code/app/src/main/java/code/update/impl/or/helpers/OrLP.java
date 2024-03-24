@@ -9,11 +9,11 @@ import com.google.ortools.linearsolver.MPVariable;
 public class OrLP {
 
     public static void printSolution(MPSolver problem) {
-        System.out.println("Solution:");
-        MPVariable[] variables = problem.variables();
-        for (int i = 0; i < variables.length; ++i) {
-            System.out.println(variables[i].name() + " : " + variables[i].solutionValue());
-        }
+        // System.out.println("Solution:");
+        // MPVariable[] variables = problem.variables();
+        // for (int i = 0; i < variables.length; ++i) {
+        //     System.out.println(variables[i].name() + " : " + variables[i].solutionValue());
+        // }
         System.out.println("Computed in " + problem.wallTime() + " ms");
     }
 

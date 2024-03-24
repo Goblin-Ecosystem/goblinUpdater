@@ -128,7 +128,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                         .getDeclaredConstructor(JSONObject.class)
                         .newInstance(node));
             } catch (Exception e) {
-                LoggerHelpers.warning(e.getMessage());
+                LoggerHelpers.instance().warning(e.getMessage());
             }
         }
     }
@@ -150,7 +150,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             }
         });
         // Log
-        LoggerHelpers.info(graph.toString());
+        LoggerHelpers.instance().info(graph.toString());
         return graph;
     }
 
@@ -164,7 +164,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         Set<ReleaseNode> releaseNodes = graphCopy.releaseNodes().stream()
                 .map(ReleaseNode.class::cast).collect(Collectors.toSet());
         // step 1 : create change edges
-        LoggerHelpers.info("Generate change edge");
+        LoggerHelpers.instance().info("Generate change edge");
         releaseNodes.forEach(
                 r -> graphCopy.directDependencies(r).forEach(
                         a -> graphCopy.versions(a).forEach(
@@ -172,9 +172,9 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                                         r.id(),
                                         v.id(),
                                         new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of())))));
-        LoggerHelpers.info(graph.toString());
+        LoggerHelpers.instance().info(graph.toString());
         // step 2: compute change edge quality and cost
-        LoggerHelpers.info("Compute change edge values");
+        LoggerHelpers.instance().info("Compute change edge values");
         releaseNodes.forEach(
                 r -> {
                     graph.changes(r).forEach(

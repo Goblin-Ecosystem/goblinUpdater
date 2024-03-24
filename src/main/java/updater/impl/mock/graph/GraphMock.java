@@ -1,6 +1,7 @@
 package updater.impl.mock.graph;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -238,7 +239,83 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         return graph;
     }
 
-    // examples : make 1 static final method for each
+    /**
+     * generates an example with only a n artifacts, and m releases for each.
+     */
+    public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample001(int n, int m) {
+        List<String> artifacts = new ArrayList<>();
+        List<String> releases = new ArrayList<>();
+        Map<String, List<String>> versions = new HashMap<>();
+        Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        //
+        String root = rId(0, 1);
+        qualities.put(root, genMetrics());
+        for (int i = 1; i <= n; i++) {
+            String artifact = aId(i);
+            artifacts.add(artifact);
+            versions.put(artifact, new ArrayList<>());
+            for (int j = 1; j <= m; j++) {
+                String release = rId(i, j);
+                releases.add(release);
+                versions.computeIfAbsent(artifact, a -> new ArrayList<>()).add(release);
+                qualities.put(release, genMetrics());
+            }
+        }
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+    }
+
+    /**
+     * generates an example with only a n artifacts, and m releases for each, plus
+     * dependencies
+     * g:0:1 -1-> g:1
+     * g:i:x -x-> g:i+1 (1 <= i < n)
+     */
+    public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample002(int n, int m) {
+        List<String> artifacts = new ArrayList<>();
+        List<String> releases = new ArrayList<>();
+        Map<String, List<String>> versions = new HashMap<>();
+        Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        // root
+        String root = rId(0, 1); // g:0:1
+        qualities.put(root, genMetrics());
+        dependencies.computeIfAbsent(rId(0, 1), a -> new ArrayList<>()).add(Tuple.of(aId(1), "1")); // g:0:1 -1-> g:1
+        // others
+        for (int i = 1; i <= n; i++) {
+            String artifact = aId(i); // artifact g:i
+            artifacts.add(artifact);
+            versions.put(artifact, new ArrayList<>());
+            for (int j = 1; j <= m; j++) {
+                String release = rId(i, j); // release g:i:j
+                releases.add(release);
+                versions.computeIfAbsent(artifact, a -> new ArrayList<>()).add(release);
+                qualities.put(release, genMetrics());
+                if (i < n) {
+                    dependencies.computeIfAbsent(release, a -> new ArrayList<>())
+                            .add(Tuple.of(aId(i + 1), String.format("%d", j))); // g:i:j -j-> g:i+1
+                }
+            }
+        }
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+    }
+
+    private static final String aId(int id) {
+        return String.format("g:%d", id);
+    }
+
+    private static final String rId(int artifactId, int id) {
+        return String.format("g:%d:%d", artifactId, id);
+    }
+
+    private static final MetricContainer<MetricType> genMetrics() {
+        Map<MetricType, Double> map = Map.of(
+                CVE, 0.0,
+                FRESHNESS, 0.0,
+                POPULARITY, 0.0);
+        return new MetricMap<>(map);
+    }
+
     public static final UpdateGraph<UpdateNode, UpdateEdge> example001() {
         String root = "a:a:1";
         List<String> artifacts = List.of("b:b", "h:h", "e:e");

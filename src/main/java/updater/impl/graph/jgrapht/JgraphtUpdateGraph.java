@@ -33,7 +33,7 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
                .filter(e -> target(e).equals(artifact))
                .findFirst().orElse(null);
         if (edge == null) {
-            LoggerHelpers.error("Fail to get current release of: " + artifact.id());
+            LoggerHelpers.instance().error("Fail to get current release of: " + artifact.id());
             return null;
         } else {
             String versionId = artifact.id() + ":" + edge.targetVersion();

@@ -17,7 +17,7 @@ public class MavenProjectLoader implements ProjectLoader {
 
     @Override
     public Optional<Project> load(Path projectPath) {
-        LoggerHelpers.info("Get pom direct dependencies");
+        LoggerHelpers.instance().info("Get pom direct dependencies");
         Set<Dependency> resultList = new HashSet<>();
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(projectPath.toFile());
@@ -44,7 +44,7 @@ public class MavenProjectLoader implements ProjectLoader {
                 resultList.add(new Dependency(groupId, artifactId, version));
             }
         }
-        LoggerHelpers.info("Direct dependencies number: " + resultList.size());
+        LoggerHelpers.instance().info("Direct dependencies number: " + resultList.size());
         return Optional.of(new SimpleProject(projectPath, resultList));
     }
 }

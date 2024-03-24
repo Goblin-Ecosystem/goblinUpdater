@@ -71,7 +71,7 @@ public class MavenLocalRepository {
             ArtifactResult result = system.resolveArtifact(session, request);
             return result.getArtifact().getFile().getPath();
         } catch (ArtifactResolutionException e) {
-            LoggerHelpers.warning(e.getMessage());
+            LoggerHelpers.instance().warning(e.getMessage());
             return null;
         }
     }

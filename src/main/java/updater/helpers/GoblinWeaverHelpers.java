@@ -45,7 +45,7 @@ public class GoblinWeaverHelpers {
             }
             http.disconnect();
         } catch (IOException | org.json.simple.parser.ParseException e) {
-            LoggerHelpers.fatal("Unable to connect to API:\n" + e.getMessage());
+            LoggerHelpers.instance().fatal("Unable to connect to API:\n" + e.getMessage());
         }
         return null;
     }
@@ -53,7 +53,7 @@ public class GoblinWeaverHelpers {
     // GPGA
     public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
-        LoggerHelpers.info("Get all possibilities graph");
+        LoggerHelpers.instance().info("Get all possibilities graph");
         String apiRoute = "/graph/allPossibilitiesRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
@@ -69,7 +69,7 @@ public class GoblinWeaverHelpers {
     // LPLA
     public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
-        LoggerHelpers.info("Get direct all possibilities graph");
+        LoggerHelpers.instance().info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
@@ -85,7 +85,7 @@ public class GoblinWeaverHelpers {
     // LPGA
     public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
-        LoggerHelpers.info("Get direct all possibilities with transitive graph");
+        LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 
         JSONObject bodyJsonObject = new JSONObject();

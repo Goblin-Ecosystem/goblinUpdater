@@ -13,6 +13,7 @@ import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
 import util.helpers.or.OrHelpers;
+import util.helpers.system.LoggerHelpers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+
+import org.apache.logging.log4j.core.Logger;
 
 public class LPGAUpdateSolver implements UpdateSolver {
 
@@ -49,7 +52,6 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
         private Optional<UpdateGraph<UpdateNode, UpdateEdge>> solutionToGraph(MPSolver solution,
                         UpdateGraph<UpdateNode, UpdateEdge> updateGraph, Preferences updatePreferences) {
-                OrHelpers.printSolution(solution);
                 // TODO: JOYCE en second
                 return Optional.empty();
         }
@@ -58,11 +60,13 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         Preferences updatePreferences) {
                 MPSolver.ResultStatus result = problem.solve();
                 if (result == MPSolver.ResultStatus.OPTIMAL || result == MPSolver.ResultStatus.FEASIBLE) {
-                        System.out.println("Problem solved");
+                        LoggerHelpers.instance().info("Problem solved");
+                        OrHelpers.printTime(problem);
                         OrHelpers.printProblem(problem);
+                        OrHelpers.printSolution(problem);
                         return Optional.of(problem);
                 } else {
-                        System.out.println("Problem not solved");
+                        LoggerHelpers.instance().info("Problem not solved");
                         OrHelpers.printProblem(problem);
                         return Optional.empty();
                 }

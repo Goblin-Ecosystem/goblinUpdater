@@ -38,7 +38,7 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
     private void computeQualityAndCost(Project project, UpdateGraph<UpdateNode, UpdateEdge> updateGraph,
             Preferences updatePreferences) {
         // compute direct dep cost
-        LoggerHelpers.info("Compute quality and cost");
+        LoggerHelpers.instance().info("Compute quality and cost");
         Set<UpdateNode> artifactDirectDeps = updateGraph.rootDirectDependencies();
         for (UpdateNode artifactDirectDep : artifactDirectDeps) {
             // Get current used version

@@ -7,21 +7,25 @@ import com.google.ortools.linearsolver.MPVariable;
 import java.util.List;
 
 import io.vavr.Tuple2;
+import util.helpers.system.LoggerHelpers;
 
 public class OrHelpers {
 
+    public static void printTime(MPSolver problem) {
+        LoggerHelpers.instance().info("-- Computed in " + problem.wallTime() + " ms");
+    }
+
     public static void printSolution(MPSolver problem) {
-        System.out.println("## Solution:");
+        LoggerHelpers.instance().low("## Solution:");
         MPVariable[] variables = problem.variables();
         for (int i = 0; i < variables.length; ++i) {
-            System.out.println(variables[i].name() + " : " + variables[i].solutionValue());
+            LoggerHelpers.instance().low(variables[i].name() + " : " + variables[i].solutionValue());
         }
-        System.out.println("-- Computed in " + problem.wallTime() + " ms");
     }
 
     public static void printProblem(MPSolver problem) {
-        System.out.println("## Problem:");
-        System.out.println(problem.exportModelAsLpFormat());
+        LoggerHelpers.instance().low("## Problem:");
+        LoggerHelpers.instance().low(problem.exportModelAsLpFormat());
     }
 
     // create constraint name: x = v

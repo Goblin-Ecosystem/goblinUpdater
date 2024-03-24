@@ -16,7 +16,7 @@ public class FileHelpers {
             Path path = Paths.get(directoryPath);
             Files.createDirectories(path);
         } catch (IOException e) {
-            LoggerHelpers.error("Failed to create directory:\n" + e.getMessage());
+            LoggerHelpers.instance().error("Failed to create directory:\n" + e.getMessage());
         }
     }
 
@@ -29,7 +29,7 @@ public class FileHelpers {
                         .map(Path::toFile)
                         .forEach(File::delete);
             } catch (IOException e) {
-                LoggerHelpers.error("Unable to delete folder: " + directoryPath);
+                LoggerHelpers.instance().error("Unable to delete folder: " + directoryPath);
             }
         }
     }

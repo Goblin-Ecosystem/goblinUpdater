@@ -7,6 +7,7 @@ import updater.impl.maven.project.MavenProjectLoader;
 import updater.impl.preferences.SimplePreferences;
 import updater.impl.process.graphbased.lpla.LPLAUpdater;
 import util.helpers.system.LoggerHelpers;
+import util.helpers.system.LoggerHelpers.Level;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class ClientLPLA {
 
     public static void main(String[] args) {
+        LoggerHelpers.instance().setLevel(Level.INFO);
         Path projectPath = Path.of(System.getProperty("projectPath"));
         Path preferencesPath = Path.of(System.getProperty("confFile"));
         Path updatePath = Path.of("..");
@@ -32,6 +34,6 @@ public class ClientLPLA {
         if (updatedProject.isPresent())
             updatedProject.get().dump(updatePath);
         else
-            LoggerHelpers.error("Could not update project");
+            LoggerHelpers.instance().error("Could not update project");
     }
 }

@@ -64,17 +64,17 @@ public interface Preferences {
     default boolean isValid() {
         // 1. at least one quality metric
         if (qualityMetrics().isEmpty()) {
-            LoggerHelpers.error("Missing quality metrics");
+            LoggerHelpers.instance().error("Missing quality metrics");
             return false;
         }
         // 2. at least one cost metric
         if (costMetrics().isEmpty()) {
-            LoggerHelpers.error("Missing cost metrics");
+            LoggerHelpers.instance().error("Missing cost metrics");
             return false;
         }
         // 3. the sum of coefficients for quality metrics is 1
         if (sumFor(qualityMetrics()) != 1.0) {
-            LoggerHelpers.error("Quality weights sum should be 1.0");
+            LoggerHelpers.instance().error("Quality weights sum should be 1.0");
             return false;
         }
         return true;

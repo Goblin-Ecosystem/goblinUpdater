@@ -26,7 +26,7 @@ public class SystemHelpers {
                 errorHandling(process, String.join(" ", processBuilder.command()));
             }
         } catch (IOException e) {
-            LoggerHelpers.error(
+            LoggerHelpers.instance().error(
                     "Unable to run command: " + String.join(" ", processBuilder.command()) + "\n" + e.getMessage());
         }
         return output;
@@ -43,11 +43,11 @@ public class SystemHelpers {
                 while ((line = stdError.readLine()) != null) {
                     errorSb.append(line).append("\n");
                 }
-                LoggerHelpers.error("Error on command: " + command + "\n Error output: \n" + errorSb);
+                LoggerHelpers.instance().error("Error on command: " + command + "\n Error output: \n" + errorSb);
             }
             stdError.close();
         } catch (IOException e) {
-            LoggerHelpers.error(e.getMessage());
+            LoggerHelpers.instance().error(e.getMessage());
         }
     }
 }
