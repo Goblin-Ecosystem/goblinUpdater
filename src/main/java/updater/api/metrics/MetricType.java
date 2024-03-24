@@ -1,7 +1,7 @@
 package updater.api.metrics;
 
 /**
- * Inteface for metric types.
+ * Interface for metric types.
  */
 public interface MetricType {
     /**

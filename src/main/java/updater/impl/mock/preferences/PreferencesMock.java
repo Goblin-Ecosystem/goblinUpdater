@@ -2,7 +2,6 @@ package updater.impl.mock.preferences;
 
 import java.util.Set;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import updater.api.metrics.MetricType;

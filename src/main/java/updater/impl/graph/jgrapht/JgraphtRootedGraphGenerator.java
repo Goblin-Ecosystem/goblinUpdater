@@ -177,7 +177,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         LoggerHelpers.info("Compute change edge values");
         releaseNodes.forEach(
                 r -> {
-                    graph.possibles(r).forEach(
+                    graph.changes(r).forEach(
                             e -> {
                                 ChangeEdge change = (ChangeEdge) e;
                                 ReleaseNode v = (ReleaseNode) graph.target(e);

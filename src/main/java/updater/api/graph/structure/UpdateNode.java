@@ -7,7 +7,7 @@ import updater.api.metrics.MetricType;
 import util.api.Identifiable;
 
 /**
- * Interface for nodes used in dependency update.
+ * Interface for nodes used in dependency update. These nodes are also identifiable (extend {@link Identifiable}) and may contain metrics (extend {@link MetricType}).
  */
 public interface UpdateNode extends Identifiable<String>, MetricContainer<MetricType> {
     /**
@@ -21,17 +21,17 @@ public interface UpdateNode extends Identifiable<String>, MetricContainer<Metric
     boolean isArtifact();
 
     /**
-     * Returns set of added value kinds that can be associated to this node
+     * Returns set of metrics that can be associated to this node
      */
     Set<MetricType> knownValues();
 
     /**
-     * Checks if the id of the edge is valid.
+     * Checks if the id of the node is valid.
      */
     boolean hasValidId(String id);
 
     /**
-     * Get the g:a part of the id of the edge. Checks if the edge has a valid id.
+     * Get the g:a part of the id of the node. Checks if the node has a valid id.
      */
     default String ga() {
         if (hasValidId(id())) {

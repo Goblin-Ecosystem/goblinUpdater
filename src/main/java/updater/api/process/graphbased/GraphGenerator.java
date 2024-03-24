@@ -7,9 +7,12 @@ import updater.api.preferences.Preferences;
 import updater.api.project.Project;
 
 /**
- * Interface for the generation of a graph from a project. This is the first
+ * Functional interface for the generation of a graph from a project. This is the first
  * step of the {@link GraphBasedUpdater} update process.
+ * 
+ * <P>computeUpdateGraph : {@link Project} x {@link Preferences} -> {@link UpdateGraph}
  */
+@FunctionalInterface
 public interface GraphGenerator<N extends UpdateNode, E extends UpdateEdge> {
     /**
      * Generates a graph from a given project and preferences.

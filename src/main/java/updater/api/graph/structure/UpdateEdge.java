@@ -5,7 +5,7 @@ import updater.api.metrics.MetricType;
 import util.api.Identifiable;
 
 /**
- * Interface for edges used in dependency update.
+ * Interface for edges used in dependency update. These edges are also identifiable (extend {@link Identifiable}) and may contain metrics (extend {@link MetricType}).
  */
 public interface UpdateEdge extends Identifiable<String>, MetricContainer<MetricType> {
     /**

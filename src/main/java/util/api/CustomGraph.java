@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Base interface for graphs used in dependency update. Shall be fused into an interface global to all of the Goblin framework in some future (or not ...). Hence, rather use UpdateGraph for update matters.
+ * Base interface for graphs. Shall be fused into an interface global to all of the Goblin framework in some future (or not ...).
  * @param <N> type of the nodes in the graph (should implement the Identifiable interface)
  * @param <E> type of the edges in the graph
  */

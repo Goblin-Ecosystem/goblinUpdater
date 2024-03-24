@@ -7,9 +7,12 @@ import updater.api.preferences.Preferences;
 import updater.api.project.Project;
 
 /**
- * Interface for project updaters. This is the last step of the
+ * Functional interface for project updaters. This is the last step of the
  * {@link GraphBasedUpdater} update process.
+ * 
+ * <P>updateProject : {@link Project} x {@link UpdateGraph} x {@link Preferences} -> {@link Project}
  */
+@FunctionalInterface
 public interface ProjectUpdater {
     /**
      * Updates the given {@link Project}.

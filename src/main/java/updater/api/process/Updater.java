@@ -6,8 +6,10 @@ import updater.api.preferences.Preferences;
 import updater.api.project.Project;
 
 /**
- * Interface for project updaters. A project updater is responsible for updating
+ * Functional interface for project updaters. A project updater is responsible for updating
  * a given project according to some user preferences.
+ * 
+ * <P>update : {@link Project} x {@link Preferences} -> Optional<{@link Project}>
  */
 public interface Updater {
     /**

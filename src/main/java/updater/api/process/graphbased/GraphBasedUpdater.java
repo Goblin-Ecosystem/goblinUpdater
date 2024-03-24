@@ -11,10 +11,10 @@ import updater.api.project.Project;
 
 /**
  * A refined interface for a project updater ({@link Updater}). It relies on
- * three steps to update a project: generate an update graph for the project,
- * compute an updated graph using some update solver (this may fail, hence one
- * gets an Optional of a graph), and finally update the project the updated
- * graph.
+ * three steps to update a project: generate an update graph for the project (using a {@link GraphGenerator}),
+ * compute an updated graph using some {@link UpdateSolver} (this may fail, hence one
+ * gets an Optional of a graph), and finally update the project using the updated
+ * graph (using a {@link ProjectUpdater}).
  */
 public interface GraphBasedUpdater extends Updater {
 
@@ -45,6 +45,9 @@ public interface GraphBasedUpdater extends Updater {
      */
     ProjectUpdater projectUpdater();
 
+    /**
+     * Default implementation of the {@link #update(Project, Preferences)} method.
+     */
     default Optional<Project> update(Project project, Preferences updatePreferences) {
         UpdateGraph<UpdateNode, UpdateEdge> initialGraph = graphGenerator().computeUpdateGraph(project,
                 updatePreferences);

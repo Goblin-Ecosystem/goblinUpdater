@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class SimpleMetricDeclarator implements MetricDeclarator {
 
+    // FIXME: add classes for Popularity and PopularityAggregated
     /**
      * This map could be populated using a configuration file.
      */
