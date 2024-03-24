@@ -19,10 +19,10 @@ import java.util.Set;
 public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge>  {
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge>  computeUpdateGraph(Project project, Preferences updatePreferences) {
-        Set<MetricType> addedValuesToCompute = updatePreferences.metrics(); // TODO: OK ? We have ones to compute and others to get from the weaver. isComputed can be used.
-        JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
+        Set<MetricType> metricsToCompute = updatePreferences.metrics(); // TODO: OK ? We have ones to compute and others to get from the weaver. isComputed can be used.
+        JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), metricsToCompute);
         RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
-        UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
+        UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, metricsToCompute);
         jgraphtGraphGenerator.generateChangeEdge(project.getPath(), updateGraph, updatePreferences);
         return updateGraph;
     }

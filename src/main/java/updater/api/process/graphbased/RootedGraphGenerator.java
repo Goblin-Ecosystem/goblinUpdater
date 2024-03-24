@@ -12,6 +12,6 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public interface RootedGraphGenerator {
-    UpdateGraph<UpdateNode, UpdateEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<MetricType> addedValuesToCompute);
+    UpdateGraph<UpdateNode, UpdateEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph, Set<MetricType> metricsToCompute);
     void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph, Preferences updatePreferences);
 }

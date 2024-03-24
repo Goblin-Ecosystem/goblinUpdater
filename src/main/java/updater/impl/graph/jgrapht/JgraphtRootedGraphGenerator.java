@@ -123,7 +123,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     private void addValues(AbstractNode n, JSONObject node, Set<MetricType> avs) {
         for (MetricType av : avs) {
             try {
-                n.addAddedValue(SimpleMetricDeclarator.instance().metric(av)
+                n.addMetric(SimpleMetricDeclarator.instance().metric(av)
                         .orElseThrow(() -> new RuntimeException("No metric for " + av))
                         .getDeclaredConstructor(JSONObject.class)
                         .newInstance(node));
@@ -135,11 +135,11 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> generateRootedGraphFromJsonObject(JSONObject weaverJsonGraph,
-            Set<MetricType> addedValuesToCompute) {
+            Set<MetricType> metricsToCompute) {
         graph = new JgraphtUpdateGraph();
         // Add elements in graph
         List<Tuple2<String, Consumer<JSONObject>>> creators = List.of(
-                Tuple.of("nodes", createNode.apply(addedValuesToCompute)),
+                Tuple.of("nodes", createNode.apply(metricsToCompute)),
                 Tuple.of("edges", createEdge));
         creators.stream().forEach(t -> {
             Object maybes = weaverJsonGraph.get(t._1());

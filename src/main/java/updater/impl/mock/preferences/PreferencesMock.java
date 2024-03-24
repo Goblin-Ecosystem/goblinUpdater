@@ -28,18 +28,11 @@ public class PreferencesMock implements Preferences {
         return metricsAndCoefMap.keySet().stream().filter(MetricType::isCostMetric).collect(Collectors.toSet());
     }
 
-    // @Override
-    // public Set<AddedValueEnum> qualityMetricsAggregated() {
-    //     return metricsAndCoefMap.keySet().stream()
-    //             .map(m -> m.isAggregated() ? m : m.aggregatedVersion())
-    //             .collect(Collectors.toSet());
-    // }
-
     @Override
-    public double coefficientFor(MetricType addedValueEnum) {
-        if (addedValueEnum == null)
+    public double coefficientFor(MetricType metric) {
+        if (metric == null)
             return 0.0;
-        return metricsAndCoefMap.get(addedValueEnum) == null ? 0.0 : metricsAndCoefMap.get(addedValueEnum);
+        return metricsAndCoefMap.get(metric) == null ? 0.0 : metricsAndCoefMap.get(metric);
     }
 
 }

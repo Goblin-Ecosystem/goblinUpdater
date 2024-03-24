@@ -178,7 +178,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 if (!updatePreferences.isValid()) {
                         throw new IllegalArgumentException("Update preferences are not valid");
                 }
-                MetricType costAddedValue = updatePreferences.costMetrics().stream().findFirst()
+                MetricType costMetric = updatePreferences.costMetrics().stream().findFirst()
                                 .orElseThrow(() -> new IllegalArgumentException("No cost added value defined"));
 
                 // Aggregative variables
@@ -223,7 +223,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 OrHelpers.makeEqualityWithWeightedSumConstraint(solver, "COST Constraint", costs, 1.0, totalCost);
 
                 // scaling factors for quality vs cost
-                double costScaleFactor = updatePreferences.coefficientFor(costAddedValue);
+                double costScaleFactor = updatePreferences.coefficientFor(costMetric);
                 double qualityScaleFactor = 1 - costScaleFactor;
 
                 // Objective function

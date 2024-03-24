@@ -52,7 +52,7 @@ public class GoblinWeaverHelpers {
 
     // GPGA
     public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> addedValues) {
+            Set<MetricType> metrics) {
         LoggerHelpers.info("Get all possibilities graph");
         String apiRoute = "/graph/allPossibilitiesRooted";
 
@@ -60,15 +60,15 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
-        JSONArray addedValuesArray = new JSONArray();
-        addedValuesArray.addAll(addedValues.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", addedValuesArray);
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", metricsArray);
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
     // LPLA
     public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> addedValues) {
+            Set<MetricType> metrics) {
         LoggerHelpers.info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
 
@@ -76,15 +76,15 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
-        JSONArray addedValuesArray = new JSONArray();
-        addedValuesArray.addAll(addedValues.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", addedValuesArray);
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", metricsArray);
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
     // LPGA
     public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> addedValues) {
+            Set<MetricType> metrics) {
         LoggerHelpers.info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 
@@ -92,9 +92,9 @@ public class GoblinWeaverHelpers {
         JSONArray releasesArray = new JSONArray();
         directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
         bodyJsonObject.put("releases", releasesArray);
-        JSONArray addedValuesArray = new JSONArray();
-        addedValuesArray.addAll(addedValues.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", addedValuesArray);
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", metricsArray);
         return executeQuery(bodyJsonObject, apiRoute);
     }
 

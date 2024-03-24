@@ -41,13 +41,13 @@ public class SimplePreferences implements Preferences {
 
     // FIXME: should this logic be here or in an updater?
     @Override
-    public double coefficientFor(MetricType addedValueEnum) {
-        if (addedValueEnum == null)
+    public double coefficientFor(MetricType metric) {
+        if (metric == null)
             return 0.0;
-        if (metricsAndCoefMap.containsKey(addedValueEnum))
-            return metricsAndCoefMap.get(addedValueEnum);
-        if (addedValueEnum.isAggregated() && metricsAndCoefMap.containsKey(addedValueEnum.nonAggregatedVersion()))
-            return metricsAndCoefMap.get(addedValueEnum.nonAggregatedVersion());
+        if (metricsAndCoefMap.containsKey(metric))
+            return metricsAndCoefMap.get(metric);
+        if (metric.isAggregated() && metricsAndCoefMap.containsKey(metric.nonAggregatedVersion()))
+            return metricsAndCoefMap.get(metric.nonAggregatedVersion());
         return 0.0;
     }
 

@@ -40,16 +40,16 @@ public interface Preferences {
      * Get the coefficient for a given metric. 0.0 if the metric is not in the
      * preferences (ie the metric has weight 0 for the user).
      * 
-     * @param addedValueEnum
+     * @param metric
      * @return
      */
-    double coefficientFor(MetricType addedValueEnum);
+    double coefficientFor(MetricType metric);
 
     /**
      * Get the sum of all coefficients for a given set of added values.
      */
-    default Double sumFor(Set<MetricType> addedValues) {
-        return addedValues.stream()
+    default Double sumFor(Set<MetricType> metrics) {
+        return metrics.stream()
                 .mapToDouble(this::coefficientFor)
                 .sum();
     }

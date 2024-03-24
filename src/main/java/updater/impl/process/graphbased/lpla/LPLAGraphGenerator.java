@@ -25,12 +25,12 @@ public class LPLAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge> computeUpdateGraph(Project project,
             Preferences updatePreferences) {
-        Set<MetricType> addedValuesToCompute = updatePreferences.qualityMetrics().stream().filter(MetricType::isAggregated).collect(Collectors.toSet());
+        Set<MetricType> metricsToCompute = updatePreferences.qualityMetrics().stream().filter(MetricType::isAggregated).collect(Collectors.toSet());
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers
-                .getDirectPossibilitiesRootedGraph(project.getDirectDependencies(), addedValuesToCompute);
+                .getDirectPossibilitiesRootedGraph(project.getDirectDependencies(), metricsToCompute);
         RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
         UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator
-                .generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, addedValuesToCompute);
+                .generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, metricsToCompute);
         computeQualityAndCost(project, updateGraph, updatePreferences);
         return updateGraph;
     }
