@@ -8,6 +8,7 @@ import java.util.Map;
 
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
+import util.api.CustomGraph;
 
 public class ReleaseNode extends AbstractNode {
 
@@ -24,6 +25,9 @@ public class ReleaseNode extends AbstractNode {
     }
 
     private static final boolean isValidId(String id) {
+        if(id.equals(CustomGraph.ROOT_ID)){
+            return true;
+        }
         return id.split(":").length == 3; // FIXME: check more thoroughly
     }
 
