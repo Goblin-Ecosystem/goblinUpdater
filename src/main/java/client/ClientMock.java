@@ -118,13 +118,14 @@ public class ClientMock {
             // added in encoding : constraints for change edges
             //
             // 6th experiment:
+            // UPDATED LPGA Solver : added constraints for change links
             // generateExample002
             // multi-core specified, regular structure, zero quality, regular dependencies
             //
             //   #A, #R/A, Q?, cores :  solving time : total time
             //   10,   10,  0,   8   :   2350-2400ms :         3s    >> / >>
             //  100,   10,  0,   8   : 10200-10300ms :        11s    >> / >>
-            // 1000,   10,  0,   8   :
+            // 1000,   10,  0,   8   : 1,390s-1,450s :     23-24m    >> / >>
             // 2000,   10,  0,   8   :    -stopped-  : -stopped-
             // reference (from 4)
             //   10,   10,  0,   8   :       40-50ms :        <1s
