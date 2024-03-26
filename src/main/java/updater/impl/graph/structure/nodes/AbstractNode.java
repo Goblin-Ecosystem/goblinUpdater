@@ -16,8 +16,6 @@ import java.util.Map;
 public abstract class AbstractNode implements UpdateNode {
     private final String id;
     private MetricContainer<MetricType> metricMap;
-    // FIXME: replaced by the MetricContainer API
-    private final List<Metric> metrics = new ArrayList<>();
     private Double quality = null;
 
     protected AbstractNode(String id, Map<MetricType, Double> metricMap) {
@@ -50,20 +48,15 @@ public abstract class AbstractNode implements UpdateNode {
 
     // FIXME: should be private or in an interface
     // FIXME: replaced by the MetricContainer API?
-    public void addMetric(Metric metric) {
-        this.metrics.add(metric);
-    }
-
-    // FIXME: should be private or in an interface
-    // FIXME: replaced by the MetricContainer API?
     public double getNodeQuality(Preferences updatePreferences) {
         if (this.quality != null) {
             return this.quality;
         }
         this.quality = 0.0;
-        for (Metric metric : metrics) {
-            this.quality += (metric.compute()
-                    * updatePreferences.coefficientFor(metric.type())); // TODO: normalize quality + score
+        for (MetricType metricType : metricMap.contentTypes()) {
+            Optional<Double> metricValue = metricMap.get(metricType);
+            // TODO: normalize quality + score
+            metricValue.ifPresent(value -> this.quality += (value * updatePreferences.coefficientFor(metricType)));
         }
         return this.quality;
     }
