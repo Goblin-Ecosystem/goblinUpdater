@@ -388,7 +388,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
      * NEW wrt generateExample004: quality metrics are not 0
      */
     public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample004(int n, int m) {
-        LoggerHelpers.instance().info("example generator n 3");
+        LoggerHelpers.instance().info("example generator n 4");
         List<String> artifacts = new ArrayList<>();
         List<String> releases = new ArrayList<>();
         Map<String, List<String>> versions = new HashMap<>();
