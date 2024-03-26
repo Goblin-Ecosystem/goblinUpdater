@@ -82,7 +82,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                                                                                              // should
                                                                                                              // exists
                         MPVariable excludedVariable = GraphLP.releaseVariable(problem, node);
-                        OrHelpers.makeEqualityConstraint(problem, "constraint on " + e, excludedVariable, v);
+                        OrHelpers.x_eq_v(problem, "constraint on " + e, excludedVariable, v);
                 }
         }
 
@@ -112,7 +112,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
                 // create a constraint stating that the variable for the root node equals 1
                 // (ROOT)
-                updateGraph.rootNode().ifPresent(n -> OrHelpers.makeEqualityConstraint(solver,
+                updateGraph.rootNode().ifPresent(n -> OrHelpers.x_eq_v(solver,
                                 "ROOT",
                                 GraphLP.releaseVariable(solver, n),
                                 1));
@@ -130,7 +130,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                         .map(updateGraph::target)
                                         .map(r -> GraphLP.releaseVariable(solver, r))
                                         .toList();
-                        OrHelpers.makeEqualityWithSumConstraint(solver,
+                        OrHelpers.sum_xi_eq_k_times_y(solver,
                                         "VERSIONS of " + GraphLP.artifactVariableName(a),
                                         releases,
                                         1, vA);
@@ -139,7 +139,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                         .map(updateGraph::source)
                                         .map(r -> GraphLP.releaseVariable(solver, r))
                                         .toList();
-                        OrHelpers.makeSupEqualWithSumConstraint(solver, "DEP1 " + aName, dependants, vA);
+                        OrHelpers.sum_xi_ge_y_plus_n(solver, "DEP1 " + aName, dependants, vA, 0.0);
                 }
 
                 // create constraints for dependencies (DEP2)
@@ -151,31 +151,25 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         String tName = GraphLP.artifactVariableName(target);
                         MPVariable sVar = GraphLP.releaseVariable(solver, source);
                         MPVariable tVar = GraphLP.artifactVariable(solver, target);
-                        OrHelpers.makeSupEqualConstraint(solver, "DEP2 " + sName + " " + tName, tVar, sVar);
+                        OrHelpers.x_ge_y(solver, "DEP2 " + sName + " " + tName, tVar, sVar);
                 }
 
-                // FIXME: create constraints on change edges
-                // create constraints for possibilities
-
-                // OPTION 1
-                // --------
-                //
-                // 1.1.) there is at most one possible arc for each dependency
-                // for all d=(s,t) in dependencyEdges, sum_{p in possibles(s,t)} (var_p) = var_s
-                // NOTE: this does not mean 1.2,
-                // e.g., if var_s=var_(s,v1)=var_v2=1 and var_(s,v2)=var_v1=0.
-                // (hence 1.2 is required)
-                //
-                // 1.2.) if there is a possible arc then its source and target are there
-                // for all p=(s,u) in possibilityEdges, var_s >= var_p and var_u >= var_p
-                // i.e., var_p => var_s and var_p => var_u
-                // NOTE: this does not mean that (var_s and var_u) => var_p, hence 1.1.
-
-                // OPTION 2
-                // --------
-                //
-                // for all d=(s,u) in possibilityEdges, (var_s and var_u) => var_p
-                // problem: how to express this in PL?
+                // create constraints for possibilities (CHG1, CHG2, CHG3)
+                // for each e=(r,r') in changeEdges, e = r*r'
+                // using linearization we get e<=r, e<=r' and e>=r+r'-1
+                for (E e : changeEdges) {
+                        N source = updateGraph.source(e);
+                        N target = updateGraph.target(e);
+                        String sName = GraphLP.releaseVariableName(source);
+                        String tName = GraphLP.releaseVariableName(target);
+                        MPVariable sVar = GraphLP.releaseVariable(solver, source);
+                        MPVariable tVar = GraphLP.releaseVariable(solver, target);
+                        MPVariable eVar = GraphLP.changeVariable(solver, updateGraph, e);
+                        OrHelpers.x_ge_y(solver, "CHG2 " + sName + " " + tName, sVar, eVar);
+                        OrHelpers.x_ge_y(solver, "CHG1 " + sName + " " + tName, tVar, eVar);
+                        OrHelpers.y_ge_sum_ki_times_xi_plus_n(solver, "CHG 3 " + sName + " " + tName,
+                                        eVar, List.of(Tuple.of(sVar, 1.0), Tuple.of(tVar, 1.0)), -1.0);
+                }
 
                 // TODO: rather fail using Optional or Either, which means problem generation
                 // can fail too (not only solving it)
@@ -205,7 +199,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                         solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "Quality[" + q + "]"));
                         List<Tuple2<MPVariable, Double>> qualities = updateGraph.releaseNodes().stream()
                                         .map(nq2t.apply(q)).toList();
-                        OrHelpers.makeEqualityWithWeightedSumConstraint(solver, "Quality[" + q + "] Constraint",
+                        OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "Quality[" + q + "] Constraint",
                                         qualities, 1.0, qualityVariables.get(q));
                 }
 
@@ -214,17 +208,18 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                 updatePreferences.coefficientFor(q));
                 List<Tuple2<MPVariable, Double>> qualities = updatePreferences.qualityMetrics().stream().map(q2t)
                                 .toList();
-                OrHelpers.makeEqualityWithWeightedSumConstraint(solver, "QUALITY Constraint", qualities, 1.0,
+                OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "QUALITY Constraint", qualities, 1.0,
                                 totalQuality);
 
                 // Constraint for total cost (cost is only on change edges)
                 // totalCost = sum_{d in changeEdges} (var_d * cost(d))
                 // TODO: by now only one cost metric is used
+                // TODO: is it ok to put 0 if cost is not found?
                 Function<E, Tuple2<MPVariable, Double>> ce2t = ce -> Tuple.of(
                                 GraphLP.changeVariable(solver, updateGraph, ce),
-                                0.0);
+                                ce.get(costMetric).orElse(0.0));
                 List<Tuple2<MPVariable, Double>> costs = updateGraph.changeEdges().stream().map(ce2t).toList();
-                OrHelpers.makeEqualityWithWeightedSumConstraint(solver, "COST Constraint", costs, 1.0, totalCost);
+                OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "COST Constraint", costs, 1.0, totalCost);
 
                 // scaling factors for quality vs cost
                 double costScaleFactor = updatePreferences.coefficientFor(costMetric);

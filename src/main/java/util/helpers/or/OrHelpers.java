@@ -9,6 +9,7 @@ import java.util.List;
 import io.vavr.Tuple2;
 import util.helpers.system.LoggerHelpers;
 
+// TODO: some DRY cleaning is possible
 public class OrHelpers {
 
     public static void printTime(MPSolver problem) {
@@ -29,27 +30,28 @@ public class OrHelpers {
     }
 
     // create constraint name: x = v
-    public static void makeEqualityConstraint(MPSolver solver, String name, MPVariable x, int v) {
+    public static void x_eq_v(MPSolver solver, String name, MPVariable x, int v) {
         MPConstraint constraint = solver.makeConstraint(v, v, name);
         constraint.setCoefficient(x, 1);
     }
 
     // create constraint name: x = y
-    public static void makeEqualityConstraint(MPSolver solver, String name, MPVariable x, MPVariable y) {
+    public static void x_eq_y(MPSolver solver, String name, MPVariable x, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, 0, name);
         constraint.setCoefficient(x, 1);
         constraint.setCoefficient(y, -1);
     }
 
     // create constraint name: x >= y
-    public static void makeSupEqualConstraint(MPSolver solver, String name, MPVariable x, MPVariable y) {
+    public static void x_ge_y(MPSolver solver, String name, MPVariable x, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, MPSolver.infinity(), name);
         constraint.setCoefficient(x, 1);
         constraint.setCoefficient(y, -1);
     }
 
-    // create constraint name: sum(xs) = k*y
-    public static void makeEqualityWithSumConstraint(MPSolver solver, String name, List<MPVariable> xs,
+    // create constraint name: sum(xi) = k*y
+    // i.e., sum(xi) - k*y = 0
+    public static void sum_xi_eq_k_times_y(MPSolver solver, String name, List<MPVariable> xs,
             int k, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, 0, name);
         xs.forEach(x -> constraint.setCoefficient(x, 1));
@@ -57,7 +59,8 @@ public class OrHelpers {
     }
 
     // create constraint name: sum(ki*xi) = k*y
-    public static void makeEqualityWithWeightedSumConstraint(MPSolver solver, String name,
+    // i.e., sum(ki*xi) - k*y = 0
+    public static void sum_ki_times_xi_eq_k_times_y(MPSolver solver, String name,
             List<Tuple2<MPVariable, Double>> ts,
             Double k, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, 0, name);
@@ -65,12 +68,31 @@ public class OrHelpers {
         constraint.setCoefficient(y, -k);
     }
 
-    // create constraint name: sum(xs) >= y
-    public static void makeSupEqualWithSumConstraint(MPSolver solver, String name, List<MPVariable> xs,
-            MPVariable y) {
-        MPConstraint constraint = solver.makeConstraint(0, MPSolver.infinity(), name);
+    // create constraint name: sum(xs) >= y + n
+    // i.e., sum(xs) - y >= n
+    public static void sum_xi_ge_y_plus_n(MPSolver solver, String name, List<MPVariable> xs,
+            MPVariable y, Double n) {
+        MPConstraint constraint = solver.makeConstraint(n, MPSolver.infinity(), name);
         xs.forEach(x -> constraint.setCoefficient(x, 1));
         constraint.setCoefficient(y, -1);
+    }
+
+    // create constraint name: sum(ki*xi) >= y + n
+    // i.e., sum(ki*xi) - y >= n
+    public static void sum_ki_times_xi_ge_y_plus_n(MPSolver solver, String name,
+            List<Tuple2<MPVariable, Double>> ts, MPVariable y, Double n) {
+        MPConstraint constraint = solver.makeConstraint(n, MPSolver.infinity(), name);
+        ts.forEach(t -> constraint.setCoefficient(t._1(), t._2()));
+        constraint.setCoefficient(y, -1);
+    }
+
+    // create constraint name: y >= sum(ki*xi) + n
+    // i.e., y - sum(ki*xi) >= n
+    public static void y_ge_sum_ki_times_xi_plus_n(MPSolver solver, String name,
+            MPVariable y, List<Tuple2<MPVariable, Double>> ts, Double n) {
+        MPConstraint constraint = solver.makeConstraint(n, MPSolver.infinity(), name);
+        ts.forEach(t -> constraint.setCoefficient(t._1(), -t._2()));
+        constraint.setCoefficient(y, 1);
     }
 
 }
