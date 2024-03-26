@@ -27,9 +27,11 @@ public class ClientMock {
     public static void main(String[] args) {
         LoggerHelpers.instance().setLevel(Level.INFO);
         // inputs
-        final int EXAMPLE = 0;
+        final int EXAMPLE = -2;
         UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
-            case 0 -> GraphMock.generateExample002(1000, 10);
+            case 0 -> GraphMock.generateExample001(10   , 10);
+            case -1 -> GraphMock.generateExample002(10   , 10);
+            case -2 -> GraphMock.generateExample003(2000   , 10);
             // Macbook Pro, M1 MAX, 64 Go
             //
             // 2024-03-26
@@ -115,8 +117,6 @@ public class ClientMock {
             // 2024-03-26
             // ----------
             //
-            // added in encoding : constraints for change edges
-            //
             // 6th experiment:
             // UPDATED LPGA Solver : added constraints for change links
             // generateExample002
@@ -139,6 +139,36 @@ public class ClientMock {
             // - change arcs seem very costly, is there a way to have less of them (or do not use them)? In reality, we do not have a lot of change arcs but possibly for the root. -> develop a new example generator that takes this into account given some reality measures.
             // - this raises the question of synthetic examples vs reality. We need a set of real examples soon.
             //
+            // modified: change edges only from root
+            //
+            // 7th experiment:
+            // UPDATED Graph Generation: only change edges from root.
+            // generateExample003
+            // multi-core specified, regular structure, zero quality, regular dependencies
+            //
+            //   #A, #R/A, Q?, cores :  solving time : total time
+            //   10,   10,  0,   8   :          40ms :        <1s
+            //  100,   10,  0,   8   :     190-195ms :        <1s
+            // 1000,   10,  0,   8   :   2280-2300ms :   6,5-7,5s
+            // 2000,   10,  0,   8   :   5835-5855ms :     26-27s
+            // reference (from 6)
+            //   10,   10,  0,   8   :   2350-2400ms :         3s
+            //  100,   10,  0,   8   : 10200-10300ms :        11s
+            // 1000,   10,  0,   8   : 1,390s-1,450s :     23-24m
+            // 2000,   10,  0,   8   :    -stopped-  : -stopped-
+            // reference (from 4)
+            //   10,   10,  0,   8   :       40-50ms :        <1s
+            //  100,   10,  0,   8   :     250-260ms :        <1s
+            // 1000,   20,  0,   8   :   8100-8400ms :   3m-3m30s
+            // reference (from 5)
+            // 1000,   10,  0,   8   :   2765-2800ms :     25-26s
+            // 2000,   10,  0,   8   : 12600-14000ms :1m50s-2m10s
+            //
+            // COMMENTS:
+            // - change arc are clearly a big issue. One should have the less possible.
+            // - this does not mean we do not have choices to make (we still have m versions per artifact), just that we won't be able to take into account a cost everyhere
+            //
+            
             case 1 -> GraphMock.example001();
             case 2 -> GraphMock.example002();
             default -> throw new IllegalArgumentException("Invalid example");

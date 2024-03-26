@@ -153,6 +153,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         MPVariable tVar = GraphLP.artifactVariable(solver, target);
                         OrHelpers.x_ge_y(solver, "DEP2 " + sName + " " + tName, tVar, sVar);
                 }
+                LoggerHelpers.instance().info(dependencyEdges.size() + " dependency edges");
 
                 // create constraints for possibilities (CHG1, CHG2, CHG3)
                 // for each e=(r,r') in changeEdges, e = r*r'
@@ -170,6 +171,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         OrHelpers.y_ge_sum_ki_times_xi_plus_n(solver, "CHG 3 " + sName + " " + tName,
                                         eVar, List.of(Tuple.of(sVar, 1.0), Tuple.of(tVar, 1.0)), -1.0);
                 }
+                LoggerHelpers.instance().info(changeEdges.size() + " change edges");
 
                 // TODO: rather fail using Optional or Either, which means problem generation
                 // can fail too (not only solving it)

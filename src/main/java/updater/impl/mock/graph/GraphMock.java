@@ -17,6 +17,7 @@ import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
 import updater.impl.metrics.MetricMap;
+import util.helpers.system.LoggerHelpers;
 
 import static updater.impl.metrics.SimpleMetricType.*;
 import static updater.impl.mock.graph.GraphMock.EdgeType.*;
@@ -239,10 +240,56 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         return graph;
     }
 
+    private static final UpdateGraph<UpdateNode, UpdateEdge> generateGraph2(String root, List<String> artifacts,
+            List<String> releases, Map<String, List<String>> versions,
+            Map<String, List<Tuple2<String, String>>> dependencies,
+            Map<String, MetricContainer<MetricType>> metrics) {
+        GraphMock graph = new GraphMock();
+        int idEdge = 0;
+        // root (has no metrics)
+        UpdateNode rootNode = graph.addNode(root, RELEASE, metrics.get(root));
+        graph.setRoot(rootNode);
+        // other releases
+        for (String r : releases) {
+            graph.addNode(r, RELEASE, metrics.get(r));
+        }
+        // artifacts
+        for (String a : artifacts) {
+            graph.addNode(a, ARTIFACT, metrics.get(a));
+        }
+        // versions
+        for (Entry<String, List<String>> e : versions.entrySet()) {
+            for (String v : e.getValue()) {
+                graph.addEdge("e" + idEdge++, VERSION, e.getKey(), v, null, null);
+            }
+        }
+        // dependencies and possibles
+        for (Entry<String, List<Tuple2<String, String>>> e : dependencies.entrySet()) {
+            for (Tuple2<String, String> d : e.getValue()) {
+                graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2(), null);
+                LoggerHelpers.instance().low(e.getKey() + " -> " + d._1());
+            }
+        }
+        // changes
+        for (Entry<String, List<Tuple2<String, String>>> e : dependencies.entrySet()) {
+            for (Tuple2<String, String> d : e.getValue()) {
+                if (e.getKey().equals(root)) {
+                    for (String v : versions.get(d._1())) {
+                        graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, null); // TODO: get metrics
+                        LoggerHelpers.instance().low(e.getKey() + " => " + v);
+                    }
+                }
+            }
+        }
+        // return
+        return graph;
+    }
+
     /**
-     * generates an example with only a n artifacts, and m releases for each.
+     * generates an example with only n artifacts, and m releases for each.
      */
     public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample001(int n, int m) {
+        LoggerHelpers.instance().info("example generator n 1");
         List<String> artifacts = new ArrayList<>();
         List<String> releases = new ArrayList<>();
         Map<String, List<String>> versions = new HashMap<>();
@@ -266,12 +313,11 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
     }
 
     /**
-     * generates an example with only a n artifacts, and m releases for each, plus
-     * dependencies
-     * g:0:1 -1-> g:1
-     * g:i:x -x-> g:i+1 (1 <= i < n)
+     * generates an example with only n artifacts, and m releases for each,
+     * NEW wrt generateExample001: dependencies g:0:1 -1-> g:1 and g:i:x -x-> g:i+1 (1 <= i < n)
      */
     public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample002(int n, int m) {
+        LoggerHelpers.instance().info("example generator n 2");
         List<String> artifacts = new ArrayList<>();
         List<String> releases = new ArrayList<>();
         Map<String, List<String>> versions = new HashMap<>();
@@ -298,6 +344,41 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
             }
         }
         return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+    }
+
+    /**
+     * generates an example with only a n artifacts, and m releases for each, plus
+     * dependencies g:0:1 -1-> g:1 and g:i:x -x-> g:i+1 (1 <= i < n)
+     * NEW wrt generateExample002: change edges only for root
+     */
+    public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample003(int n, int m) {
+        LoggerHelpers.instance().info("example generator n 3");
+        List<String> artifacts = new ArrayList<>();
+        List<String> releases = new ArrayList<>();
+        Map<String, List<String>> versions = new HashMap<>();
+        Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        // root
+        String root = rId(0, 1); // g:0:1
+        qualities.put(root, genMetrics());
+        dependencies.computeIfAbsent(rId(0, 1), a -> new ArrayList<>()).add(Tuple.of(aId(1), "1")); // g:0:1 -1-> g:1
+        // others
+        for (int i = 1; i <= n; i++) {
+            String artifact = aId(i); // artifact g:i
+            artifacts.add(artifact);
+            versions.put(artifact, new ArrayList<>());
+            for (int j = 1; j <= m; j++) {
+                String release = rId(i, j); // release g:i:j
+                releases.add(release);
+                versions.computeIfAbsent(artifact, a -> new ArrayList<>()).add(release);
+                qualities.put(release, genMetrics());
+                if (i < n) {
+                    dependencies.computeIfAbsent(release, a -> new ArrayList<>())
+                            .add(Tuple.of(aId(i + 1), String.format("%d", j))); // g:i:j -j-> g:i+1
+                }
+            }
+        }
+        return generateGraph2(root, artifacts, releases, versions, dependencies, qualities);
     }
 
     private static final String aId(int id) {
