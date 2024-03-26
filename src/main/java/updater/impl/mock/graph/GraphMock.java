@@ -381,6 +381,42 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         return generateGraph2(root, artifacts, releases, versions, dependencies, qualities);
     }
 
+    /**
+     * generates an example with only a n artifacts, and m releases for each, plus
+     * dependencies g:0:1 -1-> g:1 and g:i:x -x-> g:i+1 (1 <= i < n)
+     * change edges only for root.
+     * NEW wrt generateExample004: quality metrics are not 0
+     */
+    public static final UpdateGraph<UpdateNode, UpdateEdge> generateExample004(int n, int m) {
+        LoggerHelpers.instance().info("example generator n 3");
+        List<String> artifacts = new ArrayList<>();
+        List<String> releases = new ArrayList<>();
+        Map<String, List<String>> versions = new HashMap<>();
+        Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        // root
+        String root = rId(0, 1); // g:0:1
+        qualities.put(root, genMetrics2(null, root, 0, 1, 1));
+        dependencies.computeIfAbsent(rId(0, 1), a -> new ArrayList<>()).add(Tuple.of(aId(1), "1")); // g:0:1 -1-> g:1
+        // others
+        for (int i = 1; i <= n; i++) {
+            String artifact = aId(i); // artifact g:i
+            artifacts.add(artifact);
+            versions.put(artifact, new ArrayList<>());
+            for (int j = 1; j <= m; j++) {
+                String release = rId(i, j); // release g:i:j
+                releases.add(release);
+                versions.computeIfAbsent(artifact, a -> new ArrayList<>()).add(release);
+                qualities.put(release, genMetrics2(artifact, release, i, j, m));
+                if (i < n) {
+                    dependencies.computeIfAbsent(release, a -> new ArrayList<>())
+                            .add(Tuple.of(aId(i + 1), String.format("%d", j))); // g:i:j -j-> g:i+1
+                }
+            }
+        }
+        return generateGraph2(root, artifacts, releases, versions, dependencies, qualities);
+    }
+
     private static final String aId(int id) {
         return String.format("g:%d", id);
     }
@@ -394,6 +430,26 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 CVE, 0.0,
                 FRESHNESS, 0.0,
                 POPULARITY, 0.0);
+        return new MetricMap<>(map);
+    }
+
+    private static final MetricContainer<MetricType> genMetrics2(String artifact, String release, int artifactId, int version, int nbVersions) {
+        // NOTE: we use min-max normalization, there is also mean normalization
+        Map<MetricType, Double> map = Map.of(
+                CVE, 0.0,
+                // freshness (HERE) = nb of more recent versions
+                // for a with |versions(a)| = m . freshness(a:i) = m - i
+                // (because all artifacts have m versions, no need to normalize)
+                FRESHNESS, (double)(nbVersions-version),
+                // popularity (HERE) = from 2^1 to 2^10 (whatever this means the exp law is the only important thing, we could use another law)
+                // so we have [1..1024]
+                // then we have to normalize (and multiply by max of target interval)
+                // (2^i - 1) / (2^10 - 1) * 10
+                // so we have [0, 0.0009, 0.029, 0.068, ... 10]
+                // and then to reverse (because 10 is better than 0)
+                // 10 - ((2^i - 1) / (2^10 - 1) * 10)
+                // se we have [0..10]
+                POPULARITY, 10 - ((Math.pow(2,version) - 1) / (1024 - 1) * 10));
         return new MetricMap<>(map);
     }
 

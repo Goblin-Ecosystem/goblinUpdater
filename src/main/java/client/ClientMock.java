@@ -25,13 +25,15 @@ import io.vavr.Tuple2;
 public class ClientMock {
 
     public static void main(String[] args) {
-        LoggerHelpers.instance().setLevel(Level.INFO);
+        // default log level (DO NOT USE LOW FOR BIG GRAPHS)
+        LoggerHelpers.instance().setLevel(Level.INFO); // LOW, INFO, ...
         // inputs
-        final int EXAMPLE = -2;
+        final int EXAMPLE = -4;
         UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
-            case 0 -> GraphMock.generateExample001(10   , 10);
-            case -1 -> GraphMock.generateExample002(10   , 10);
-            case -2 -> GraphMock.generateExample003(2000   , 10);
+            case -1 -> GraphMock.generateExample001(10   , 10);
+            case -2 -> GraphMock.generateExample002(10   , 10);
+            case -3 -> GraphMock.generateExample003(10   , 10);
+            case -4 -> GraphMock.generateExample004(1000   , 10);
             // Macbook Pro, M1 MAX, 64 Go
             //
             // 2024-03-26
@@ -139,8 +141,6 @@ public class ClientMock {
             // - change arcs seem very costly, is there a way to have less of them (or do not use them)? In reality, we do not have a lot of change arcs but possibly for the root. -> develop a new example generator that takes this into account given some reality measures.
             // - this raises the question of synthetic examples vs reality. We need a set of real examples soon.
             //
-            // modified: change edges only from root
-            //
             // 7th experiment:
             // UPDATED Graph Generation: only change edges from root.
             // generateExample003
@@ -168,7 +168,25 @@ public class ClientMock {
             // - change arc are clearly a big issue. One should have the less possible.
             // - this does not mean we do not have choices to make (we still have m versions per artifact), just that we won't be able to take into account a cost everyhere
             //
-            
+            // 8th experiment:
+            // UPDATED Graph Generation: "realistic" freshness values
+            // generateExample004
+            // multi-core specified, regular structure, freshness+popularity quality, regular dependencies
+            //
+            //   #A, #R/A, Q?, cores :  solving time : total time
+            //   10,   10, PF,   8   :          40ms :        <1s
+            //  100,   10, PF,   8   :     375-390ms :        <1s    > / =
+            // 1000,   10, PF,   8   :        23-24s :     28-30s   >> / >>
+            // 2000,   10, PF,   8   :   ??????????s :     ?????s
+            // reference (from 7)
+            //   10,   10,  0,   8   :          40ms :        <1s
+            //  100,   10,  0,   8   :     190-195ms :        <1s
+            // 1000,   10,  0,   8   :   2280-2300ms :   6,5-7,5s
+            // 2000,   10,  0,   8   :   5835-5855ms :     26-27s
+            //
+            // COMMENTS:
+            // - the demo popularity measure used in synthetic graph generation is bad (not really discriminating version 1 to 6), anyway, it is not the objective here
+            //
             case 1 -> GraphMock.example001();
             case 2 -> GraphMock.example002();
             default -> throw new IllegalArgumentException("Invalid example");

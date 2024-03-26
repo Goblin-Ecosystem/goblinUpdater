@@ -63,7 +63,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         LoggerHelpers.instance().info("Problem solved");
                         OrHelpers.printTime(problem);
                         OrHelpers.printProblem(problem);
-                        OrHelpers.printSolution(problem);
+                        OrHelpers.printSolution(problem, true);
                         return Optional.of(problem);
                 } else {
                         LoggerHelpers.instance().info("Problem not solved");

@@ -16,10 +16,12 @@ public class OrHelpers {
         LoggerHelpers.instance().info("-- Computed in " + problem.wallTime() + " ms");
     }
 
-    public static void printSolution(MPSolver problem) {
+    public static void printSolution(MPSolver problem, boolean onlyNonZero) {
         LoggerHelpers.instance().low("## Solution:");
         MPVariable[] variables = problem.variables();
         for (int i = 0; i < variables.length; ++i) {
+            double value = variables[i].solutionValue();
+            if (onlyNonZero && value == 0) continue;
             LoggerHelpers.instance().low(variables[i].name() + " : " + variables[i].solutionValue());
         }
     }
