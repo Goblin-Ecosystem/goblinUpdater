@@ -12,7 +12,7 @@ import util.api.CustomGraph;
 
 public class ReleaseNode extends AbstractNode {
 
-    private static final Set<MetricType> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED);
+    private static final Set<MetricType> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED);
 
     private double changeCost = 0.0;
 

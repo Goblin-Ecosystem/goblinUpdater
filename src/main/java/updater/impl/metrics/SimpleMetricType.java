@@ -18,13 +18,13 @@ public enum SimpleMetricType implements MetricType {
     CVE_AGGREGATED,
     FRESHNESS,
     FRESHNESS_AGGREGATED,
-    POPULARITY,
-    POPULARITY_AGGREGATED,
+    POPULARITY_1_YEAR,
+    POPULARITY_1_YEAR_AGGREGATED,
     COST;
 
     public boolean isAggregated() {
         return switch (this) {
-            case CVE_AGGREGATED, FRESHNESS_AGGREGATED, POPULARITY_AGGREGATED -> true;
+            case CVE_AGGREGATED, FRESHNESS_AGGREGATED, POPULARITY_1_YEAR_AGGREGATED -> true;
             default -> false;
         };
     }
@@ -33,7 +33,7 @@ public enum SimpleMetricType implements MetricType {
         return switch (this) {
             case CVE -> CVE_AGGREGATED;
             case FRESHNESS -> FRESHNESS_AGGREGATED;
-            case POPULARITY -> POPULARITY_AGGREGATED;
+            case POPULARITY_1_YEAR -> POPULARITY_1_YEAR_AGGREGATED;
             default -> this;
         };
     }
@@ -42,14 +42,14 @@ public enum SimpleMetricType implements MetricType {
         return switch (this) {
             case CVE_AGGREGATED -> CVE;
             case FRESHNESS_AGGREGATED -> FRESHNESS;
-            case POPULARITY_AGGREGATED -> POPULARITY;
+            case POPULARITY_1_YEAR_AGGREGATED -> POPULARITY_1_YEAR;
             default -> this;
         };
     }
 
     public boolean isQualityMetric() {
         return switch (this) {
-            case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY, POPULARITY_AGGREGATED -> true;
+            case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED -> true;
             default -> false;
         };
     }

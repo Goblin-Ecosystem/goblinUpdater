@@ -6,9 +6,8 @@ import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.impl.metrics.MetricMap;
+import updater.impl.metrics.Popularity1Year;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map;

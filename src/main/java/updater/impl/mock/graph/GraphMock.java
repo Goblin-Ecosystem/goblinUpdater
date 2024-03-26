@@ -429,7 +429,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         Map<MetricType, Double> map = Map.of(
                 CVE, 0.0,
                 FRESHNESS, 0.0,
-                POPULARITY, 0.0);
+                POPULARITY_1_YEAR, 0.0);
         return new MetricMap<>(map);
     }
 
@@ -449,7 +449,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 // and then to reverse (because 10 is better than 0)
                 // 10 - ((2^i - 1) / (2^10 - 1) * 10)
                 // se we have [0..10]
-                POPULARITY, 10 - ((Math.pow(2,version) - 1) / (1024 - 1) * 10));
+                POPULARITY_1_YEAR, 10 - ((Math.pow(2,version) - 1) / (1024 - 1) * 10));
         return new MetricMap<>(map);
     }
 
@@ -500,23 +500,23 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         dependencies.put("x:l6:2", List.of());
         Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
         // FIXME: root needs info too
-        qualities.put("p:p:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        qualities.put("p:p:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         // same all for l1 versions 1-2-3
-        qualities.put("x:l1:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 10.0, POPULARITY, 0.0)));
-        qualities.put("x:l1:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
-        qualities.put("x:l1:3", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        qualities.put("x:l1:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 10.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("x:l1:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("x:l1:3", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         // l2 version 1 is less fresh but more popular than l2 version 2
-        qualities.put("x:l2:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
-        qualities.put("x:l2:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 5.0)));
+        qualities.put("x:l2:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("x:l2:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 5.0)));
         // l6 version 1 is less fresh but more popular than l2 version 2
-        qualities.put("x:l6:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY, 0.0)));
-        qualities.put("x:l6:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 2.8)));
+        qualities.put("x:l6:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 5.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("x:l6:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 2.8)));
         // neutral info for l3 version 1 (single version, end of graph)
-        qualities.put("x:l3:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        qualities.put("x:l3:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         // neutral info for l4 version 1 (single version, end of graph)
-        qualities.put("x:l4:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        qualities.put("x:l4:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         // neutral info for l5 version 1 (single version, end of graph)
-        qualities.put("x:l5:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY, 0.0)));
+        qualities.put("x:l5:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
     }
 

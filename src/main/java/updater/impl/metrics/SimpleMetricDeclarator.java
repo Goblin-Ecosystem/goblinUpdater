@@ -20,7 +20,9 @@ public class SimpleMetricDeclarator implements MetricDeclarator {
                 CVE, Cve.class,
                 CVE_AGGREGATED, CveAggregated.class,
                 FRESHNESS, Freshness.class,
-                FRESHNESS_AGGREGATED, FreshnessAggregated.class);
+                FRESHNESS_AGGREGATED, FreshnessAggregated.class,
+                POPULARITY_1_YEAR, Popularity1Year.class,
+                POPULARITY_1_YEAR_AGGREGATED, Popularity1YearAggregated.class);
     }
 
     private SimpleMetricDeclarator() {
