@@ -123,10 +123,10 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     private void addValues(AbstractNode n, JSONObject node, Set<MetricType> avs) {
         for (MetricType av : avs) {
             try {
-                n.addMetric(SimpleMetricDeclarator.instance().metric(av)
+                n.put(av, SimpleMetricDeclarator.instance().metric(av)
                         .orElseThrow(() -> new RuntimeException("No metric for " + av))
                         .getDeclaredConstructor(JSONObject.class)
-                        .newInstance(node));
+                        .newInstance(node).compute());
             } catch (Exception e) {
                 LoggerHelpers.instance().warning(e.getMessage());
             }
