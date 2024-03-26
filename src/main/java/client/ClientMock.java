@@ -33,7 +33,7 @@ public class ClientMock {
             case -1 -> GraphMock.generateExample001(10   , 10);
             case -2 -> GraphMock.generateExample002(10   , 10);
             case -3 -> GraphMock.generateExample003(10   , 10);
-            case -4 -> GraphMock.generateExample004(1000   , 10);
+            case -4 -> GraphMock.generateExample004(2000   , 10);
             // Macbook Pro, M1 MAX, 64 Go
             //
             // 2024-03-26
@@ -177,7 +177,7 @@ public class ClientMock {
             //   10,   10, PF,   8   :          40ms :        <1s
             //  100,   10, PF,   8   :     375-390ms :        <1s    > / =
             // 1000,   10, PF,   8   :        23-24s :     28-30s   >> / >>
-            // 2000,   10, PF,   8   :   ??????????s :     ?????s
+            // 2000,   10, PF,   8   :       92s-93s :   1m50s-2m   >> / >>
             // reference (from 7)
             //   10,   10,  0,   8   :          40ms :        <1s
             //  100,   10,  0,   8   :     190-195ms :        <1s
@@ -186,6 +186,7 @@ public class ClientMock {
             //
             // COMMENTS:
             // - the demo popularity measure used in synthetic graph generation is bad (not really discriminating version 1 to 6), anyway, it is not the objective here
+            // - do some experiments with cost
             //
             case 1 -> GraphMock.example001();
             case 2 -> GraphMock.example002();
