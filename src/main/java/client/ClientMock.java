@@ -200,7 +200,7 @@ public class ClientMock {
         Preferences prefs = new PreferencesMock(Map.of(
                 CVE, 0.5,
                 FRESHNESS, 0.3,
-                POPULARITY, 0.2,
+                POPULARITY_1_YEAR, 0.2,
                 COST, 0.6));
         // create solver and resolve update
         UpdateSolver solver = new LPGAUpdateSolver(constrainedValues);
