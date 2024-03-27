@@ -440,6 +440,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 // freshness (HERE) = nb of more recent versions
                 // for a with |versions(a)| = m . freshness(a:i) = m - i
                 // (because all artifacts have m versions, no need to normalize)
+                // FIXME: wrong, not always n=10 while 10 is used for freshness.
                 FRESHNESS, (double)(nbVersions-version),
                 // popularity (HERE) = from 2^1 to 2^10 (whatever this means the exp law is the only important thing, we could use another law)
                 // so we have [1..1024]
