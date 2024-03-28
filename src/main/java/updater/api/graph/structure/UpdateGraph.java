@@ -113,6 +113,16 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
+     * Artifact of a node (should be a release node). Default method than can be refined in classes for optimizing.
+     * @param node the node to find the versions of (should be a release node)
+     * @return An optional node of the artifact corresponding to the release.
+     */
+    default Optional<N> artifactOf(N node){
+        return incomingEdgesOf(node).stream()
+                .filter(UpdateEdge::isVersion).findFirst().map(this::source);
+    }
+
+    /**
      * TODO:
      */
     UpdateGraph<N, E> copy();

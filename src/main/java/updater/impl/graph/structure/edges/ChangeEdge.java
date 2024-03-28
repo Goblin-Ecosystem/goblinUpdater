@@ -5,20 +5,10 @@ import java.util.Map;
 import updater.api.metrics.MetricType;
 
 public class ChangeEdge extends AbstractEdge {
-    private double qualityChange;
     private double changeCost;
 
     public ChangeEdge(String id, Map<MetricType, Double> metricMap) {
         super(id, metricMap);
-    }
-
-    private double getQualityChange() {
-        return qualityChange;
-    }
-
-    // FIXME: should be private or in an interface
-    public void setQualityChange(double qualityChange) {
-        this.qualityChange = qualityChange;
     }
 
     // FIXME: should be private or in an interface

@@ -92,6 +92,11 @@ public class JgraphtCustomGraph implements CustomGraph<UpdateNode, UpdateEdge> {
     }
 
     @Override
+    public Set<UpdateEdge> incomingEdgesOf(UpdateNode node) {
+        return graph.incomingEdgesOf(node);
+    }
+
+    @Override
     public String toString() {
         return "Graph size: "+graph.vertexSet().size()+" vertices, "+graph.edgeSet().size()+" edges";
     }

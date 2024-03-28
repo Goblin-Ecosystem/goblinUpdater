@@ -19,18 +19,16 @@ import java.util.HashSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import updater.impl.metrics.SimpleMetricType;
 import util.IdGenerator;
-import util.api.CustomGraph;
 import util.helpers.system.LoggerHelpers;
 
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
@@ -161,44 +159,38 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         // prepare things
         UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         IdGenerator generator = IdGenerator.instance();
-        Set<ReleaseNode> releaseNodes = graphCopy.releaseNodes().stream()
-                .map(ReleaseNode.class::cast).collect(Collectors.toSet());
-        // step 1 : create change edges
         LoggerHelpers.instance().info("Generate change edge");
-        releaseNodes.forEach(
-                r -> graphCopy.directDependencies(r).forEach(
-                        a -> graphCopy.versions(a).forEach(
-                                v -> graph.addEdgeFromNodeId(
-                                        r.id(),
-                                        v.id(),
-                                        new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of())))));
-        LoggerHelpers.instance().info(graph.toString());
-        // step 2: compute change edge quality and cost
-        LoggerHelpers.instance().info("Compute change edge values");
-        releaseNodes.forEach(
-                r -> {
-                    graph.changes(r).forEach(
-                            e -> {
-                                ChangeEdge change = (ChangeEdge) e;
-                                ReleaseNode v = (ReleaseNode) graph.target(e);
-                                // compute quality change in any case
-                                change.setQualityChange(
-                                        v.getNodeQuality(updatePreferences) - r.getNodeQuality(updatePreferences));
-                                // compute cost only for direct dependencies of root
-                                if (r.id().equals(CustomGraph.ROOT_ID)) {
-                                    Optional<UpdateNode> or = graph.rootCurrentDependencyRelease(v);
-                                    if (or.isPresent()) {
-                                        change.setCost(MaracasHelpers.computeChangeCost(
-                                                projectPath,
-                                                or.get(),
-                                                v));
-                                    } else {
-                                        change.setCost(9999999.9); // FIXME: OK ?
-                                    }
-                                } else {
-                                    change.setCost(9999999.9);
-                                }
-                            });
-                });
+        // Get root node
+        Optional<UpdateNode> optRootNode = graphCopy.rootNode();
+        if(optRootNode.isPresent()){
+            System.out.println("Root present");
+            UpdateNode rootNode = optRootNode.get();
+            // step 1 : create change edges between root and direct dependencies
+            System.out.println("Nb outgoing: "+ graphCopy.outgoingEdgesOf(rootNode).stream().filter(UpdateEdge::isDependency).toList().size());
+            graphCopy.outgoingEdgesOf(rootNode).stream().filter(UpdateEdge::isDependency).forEach(
+                    edge -> graphCopy.versions(graphCopy.target(edge)).forEach(
+                            release -> graph.addEdgeFromNodeId(rootNode.id(), release.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))
+                    )
+            );
+            LoggerHelpers.instance().info(graph.toString());
+            // step 2: compute change edge cost
+            LoggerHelpers.instance().info("Compute change edge values");
+            graph.changeEdges().forEach(
+                    changeEdge -> {
+                        UpdateNode releaseToCompute = graph.target(changeEdge);
+                        Optional<UpdateNode> optCurrentRelease = graph.rootCurrentDependencyRelease(graph.artifactOf(releaseToCompute).get());
+                        if(optCurrentRelease.isPresent()) {
+                            changeEdge.put(SimpleMetricType.COST,
+                                    MaracasHelpers.computeChangeCost(projectPath, optCurrentRelease.get(), releaseToCompute)
+                            );
+                        }
+                        else{
+                            LoggerHelpers.instance().error("Unable to find current used release of: "+releaseToCompute.id());
+                            changeEdge.put(SimpleMetricType.COST, 9999999.9); // FIXME: OK ?
+                        }
+                    });
+        } else {
+            LoggerHelpers.instance().error("Unable to find root node");
+        }
     }
 }

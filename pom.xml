@@ -112,7 +112,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>client.ClientLPLA</mainClass>
+                            <mainClass>client.ClientLPGA</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

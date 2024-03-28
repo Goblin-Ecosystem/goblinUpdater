@@ -86,7 +86,7 @@ public class GoblinWeaverHelpers {
     public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
-        String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
+        String apiRoute = "/graph/directNewPossibilitiesWithTransitiveRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();

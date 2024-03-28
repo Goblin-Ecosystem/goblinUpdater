@@ -97,6 +97,12 @@ public interface CustomGraph<N extends Identifiable<String>, E> {
     Set<E> outgoingEdgesOf(N node);
 
     /**
+     * Returns the set of all ingoing edges from a given node. Empty set if the node does not exist.
+     * @param node the node to get the outgoing edges for
+     */
+    Set<E> incomingEdgesOf(N node);
+
+    /**
      * Makes a copy of the graph.
      */
     // FIXME: this is not really needed since we can just use the copy constructor in Graphs (if there is always one), or follow the Java API for Cloneable. Choice of deep vs shallow copy is also to be discussed.

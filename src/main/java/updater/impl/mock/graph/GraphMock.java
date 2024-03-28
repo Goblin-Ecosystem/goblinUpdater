@@ -527,6 +527,11 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
     }
 
     @Override
+    public Set<UpdateEdge> incomingEdgesOf(UpdateNode node) {
+        return edges.stream().filter(e -> target(e) == node).collect(Collectors.toSet());
+    }
+
+    @Override
     public void removeNode(UpdateNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'removeNode'");
