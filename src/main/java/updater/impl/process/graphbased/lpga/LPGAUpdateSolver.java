@@ -15,11 +15,7 @@ import updater.api.process.graphbased.UpdateSolver;
 import util.helpers.or.OrHelpers;
 import util.helpers.system.LoggerHelpers;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.core.Logger;
@@ -29,6 +25,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
         private List<Tuple2<String, Integer>> constrainedValues;
 
         public LPGAUpdateSolver() {
+                constrainedValues = new ArrayList<>();
         }
 
         public LPGAUpdateSolver(List<Tuple2<String, Integer>> constrainedValues) {

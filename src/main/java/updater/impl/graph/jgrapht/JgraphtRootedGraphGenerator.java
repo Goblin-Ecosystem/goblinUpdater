@@ -163,10 +163,8 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         // Get root node
         Optional<UpdateNode> optRootNode = graphCopy.rootNode();
         if(optRootNode.isPresent()){
-            System.out.println("Root present");
             UpdateNode rootNode = optRootNode.get();
             // step 1 : create change edges between root and direct dependencies
-            System.out.println("Nb outgoing: "+ graphCopy.outgoingEdgesOf(rootNode).stream().filter(UpdateEdge::isDependency).toList().size());
             graphCopy.outgoingEdgesOf(rootNode).stream().filter(UpdateEdge::isDependency).forEach(
                     edge -> graphCopy.versions(graphCopy.target(edge)).forEach(
                             release -> graph.addEdgeFromNodeId(rootNode.id(), release.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))

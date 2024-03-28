@@ -5,3 +5,5 @@ metrics:
     coef: 0.2
   - metric: POPULARITY_1_YEAR
     coef: 0.2
+  - metric: COST
+    coef: 0.5
