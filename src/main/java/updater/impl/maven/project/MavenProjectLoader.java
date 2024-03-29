@@ -24,7 +24,7 @@ public class MavenProjectLoader implements ProjectLoader {
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             processBuilder.command("cmd", "/c", "mvn", "dependency:list", "-DexcludeTransitive=true");
         } else {
-            processBuilder.command("/bin/sh", "-c", "mvn", "dependency:list", "-DexcludeTransitive=true");
+            processBuilder.command("/bin/sh", "mvn", "dependency:list", "-DexcludeTransitive=true");
         }
         List<String> lines = SystemHelpers.execCommand(processBuilder);
         Iterator<String> lineIterator = lines.iterator();
