@@ -7,10 +7,11 @@ import updater.api.metrics.MetricType;
 import static updater.impl.metrics.SimpleMetricType.POPULARITY_1_YEAR;
 
 public class Popularity1Year implements Metric {
-    private final int value;
+    private double score;
 
     public Popularity1Year(JSONObject nodeJsonObject) {
-        this.value = Integer.parseInt(nodeJsonObject.get(type().toJsonKey()).toString());
+        score = Integer.parseInt(nodeJsonObject.get(type().toJsonKey()).toString());
+        score = score != 0 ? (1 / score) * 1000 : 1000;
     }
 
     @Override
@@ -20,6 +21,6 @@ public class Popularity1Year implements Metric {
 
     @Override
     public double compute() {
-        return value;
+        return score;
     }
 }

@@ -7,10 +7,11 @@ import updater.api.metrics.MetricType;
 import static updater.impl.metrics.SimpleMetricType.*;
 
 public class Freshness implements Metric {
-    private final JSONObject valueJsonObject;
+    private double score;
 
     public Freshness(JSONObject nodeJsonObject) {
-        this.valueJsonObject = (JSONObject) nodeJsonObject.get(type().toJsonKey());
+        JSONObject valueJsonObject = (JSONObject) nodeJsonObject.get(type().toJsonKey());
+        score = Double.parseDouble(valueJsonObject.get("numberMissedRelease").toString());
     }
 
     @Override
@@ -20,6 +21,6 @@ public class Freshness implements Metric {
 
     @Override
     public double compute() {
-        return Double.parseDouble(valueJsonObject.get("numberMissedRelease").toString());
+        return score;
     }
 }

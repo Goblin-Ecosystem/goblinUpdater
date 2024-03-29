@@ -11,6 +11,7 @@ import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.helpers.MaracasHelpers;
 import updater.impl.graph.structure.edges.*;
 import updater.impl.graph.structure.nodes.*;
+import updater.impl.metrics.MetricNormalizer;
 import updater.impl.metrics.SimpleMetricDeclarator;
 
 import java.util.Optional;
@@ -148,6 +149,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             }
         });
         // Log
+        MetricNormalizer.normalize(graph);
         LoggerHelpers.instance().info(graph.toString());
         return graph;
     }

@@ -8,10 +8,15 @@ import updater.api.metrics.MetricType;
 import static updater.impl.metrics.SimpleMetricType.*;
 
 public class Cve implements Metric {
-    private final JSONArray valueJsonArray;
+    private double score;
 
     public Cve(JSONObject nodeJsonObject) {
-        this.valueJsonArray = (JSONArray) nodeJsonObject.get(type().toJsonKey());
+        JSONArray valueJsonArray = (JSONArray) nodeJsonObject.get(type().toJsonKey());
+        score = 0.0;
+        for (Object cve : valueJsonArray) {
+            JSONObject cveJson = (JSONObject) cve;
+            score += getSeverityCoef(cveJson.get("severity").toString());
+        }
     }
 
     @Override
@@ -21,11 +26,6 @@ public class Cve implements Metric {
 
     @Override
     public double compute() {
-        double score = 0;
-        for (Object cve : valueJsonArray) {
-            JSONObject cveJson = (JSONObject) cve;
-            score += 1 * getSeverityCoef(cveJson.get("severity").toString());
-        }
         return score;
     }
 
