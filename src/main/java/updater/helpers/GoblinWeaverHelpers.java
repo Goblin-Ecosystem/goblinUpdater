@@ -42,6 +42,8 @@ public class GoblinWeaverHelpers {
                 JSONParser jsonParser = new JSONParser();
                 return (JSONObject) jsonParser.parse(
                         new InputStreamReader(http.getInputStream(), StandardCharsets.UTF_8));
+            } else {
+                LoggerHelpers.instance().error("API error code: " + http.getResponseCode() + "\n");
             }
             http.disconnect();
         } catch (IOException | org.json.simple.parser.ParseException e) {
