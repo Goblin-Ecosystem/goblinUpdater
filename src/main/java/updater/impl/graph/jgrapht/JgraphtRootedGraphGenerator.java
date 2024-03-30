@@ -5,13 +5,14 @@ import io.vavr.Tuple2;
 import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
+import updater.api.metrics.MetricNormalizer;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.helpers.MaracasHelpers;
 import updater.impl.graph.structure.edges.*;
 import updater.impl.graph.structure.nodes.*;
-import updater.impl.metrics.MetricNormalizer;
+import updater.impl.metrics.MetricMaxValueNormalizer;
 import updater.impl.metrics.SimpleMetricDeclarator;
 
 import java.util.Optional;
@@ -149,7 +150,8 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             }
         });
         // Log
-        MetricNormalizer.normalize(graph);
+        MetricNormalizer normalizer = new MetricMaxValueNormalizer();
+        normalizer.normalize(graph);
         LoggerHelpers.instance().info(graph.toString());
         return graph;
     }

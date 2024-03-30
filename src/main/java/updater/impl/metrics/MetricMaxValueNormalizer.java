@@ -3,18 +3,17 @@ package updater.impl.metrics;
 import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
+import updater.api.metrics.MetricNormalizer;
 import updater.api.metrics.MetricType;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MetricNormalizer {
-    private final Map<MetricType, Double> mapMetricMax = new HashMap<>();
+public class MetricMaxValueNormalizer implements MetricNormalizer {
 
-    private MetricNormalizer(){}
-
-    public static void normalize(UpdateGraph<UpdateNode, UpdateEdge> graph){
+    @Override
+    public void normalize(UpdateGraph<UpdateNode, UpdateEdge> graph){
         Map<MetricType, Double> mapMetricMax = new HashMap<>();
         // looking for max values
         for (UpdateNode release : graph.releaseNodes()) {
