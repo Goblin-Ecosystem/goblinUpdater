@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Set;
 
 import updater.api.metrics.MetricContainer;
+import updater.api.metrics.MetricType;
 
-public class MetricMap<T> implements MetricContainer<T> {
+public class MetricMap<T extends MetricType> implements MetricContainer<T> {
 
     private Map<T, Double> map;
 

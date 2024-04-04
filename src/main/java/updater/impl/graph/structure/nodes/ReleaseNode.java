@@ -7,14 +7,11 @@ import static updater.impl.metrics.SimpleMetricType.*;
 import java.util.Map;
 
 import updater.api.metrics.MetricType;
-import updater.api.preferences.Preferences;
 import util.api.CustomGraph;
 
 public class ReleaseNode extends AbstractNode {
 
     private static final Set<MetricType> KNOWN_VALUES = Set.of(CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED);
-
-    private double changeCost = 0.0;
 
     /**
      * Constructor for release nodes. Assumes the id is of the form "g:a:v".
@@ -34,24 +31,6 @@ public class ReleaseNode extends AbstractNode {
     @Override
     public boolean hasValidId(String id) {
         return ReleaseNode.isValidId(id);
-    }
-
-    // FIXME: should be private or in an interface
-    public double getChangeCost() {
-        return changeCost;
-    }
-
-    // FIXME: should be private or in an interface
-    public void setChangeCost(double changeCost) {
-        this.changeCost = changeCost;
-    }
-    
-    // FIXME: should be private or in an interface
-    public boolean dominates(ReleaseNode other, Preferences updatePreferences) {
-        return this.getNodeQuality(updatePreferences) <= other.getNodeQuality(updatePreferences)
-                && this.changeCost <= other.changeCost
-                && (this.getNodeQuality(updatePreferences) < other.getNodeQuality(updatePreferences)
-                        || this.changeCost < other.changeCost);
     }
 
     @Override

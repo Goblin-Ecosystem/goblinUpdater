@@ -150,13 +150,10 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             }
         });
         // Log
-        MetricNormalizer normalizer = new MetricMaxValueNormalizer();
-        normalizer.normalize(graph);
         LoggerHelpers.instance().info(graph.toString());
         return graph;
     }
 
-    // FIXME: add added values here
     @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             Preferences updatePreferences) {

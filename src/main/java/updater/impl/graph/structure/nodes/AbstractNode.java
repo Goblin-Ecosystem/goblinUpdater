@@ -13,7 +13,6 @@ import java.util.Map;
 public abstract class AbstractNode implements UpdateNode {
     private final String id;
     private MetricContainer<MetricType> metricMap;
-    private Double quality = null;
 
     protected AbstractNode(String id, Map<MetricType, Double> metricMap) {
         if (!hasValidId(id)) {
@@ -41,22 +40,6 @@ public abstract class AbstractNode implements UpdateNode {
     @Override
     public Optional<Double> get(MetricType m) {
         return metricMap.get(m);
-    }
-
-    // FIXME: should be private or in an interface
-    // FIXME: replaced by the MetricContainer API?
-    public double getNodeQuality(Preferences updatePreferences) {
-        if (this.quality != null) {
-            return this.quality;
-        }
-        this.quality = 0.0;
-        for (MetricType metricType : metricMap.contentTypes()) {
-            Optional<Double> metricValue = metricMap.get(metricType);
-            // TODO: normalize quality + score
-            // TODO: pas de coef pour LPGA, mais coef pour LPLA
-            metricValue.ifPresent(value -> this.quality += (value * updatePreferences.coefficientFor(metricType)));
-        }
-        return this.quality;
     }
 
     @Override
