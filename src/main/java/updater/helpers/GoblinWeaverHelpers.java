@@ -85,10 +85,25 @@ public class GoblinWeaverHelpers {
     }
 
     // LPGA
-    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
+    public static JSONObject getDirectNewPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
         String apiRoute = "/graph/directNewPossibilitiesWithTransitiveRooted";
+
+        JSONObject bodyJsonObject = new JSONObject();
+        JSONArray releasesArray = new JSONArray();
+        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
+        bodyJsonObject.put("releases", releasesArray);
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", metricsArray);
+        return executeQuery(bodyJsonObject, apiRoute);
+    }
+
+    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
+                                                                             Set<MetricType> metrics) {
+        LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
+        String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
