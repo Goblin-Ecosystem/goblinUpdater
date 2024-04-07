@@ -13,9 +13,13 @@ import updater.helpers.GoblinWeaverHelpers;
 import updater.impl.graph.jgrapht.JgraphtRootedGraphGenerator;
 
 import org.json.simple.JSONObject;
+import updater.impl.graph.structure.edges.DependencyEdge;
 import updater.impl.metrics.MetricMaxValueNormalizer;
 import util.helpers.system.LoggerHelpers;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 // TODO: DRY ?
@@ -36,7 +40,6 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         startTime = System.currentTimeMillis();
         jgraphtGraphGenerator.generateChangeEdge(project.getPath(), updateGraph, updatePreferences);
         endTime = System.currentTimeMillis();
-        LoggerHelpers.instance().info("Change edge size: "+updateGraph.edges(UpdateEdge::isChange).size());
         LoggerHelpers.instance().info("Time to generate generate change edges: "+ (endTime - startTime) + " ms");
         // Normalize metrics
         MetricNormalizer normalizer = new MetricMaxValueNormalizer();
@@ -44,6 +47,32 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         normalizer.normalize(updateGraph);
         endTime = System.currentTimeMillis();
         LoggerHelpers.instance().info("Time to normalize metrics: "+ (endTime - startTime) + " ms");
+        Set<UpdateNode> initialGraphNode = initialGraphQuality(updateGraph, updateGraph.rootNode().get(), new HashSet<>());
+        initialGraphNode.remove(updateGraph.rootNode().get());
+        logInitialQuality(initialGraphNode, updatePreferences);
         return updateGraph;
+    }
+
+    private void logInitialQuality(Set<UpdateNode> initialGraphNode, Preferences updatePreferences) {
+        double totalQuality = 0.0;
+        for(UpdateNode node : initialGraphNode){
+            totalQuality += node.getQuality(updatePreferences);
+        }
+        LoggerHelpers.instance().info("Initial graph quality: "+totalQuality);
+    }
+
+    private Set<UpdateNode> initialGraphQuality(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdateNode nodeToTreat, Set<UpdateNode> visitedNodes) {
+        if(visitedNodes.contains(nodeToTreat)){
+            return visitedNodes;
+        }
+        visitedNodes.add(nodeToTreat);
+        List<DependencyEdge> depEdges = updateGraph.outgoingEdgesOf(nodeToTreat).stream().filter(UpdateEdge::isDependency).map(DependencyEdge.class::cast).toList();
+        for (DependencyEdge depEdge : depEdges ){
+            String version = depEdge.targetVersion();
+            String artifactName = updateGraph.target(depEdge).ga();
+            Optional<UpdateNode> dep = updateGraph.getNode(artifactName+":"+version);
+            dep.ifPresent(updateNode -> visitedNodes.addAll(initialGraphQuality(updateGraph, updateNode, visitedNodes)));
+        }
+        return visitedNodes;
     }
 }

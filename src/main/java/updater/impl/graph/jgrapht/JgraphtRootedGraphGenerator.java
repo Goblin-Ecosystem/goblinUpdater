@@ -171,7 +171,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                             release -> graph.addEdgeFromNodeId(rootNode.id(), release.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))
                     )
             );
-            LoggerHelpers.instance().info(graph.toString());
+            LoggerHelpers.instance().info("Change edge size: "+graph.edges(UpdateEdge::isChange).size());
             // step 2: compute change edge cost
             LoggerHelpers.instance().info("Compute change edge values");
             graph.changeEdges().forEach(
