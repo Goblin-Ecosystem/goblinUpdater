@@ -3,7 +3,6 @@ package util.helpers.system;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-// TODO: why not using a regular Logger? - Cause of my thesis subject, I don't want to add new libraries just to make prints.
 public class LoggerHelpers {
 
     public enum Level implements Comparable<Level> {

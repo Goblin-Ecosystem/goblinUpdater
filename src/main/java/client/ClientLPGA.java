@@ -8,6 +8,7 @@ import updater.impl.preferences.SimplePreferences;
 import updater.impl.process.graphbased.lpga.LPGAUpdater;
 import util.helpers.system.LoggerHelpers;
 import util.helpers.system.LoggerHelpers.Level;
+import util.helpers.system.MemoryUsageTracker;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -30,10 +31,11 @@ public class ClientLPGA {
                 .load(projectPath)
                 .flatMap(project -> updater.update(project,
                         new SimplePreferences(preferencesPath)));
-
+        MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
         if (updatedProject.isPresent())
             updatedProject.get().dump(updatePath);
         else
             LoggerHelpers.instance().error("Could not update project");
+        MemoryUsageTracker.getInstance().printMemoryUsageMax();
     }
 }

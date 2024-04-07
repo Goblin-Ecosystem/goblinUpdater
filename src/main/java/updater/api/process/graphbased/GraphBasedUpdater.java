@@ -55,7 +55,7 @@ public interface GraphBasedUpdater extends Updater {
         long startTime = System.currentTimeMillis();
         Optional<UpdateGraph<UpdateNode, UpdateEdge>> updatedGraph = solver().resolve(initialGraph, updatePreferences);
         long endTime = System.currentTimeMillis();
-        LoggerHelpers.instance().info("Time to solve: "+ (endTime - startTime) + " ms");
+        LoggerHelpers.instance().info("Time to solve (ms): "+ (endTime - startTime));
         return updatedGraph.map(ug -> projectUpdater().updateProject(project, initialGraph, ug, updatePreferences));
     }
 
