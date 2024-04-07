@@ -8,6 +8,7 @@ import updater.api.graph.structure.UpdateNode;
 import updater.api.preferences.Preferences;
 import updater.api.process.Updater;
 import updater.api.project.Project;
+import util.helpers.system.LoggerHelpers;
 
 /**
  * A refined interface for a project updater ({@link Updater}). It relies on
@@ -51,7 +52,10 @@ public interface GraphBasedUpdater extends Updater {
     default Optional<Project> update(Project project, Preferences updatePreferences) {
         UpdateGraph<UpdateNode, UpdateEdge> initialGraph = graphGenerator().computeUpdateGraph(project,
                 updatePreferences);
+        long startTime = System.currentTimeMillis();
         Optional<UpdateGraph<UpdateNode, UpdateEdge>> updatedGraph = solver().resolve(initialGraph, updatePreferences);
+        long endTime = System.currentTimeMillis();
+        LoggerHelpers.instance().info("Time to solve: "+ (endTime - startTime) + " ms");
         return updatedGraph.map(ug -> projectUpdater().updateProject(project, initialGraph, ug, updatePreferences));
     }
 

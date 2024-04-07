@@ -76,22 +76,10 @@
             <artifactId>vavr</artifactId>
             <version>0.10.4</version>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <mainClass>Main</mainClass>
-                    <environmentVariables>
-                        <MAVEN_OPTS>-Xmx1g</MAVEN_OPTS>
-                    </environmentVariables>
-                </configuration>
-            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
