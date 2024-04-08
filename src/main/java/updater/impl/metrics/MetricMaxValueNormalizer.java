@@ -28,8 +28,12 @@ public class MetricMaxValueNormalizer implements MetricNormalizer {
     private final double normalize(double value, double max, double min, MetricType metricType, double k) {
         double normalizedValue;
         if (metricType.biggerIsBetter()) {
+            // for a metric where bigger is better, and since we minimize the value
+            // the maximum must be 0 and the minimum must be 1
             normalizedValue = normalizeMaxTo0MinTo1(value, max, min);
         } else {
+            // for a metric where smaller is better, and since we minimize the value
+            // the minimum must be 0 and the maximum must be 0
             normalizedValue = normalizeMinTo0MaxTo1(value, max, min);
         }
         return k * normalizedValue;
