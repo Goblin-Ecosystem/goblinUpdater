@@ -11,7 +11,6 @@ public class Popularity1Year implements Metric {
 
     public Popularity1Year(JSONObject nodeJsonObject) {
         score = Integer.parseInt(nodeJsonObject.get(type().toJsonKey()).toString());
-        score = score != 0 ? (1 / score) * 1000 : 1000;
     }
 
     @Override
