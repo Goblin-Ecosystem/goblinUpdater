@@ -19,6 +19,7 @@ import java.util.Optional;
 public class ClientLPGA {
 
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         LoggerHelpers.instance().setLevel(Level.INFO);
         Path projectPath = Path.of(System.getProperty("projectPath"));
         Path preferencesPath = Path.of(System.getProperty("confFile"));
@@ -37,5 +38,7 @@ public class ClientLPGA {
         else
             LoggerHelpers.instance().error("Could not update project");
         MemoryUsageTracker.getInstance().printMemoryUsageMax();
+        long endTime = System.currentTimeMillis();
+        LoggerHelpers.instance().info("Total execution time (ms): "+ (endTime - startTime));
     }
 }
