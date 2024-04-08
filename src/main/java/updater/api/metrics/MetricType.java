@@ -38,4 +38,9 @@ public interface MetricType {
      */
     String toJsonKey();
 
+    /**
+     * Returns true if the bigger the better, false otherwise
+     */
+    boolean biggerIsBetter();
+
 }

@@ -66,4 +66,12 @@ public enum SimpleMetricType implements MetricType {
         return this.name().toLowerCase();
     }
 
+    @Override
+    public boolean biggerIsBetter() {
+        return switch (this) {
+            case POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED -> true;
+            default -> false;
+        };
+    }
+
 }
