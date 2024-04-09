@@ -40,7 +40,7 @@ public class MavenProjectLoader implements ProjectLoader {
                 String artifactId = parts[1].trim();
                 String version = parts[3].trim();
                 String scope = parts[4].trim();
-                // TODO: integrate scopes (filtering).
+                // TODO: integrate scopes (filtering)?
                 resultList.add(new Dependency(groupId, artifactId, version));
             }
         }

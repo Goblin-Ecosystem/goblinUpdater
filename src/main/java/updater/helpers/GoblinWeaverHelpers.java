@@ -52,6 +52,21 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
+    public static JSONObject getRootedGraph(Set<Dependency> directDependencies,
+                                                            Set<MetricType> metrics) {
+        LoggerHelpers.instance().info("Get rooted graph");
+        String apiRoute = "/graph/rootedGraph";
+
+        JSONObject bodyJsonObject = new JSONObject();
+        JSONArray releasesArray = new JSONArray();
+        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
+        bodyJsonObject.put("releases", releasesArray);
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("addedValues", metricsArray);
+        return executeQuery(bodyJsonObject, apiRoute);
+    }
+
     // GPGA
     public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {

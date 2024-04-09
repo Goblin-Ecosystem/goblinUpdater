@@ -50,7 +50,7 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         normalizer.normalize(updateGraph);
         endTime = System.currentTimeMillis();
         LoggerHelpers.instance().info("Time to normalize metrics (ms): "+ (endTime - startTime));
-        Set<UpdateNode> initialGraphNode = initialGraphQuality(updateGraph, updateGraph.rootNode().get(), new HashSet<>());
+        Set<UpdateNode> initialGraphNode = generateInitialGraph(updateGraph, updateGraph.rootNode().get(), new HashSet<>());
         initialGraphNode.remove(updateGraph.rootNode().get());
         MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
         logInitialQuality(initialGraphNode, updatePreferences);
@@ -66,7 +66,7 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         LoggerHelpers.instance().info("Initial graph quality: "+totalQuality);
     }
 
-    private Set<UpdateNode> initialGraphQuality(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdateNode nodeToTreat, Set<UpdateNode> visitedNodes) {
+    private Set<UpdateNode> generateInitialGraph(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdateNode nodeToTreat, Set<UpdateNode> visitedNodes) {
         if(visitedNodes.contains(nodeToTreat)){
             return visitedNodes;
         }
@@ -76,7 +76,7 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
             String version = depEdge.targetVersion();
             String artifactName = updateGraph.target(depEdge).ga();
             Optional<UpdateNode> dep = updateGraph.getNode(artifactName+":"+version);
-            dep.ifPresent(updateNode -> visitedNodes.addAll(initialGraphQuality(updateGraph, updateNode, visitedNodes)));
+            dep.ifPresent(updateNode -> visitedNodes.addAll(generateInitialGraph(updateGraph, updateNode, visitedNodes)));
         }
         return visitedNodes;
     }
