@@ -17,6 +17,9 @@ public class MetricMaxValueNormalizer implements MetricNormalizer {
 
     // normalization [max, min] -> [0, 1]
     private final double normalizeMaxTo0MinTo1(double value, double max, double min) {
+        if(max-min == 0){
+            return 0;
+        }
         return (max - value) / (max - min);
     }
 
