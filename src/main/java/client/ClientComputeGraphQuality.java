@@ -34,13 +34,10 @@ public class ClientComputeGraphQuality {
             // Get graph
             Preferences updatePreferences = new SimplePreferences(preferencesPath);
             Set<MetricType> metricsToCompute = updatePreferences.qualityMetrics();
-            JSONObject jsonRootedGraph = GoblinWeaverHelpers.getRootedGraph(project.getDirectDependencies(), metricsToCompute);
+            JSONObject jsonRootedGraph = GoblinWeaverHelpers.getDirectNewPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), metricsToCompute);
             RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
             UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonRootedGraph, metricsToCompute);
-            LoggerHelpers.instance().info("Release nodes size: "+updateGraph.nodes(UpdateNode::isRelease).size());
-            LoggerHelpers.instance().info("Artifact nodes size: "+updateGraph.nodes(UpdateNode::isArtifact).size());
-            LoggerHelpers.instance().info("Dependency edges size: "+updateGraph.edges(UpdateEdge::isDependency).size());
-            LoggerHelpers.instance().info("Version edges size: "+updateGraph.edges(UpdateEdge::isVersion).size());
+            jgraphtGraphGenerator.generateChangeEdge(project.getPath(), updateGraph, updatePreferences);
             MetricNormalizer normalizer = new MetricMaxValueNormalizer();
             normalizer.normalize(updateGraph);
             logGraphQuality(updateGraph, updatePreferences);
@@ -51,10 +48,31 @@ public class ClientComputeGraphQuality {
     }
 
     private static void logGraphQuality(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, Preferences updatePreferences) {
-        double totalQuality = 0.0;
+        LoggerHelpers.instance().info("## Nodes quality");
         for(UpdateNode node : updateGraph.nodes(UpdateNode::isRelease).stream().filter(node -> !node.equals(updateGraph.rootNode().get())).toList()){
-            totalQuality += node.getQuality(updatePreferences);
+            StringBuilder nodeIfo = new StringBuilder();
+            nodeIfo.append(node.id()).append(" = ");
+            boolean isFirst = true;
+            double quality = 0.0;
+            for (MetricType metricType : updatePreferences.qualityMetrics()) {
+                if (!isFirst){
+                    nodeIfo.append(", ");
+                }
+                isFirst = false;
+                nodeIfo.append(metricType).append(": ").append(node.get(metricType).get() * updatePreferences.coefficientFor(metricType));
+                quality += node.get(metricType).get();
+            }
+            nodeIfo.append(", QUALITY: ").append(quality);
+            LoggerHelpers.instance().info(nodeIfo.toString());
+
         }
-        LoggerHelpers.instance().info("Initial graph quality: "+totalQuality);
+        LoggerHelpers.instance().info("## Cost");
+        for(UpdateEdge updateEdge : updateGraph.changeEdges()){
+            for(MetricType metricType : updatePreferences.costMetrics()){
+                if(updateEdge.get(metricType).isPresent()) {
+                    LoggerHelpers.instance().info(updateGraph.target(updateEdge).id() + ": " + updateEdge.get(metricType).get());
+                }
+            }
+        }
     }
 }
