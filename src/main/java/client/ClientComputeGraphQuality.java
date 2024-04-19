@@ -59,7 +59,8 @@ public class ClientComputeGraphQuality {
                     nodeIfo.append(", ");
                 }
                 isFirst = false;
-                nodeIfo.append(metricType).append(": ").append(node.get(metricType).get() * updatePreferences.coefficientFor(metricType));
+                // FIXME: better check if optionals are not empty first
+                nodeIfo.append(metricType).append(": ").append(node.get(metricType).get() * updatePreferences.coefficientFor(metricType).get());
                 quality += node.get(metricType).get();
             }
             nodeIfo.append(", QUALITY: ").append(quality);

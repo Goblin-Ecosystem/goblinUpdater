@@ -2,6 +2,7 @@ package updater.impl.mock.preferences;
 
 import java.util.Set;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import updater.api.metrics.MetricType;
@@ -28,10 +29,8 @@ public class PreferencesMock implements Preferences {
     }
 
     @Override
-    public double coefficientFor(MetricType metric) {
-        if (metric == null)
-            return 0.0;
-        return metricsAndCoefMap.get(metric) == null ? 0.0 : metricsAndCoefMap.get(metric);
+    public Optional<Double> coefficientFor(MetricType metric) {
+        return Optional.ofNullable(metric).map(m -> metricsAndCoefMap.get(m));
     }
 
 }

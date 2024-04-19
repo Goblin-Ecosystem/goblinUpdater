@@ -41,14 +41,14 @@ public class SimplePreferences implements Preferences {
 
     // FIXME: should this logic be here or in an updater?
     @Override
-    public double coefficientFor(MetricType metric) {
+    public Optional<Double> coefficientFor(MetricType metric) {
         if (metric == null)
-            return 0.0;
+            return Optional.empty();
         if (metricsAndCoefMap.containsKey(metric))
-            return metricsAndCoefMap.get(metric);
+            return Optional.of(metricsAndCoefMap.get(metric));
         if (metric.isAggregated() && metricsAndCoefMap.containsKey(metric.nonAggregatedVersion()))
-            return metricsAndCoefMap.get(metric.nonAggregatedVersion());
-        return 0.0;
+            return Optional.of(metricsAndCoefMap.get(metric.nonAggregatedVersion()));
+        return Optional.empty();
     }
 
     private Map<MetricType, Double> generateMetricAndCoefMap(Map<String, Object> confMap) {

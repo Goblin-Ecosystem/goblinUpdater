@@ -203,8 +203,9 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 }
 
                 // Constraint for total quality
+                // FIXME: check get is harmless here
                 Function<MetricType, Tuple2<MPVariable, Double>> q2t = q -> Tuple.of(qualityVariables.get(q),
-                                updatePreferences.coefficientFor(q));
+                                updatePreferences.coefficientFor(q).get());
                 List<Tuple2<MPVariable, Double>> qualities = updatePreferences.qualityMetrics().stream().map(q2t)
                                 .toList();
                 OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "QUALITY Constraint", qualities, 1.0,
@@ -221,7 +222,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "COST Constraint", costs, 1.0, totalCost);
 
                 // scaling factors for quality vs cost
-                double costScaleFactor = updatePreferences.coefficientFor(costMetric);
+                double costScaleFactor = updatePreferences.coefficientFor(costMetric).orElse(0.0);
                 double qualityScaleFactor = 1 - costScaleFactor;
 
                 // Objective function

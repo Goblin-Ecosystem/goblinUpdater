@@ -33,7 +33,7 @@ public class ClientMock {
             case -1 -> GraphMock.generateExample001(10   , 10);
             case -2 -> GraphMock.generateExample002(10   , 10);
             case -3 -> GraphMock.generateExample003(10   , 10);
-            case -4 -> GraphMock.generateExample004(2000   , 10);
+            case -4 -> GraphMock.generateExample004(10   , 10);
             // Macbook Pro, M1 MAX, 64 Go
             //
             // 2024-03-26

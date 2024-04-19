@@ -1,6 +1,7 @@
 package updater.api.preferences;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import updater.api.metrics.MetricType;
@@ -37,20 +38,22 @@ public interface Preferences {
     }
 
     /**
-     * Get the coefficient for a given metric. 0.0 if the metric is not in the
-     * preferences (ie the metric has weight 0 for the user).
+     * Get the coefficient for a given metric. Optional.empty if the metric is not in the
+     * preferences (which is different from having value 0.0).
      * 
      * @param metric
      * @return
      */
-    double coefficientFor(MetricType metric);
+    Optional<Double> coefficientFor(MetricType metric);
 
     /**
      * Get the sum of all coefficients for a given set of added values.
      */
     default Double sumFor(Set<MetricType> metrics) {
         return metrics.stream()
-                .mapToDouble(this::coefficientFor)
+                .map(this::coefficientFor)
+                .filter(Optional::isPresent)
+                .mapToDouble(od -> od.get())
                 .sum();
     }
 
