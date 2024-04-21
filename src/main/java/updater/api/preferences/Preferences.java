@@ -54,7 +54,7 @@ public interface Preferences {
         return metrics.stream()
                 .map(this::coefficientFor)
                 .filter(Optional::isPresent)
-                .mapToDouble(od -> od.get())
+                .mapToDouble(Optional::get)
                 .sum();
     }
 
