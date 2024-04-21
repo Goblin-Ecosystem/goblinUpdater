@@ -22,8 +22,6 @@ import util.helpers.system.LoggerHelpers;
 import java.util.*;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.core.Logger;
-
 public class LPGAUpdateSolver implements UpdateSolver {
 
         public LPGAUpdateSolver() {
@@ -41,7 +39,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
         private Optional<UpdateGraph<UpdateNode, UpdateEdge>> solutionToGraph(MPSolver solution,
                         UpdateGraph<UpdateNode, UpdateEdge> updateGraph, Preferences updatePreferences) {
-                // TODO: JOYCE en second
+                // TODO: if the graph is needed
                 return Optional.empty();
         }
 
@@ -81,7 +79,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 }
         }
 
-        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, CostLimitConstraint clc) {
+        private void visit(MPSolver problem, CostLimitConstraint clc) {
                 OrHelpers.x_le_v(problem, "constraint on cost limit", GraphLP.totalCostVariable(problem), clc.limit());
         }
 
@@ -96,20 +94,19 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         } else if (c instanceof PresenceConstraint pc) {
                                 visit(updateGraph, problem, pc);
                         } else if (c instanceof CostLimitConstraint clc) {
-                                visit(updateGraph, problem, clc);
+                                visit(problem, clc);
                         }
                 }
         }
 
         private <N extends UpdateNode, E extends UpdateEdge> MPSolver createProblem(UpdateGraph<N, E> updateGraph,
                         Preferences updatePreferences) {
-                // FIXME: select the best solver. CBC, CLP, GLPK, CP-SAT, ... Taking care with
-                // the correct treatment for "binary" variables (that should be 0 or 1 not 0.5
-                // for example)
-                // GLOP is not working correctly with binary variables. Also all linear solvers?
+                // TODO: select the best solver. CBC, CLP, GLPK, CP-SAT, ... 
+                // Taking care with the correct treatment for "binary" variables (that should be 0 or 1 not 0.5 for example)
+                // GLOP is not working correctly with binary variables. (all linear solvers?)
+                // CBC is good, no setNumThreads still.
                 MPSolver solver = MPSolver.createSolver("CBC");
-                solver.setNumThreads(8);
-                // FIXME: moche et pas efficace !!
+                // TODO: could be enhanced
                 Set<N> artifactNodes = updateGraph.artifactNodes();
                 Set<N> releaseNodes = updateGraph.releaseNodes();
                 Set<E> versionEdges = updateGraph.versionEdges();

@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public class LoggerHelpers {
 
-    public enum Level implements Comparable<Level> {
+    public enum Level {
         LOW, INFO, WARN, ERROR, FATAL;
     }
 

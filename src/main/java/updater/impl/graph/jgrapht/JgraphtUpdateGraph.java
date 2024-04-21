@@ -3,9 +3,6 @@ package updater.impl.graph.jgrapht;
 import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
-import updater.impl.graph.structure.edges.ChangeEdge;
-import updater.impl.graph.structure.edges.DependencyEdge;
-import updater.impl.graph.structure.nodes.ReleaseNode;
 import util.helpers.system.LoggerHelpers;
 
 import org.jgrapht.Graph;
@@ -13,8 +10,6 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGraph<UpdateNode, UpdateEdge> {
 
@@ -34,7 +29,7 @@ public class JgraphtUpdateGraph extends JgraphtCustomGraph implements UpdateGrap
                .findFirst().orElse(null);
         if (edge == null) {
             LoggerHelpers.instance().error("Fail to get current release of: " + artifact.id());
-            return null;
+            return Optional.empty();
         } else {
             String versionId = artifact.id() + ":" + edge.targetVersion();
             return getNode(versionId);

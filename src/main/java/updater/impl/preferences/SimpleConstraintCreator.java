@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import updater.api.preferences.Constraint;
 import updater.api.preferences.ConstraintCreator;
-import util.helpers.system.LoggerHelpers;
 
 public class SimpleConstraintCreator implements ConstraintCreator {
 

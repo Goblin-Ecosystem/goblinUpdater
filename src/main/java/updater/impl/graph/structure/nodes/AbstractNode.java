@@ -3,7 +3,6 @@ package updater.impl.graph.structure.nodes;
 import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
-import updater.api.preferences.Preferences;
 import updater.impl.metrics.MetricMap;
 
 import java.util.Optional;

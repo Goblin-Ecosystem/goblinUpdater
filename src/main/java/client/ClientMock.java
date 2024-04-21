@@ -11,8 +11,6 @@ import updater.impl.process.graphbased.lpga.LPGAUpdateSolver;
 import util.helpers.system.LoggerHelpers;
 import util.helpers.system.LoggerHelpers.Level;
 
-import java.util.Optional;
-
 /**
  * Basic client for LPGA project update in the Maven/Maven Central eco-system.
  * This is a mock client for testing purposes only. It may not run the whole
@@ -213,8 +211,8 @@ public class ClientMock {
                 constraints:
                   - constraint: COSTLIMIT
                     value: 0.9
-                  - constraint: PRESENCE
-                    value: "b:b:2"
+                  # - constraint: PRESENCE
+                  #   value: "b:b:2"
                   - constraint: PRESENCE
                     value: "h:h:999"
                   - constraint: ABSENCE
@@ -223,6 +221,7 @@ public class ClientMock {
         Preferences preferences = new SimplePreferences(sPreferences);
         // create solver and resolve update
         UpdateSolver solver = new LPGAUpdateSolver();
-        Optional<UpdateGraph<UpdateNode, UpdateEdge>> gprime = solver.resolve(g, preferences);
+        // Optional<UpdateGraph<UpdateNode, UpdateEdge>> gprime = 
+        solver.resolve(g, preferences);
     }
 }

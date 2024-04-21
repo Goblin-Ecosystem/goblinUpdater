@@ -10,7 +10,6 @@ import updater.api.process.graphbased.GraphGenerator;
 import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.api.project.Project;
 import updater.helpers.GoblinWeaverHelpers;
-import updater.helpers.MaracasHelpers;
 import updater.impl.graph.jgrapht.JgraphtRootedGraphGenerator;
 import updater.impl.graph.structure.nodes.ReleaseNode;
 
