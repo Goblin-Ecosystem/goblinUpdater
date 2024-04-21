@@ -37,6 +37,12 @@ public class OrHelpers {
         constraint.setCoefficient(x, 1);
     }
 
+    // create constraint name: x <= v
+    public static void x_le_v(MPSolver solver, String name, MPVariable x, double v) {
+        MPConstraint constraint = solver.makeConstraint(-v, MPSolver.infinity(), name);
+        constraint.setCoefficient(x, -1);
+    }
+
     // create constraint name: x = y
     public static void x_eq_y(MPSolver solver, String name, MPVariable x, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, 0, name);

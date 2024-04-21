@@ -66,6 +66,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 if (node != null) {
                         MPVariable v = GraphLP.releaseVariable(problem, node);
                         OrHelpers.x_eq_v(problem, "constraint on absence of " + ac.id(), v , 0);
+                } else {
+                        LoggerHelpers.instance().warning("Unknown node id: " + ac.id());
                 }
         }
 
@@ -74,7 +76,13 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 if (node != null) {
                         MPVariable v = GraphLP.releaseVariable(problem, node);
                         OrHelpers.x_eq_v(problem, "constraint on presence of " + pc.id(), v , 1);
+                } else {
+                        LoggerHelpers.instance().warning("Unknown node id: " + pc.id());
                 }
+        }
+
+        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, CostLimitConstraint clc) {
+                OrHelpers.x_le_v(problem, "constraint on cost limit", GraphLP.totalCostVariable(problem), clc.limit());
         }
 
         private <N extends UpdateNode, E extends UpdateEdge> void integrateConstraints(
@@ -88,7 +96,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         } else if (c instanceof PresenceConstraint pc) {
                                 visit(updateGraph, problem, pc);
                         } else if (c instanceof CostLimitConstraint clc) {
-                                // TODO:
+                                visit(updateGraph, problem, clc);
                         }
                 }
         }
@@ -189,8 +197,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                 .orElseThrow(() -> new IllegalArgumentException("No cost added value defined"));
 
                 // Aggregative variables
-                MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "QUALITY");
-                MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "COST");
+                MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, GraphLP.QUALITY_VARIABLE_NAME);
+                MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, GraphLP.COST_VARIABLE_NAME);
 
                 // Quality variables
                 // and associated constraints (quality is only on release edges)

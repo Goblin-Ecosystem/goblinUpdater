@@ -212,11 +212,13 @@ public class ClientMock {
                     coef: 0.6
                 constraints:
                   - constraint: COSTLIMIT
-                    value: 0.0
-                  # - constraint: PRESENCE
-                  #   value: "h:h:2"
-                  # - constraint: ABSENCE
-                  #   value: "h:h:2"
+                    value: 0.9
+                  - constraint: PRESENCE
+                    value: "b:b:2"
+                  - constraint: PRESENCE
+                    value: "h:h:999"
+                  - constraint: ABSENCE
+                    value: "h:h:999"
                       """;
         Preferences preferences = new SimplePreferences(sPreferences);
         // create solver and resolve update
