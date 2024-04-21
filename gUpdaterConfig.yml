@@ -7,3 +7,10 @@ metrics:
     coef: 0.2
   - metric: COST
     coef: 0.5
+constraints:
+  # - constraint: COSTLIMIT
+  #   value: 0.0
+  # - constraint: PRESENCE
+  #   value: "some identification"
+  # - constraint: ABSENCE
+  #   value: "some other identification"

@@ -10,8 +10,12 @@ import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
+import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
+import updater.impl.preferences.AbsenceConstraint;
+import updater.impl.preferences.CostLimitConstraint;
+import updater.impl.preferences.PresenceConstraint;
 import util.helpers.or.OrHelpers;
 import util.helpers.system.LoggerHelpers;
 
@@ -22,19 +26,7 @@ import org.apache.logging.log4j.core.Logger;
 
 public class LPGAUpdateSolver implements UpdateSolver {
 
-        private List<Tuple2<String, Integer>> constrainedValues;
-
         public LPGAUpdateSolver() {
-                constrainedValues = new ArrayList<>();
-        }
-
-        public LPGAUpdateSolver(List<Tuple2<String, Integer>> constrainedValues) {
-                this();
-                this.setConstrainedValues(constrainedValues);
-        }
-
-        private void setConstrainedValues(List<Tuple2<String, Integer>> constrainedValues) {
-                this.constrainedValues = constrainedValues;
         }
 
         @Override
@@ -42,7 +34,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         Preferences updatePreferences) {
                 Loader.loadNativeLibraries();
                 MPSolver problem = createProblem(updateGraph, updatePreferences);
-                integrateConstrainedValues(updateGraph, problem);
+                integrateConstraints(updateGraph, updatePreferences, problem);
                 return solveProblem(problem, updateGraph, updatePreferences)
                                 .flatMap(solution -> solutionToGraph(solution, updateGraph, updatePreferences));
         }
@@ -69,17 +61,35 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 }
         }
 
-        private <N extends UpdateNode, E extends UpdateEdge> void integrateConstrainedValues(
+        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, AbsenceConstraint ac) {
+                N node = updateGraph.nodes(n -> n.id().equals(ac.id())).stream().findFirst().orElse(null);
+                if (node != null) {
+                        MPVariable v = GraphLP.releaseVariable(problem, node);
+                        OrHelpers.x_eq_v(problem, "constraint on absence of " + ac.id(), v , 0);
+                }
+        }
+
+        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, PresenceConstraint pc) {
+                N node = updateGraph.nodes(n -> n.id().equals(pc.id())).stream().findFirst().orElse(null);
+                if (node != null) {
+                        MPVariable v = GraphLP.releaseVariable(problem, node);
+                        OrHelpers.x_eq_v(problem, "constraint on presence of " + pc.id(), v , 1);
+                }
+        }
+
+        private <N extends UpdateNode, E extends UpdateEdge> void integrateConstraints(
                         UpdateGraph<N, E> updateGraph,
+                        Preferences preferences,
                         MPSolver problem) {
-                for (Tuple2<String, Integer> t : constrainedValues) {
-                        String e = t._1();
-                        Integer v = t._2();
-                        N node = updateGraph.nodes(n -> n.id().equals(e)).stream().findFirst().orElse(null); // node
-                                                                                                             // should
-                                                                                                             // exists
-                        MPVariable excludedVariable = GraphLP.releaseVariable(problem, node);
-                        OrHelpers.x_eq_v(problem, "constraint on " + e, excludedVariable, v);
+                for (Constraint c : preferences.constraints()) {
+                        // TODO: avoid instanceof
+                        if (c instanceof AbsenceConstraint ac) {
+                                visit(updateGraph, problem, ac);
+                        } else if (c instanceof PresenceConstraint pc) {
+                                visit(updateGraph, problem, pc);
+                        } else if (c instanceof CostLimitConstraint clc) {
+                                // TODO:
+                        }
                 }
         }
 

@@ -1,6 +1,7 @@
 package updater.api.preferences;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,4 +83,14 @@ public interface Preferences {
         }
         return true;
     }
+
+    /**
+     * Checks whether the preferences contain constraints on solutions.
+     */
+    boolean hasConstraints();
+
+    /**
+     * Returns the preference constraints.
+     */
+    List<Constraint> constraints();
 }

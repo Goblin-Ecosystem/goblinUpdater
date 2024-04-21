@@ -466,7 +466,15 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 "a:a:1", List.of(Tuple.of("b:b", "2")),
                 "b:b:1", List.of(Tuple.of("h:h", "1")),
                 "b:b:2", List.of(Tuple.of("h:h", "1"), Tuple.of("e:e", "1")));
-        Map<String, MetricContainer<MetricType>> qualities = Map.of();
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        // FIXME: root needs info too
+        qualities.put("a:a:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("b:b:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("b:b:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("h:h:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("h:h:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("e:e:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("e:e:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
     }
 
