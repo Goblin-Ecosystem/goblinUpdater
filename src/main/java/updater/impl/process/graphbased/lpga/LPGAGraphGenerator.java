@@ -24,10 +24,13 @@ import java.util.Optional;
 import java.util.Set;
 
 // TODO: DRY ?
+// TODO: there are frameworks/libs to compute time, use them?
+// TODO: clean up by extracting methods to compute time
 public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge>  {
     @Override
     public UpdateGraph<UpdateNode, UpdateEdge>  computeUpdateGraph(Project project, Preferences updatePreferences) {
         Set<MetricType> metricsToCompute = updatePreferences.qualityMetrics(); // TODO: OK ? We have ones to compute and others to get from the weaver. isComputed can be used.
+        // 1. Generate rooted dependency graph
         long startTime = System.currentTimeMillis();
         JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectNewPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), metricsToCompute);
         MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
@@ -40,30 +43,35 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         LoggerHelpers.instance().info("Artifact nodes size: "+updateGraph.nodes(UpdateNode::isArtifact).size());
         LoggerHelpers.instance().info("Dependency edges size: "+updateGraph.edges(UpdateEdge::isDependency).size());
         LoggerHelpers.instance().info("Version edges size: "+updateGraph.edges(UpdateEdge::isVersion).size());
+        // 2. Compute change edges
         startTime = System.currentTimeMillis();
         jgraphtGraphGenerator.generateChangeEdge(project.getPath(), updateGraph, updatePreferences);
         endTime = System.currentTimeMillis();
         LoggerHelpers.instance().info("Time to generate generate change edges (ms) : "+ (endTime - startTime));
-        // Normalize metrics
+        // 3. Normalize metrics
         MetricNormalizer normalizer = new MetricMaxValueNormalizer();
         startTime = System.currentTimeMillis();
         normalizer.normalize(updateGraph);
         endTime = System.currentTimeMillis();
         LoggerHelpers.instance().info("Time to normalize metrics (ms): "+ (endTime - startTime));
-        Set<UpdateNode> initialGraphNode = generateInitialGraph(updateGraph, updateGraph.rootNode().get(), new HashSet<>());
-        initialGraphNode.remove(updateGraph.rootNode().get());
-        MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
-        logInitialQuality(initialGraphNode, updatePreferences);
-        MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
+        // 4. Post-processing
+        Optional<UpdateNode> rn = updateGraph.rootNode();
+        if (rn.isPresent()) {
+            Set<UpdateNode> initialGraphNodes = generateInitialGraph(updateGraph, rn.get(), new HashSet<>());
+            initialGraphNodes.remove(rn.get());
+            MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
+            logInitialQuality(initialGraphNodes, updatePreferences);
+            MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
+        }
+        // 5. Result
         return updateGraph;
     }
 
-    private void logInitialQuality(Set<UpdateNode> initialGraphNode, Preferences updatePreferences) {
-        double totalQuality = 0.0;
-        for(UpdateNode node : initialGraphNode){
-            totalQuality += node.getQuality(updatePreferences);
-        }
-        LoggerHelpers.instance().info("Initial graph quality: "+totalQuality);
+    private void logInitialQuality(Set<UpdateNode> initialGraphNodes, Preferences updatePreferences) {
+        double totalQuality = initialGraphNodes.stream()
+                .mapToDouble(n -> n.getQuality(updatePreferences))
+                .sum();
+        LoggerHelpers.instance().info("Initial graph quality: " + totalQuality);
     }
 
     private Set<UpdateNode> generateInitialGraph(UpdateGraph<UpdateNode, UpdateEdge> updateGraph, UpdateNode nodeToTreat, Set<UpdateNode> visitedNodes) {

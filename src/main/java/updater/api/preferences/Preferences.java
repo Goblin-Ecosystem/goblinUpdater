@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import updater.api.metrics.MetricType;
 import util.helpers.system.LoggerHelpers;
@@ -12,6 +13,21 @@ import util.helpers.system.LoggerHelpers;
  * Interface for update preferences.
  */
 public interface Preferences {
+
+    /**
+     * Focus for the generation of alternative releases / change edges
+     */
+    public enum Focus {
+        NONE, ROOT, CONSTRAINTS, ALL;
+    }
+
+    /**
+     * Selectors of alternative releases
+     */
+    public enum Selector {
+        MORE_RECENT, NO_PATCH;
+    }
+
     /**
      * Get the set of quality metrics that are of interest for the user.
      * 
@@ -93,4 +109,37 @@ public interface Preferences {
      * Returns the preference constraints.
      */
     List<Constraint> constraints();
+
+    /**
+     * Returns the focus for releases
+     */
+    Focus releaseFocus();
+
+    /**
+     * Returns the focus for change edges
+     */
+    Focus changeFocus();
+
+    /*
+     * Default value for costs
+     */
+    double defaultCost();
+
+    /** 
+     * Returns the selectors
+     */
+    Set<Selector> releaseSelectors();
+
+    /**
+     * Returns the ids for focuses (
+     * 
+     * related to some constraints)
+     */
+    default Set<String> constraintFocuses() {
+        return constraints().stream()
+            .filter(Constraint::isFocus)
+            .map(Constraint::focus)
+            .collect(Collectors.toSet());
+    }
+
 }

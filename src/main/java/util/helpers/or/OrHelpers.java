@@ -76,8 +76,8 @@ public class OrHelpers {
         constraint.setCoefficient(y, -k);
     }
 
-    // create constraint name: sum(xs) >= y + n
-    // i.e., sum(xs) - y >= n
+    // create constraint name: sum(xi) >= y + n
+    // i.e., sum(xi) - y >= n
     public static void sum_xi_ge_y_plus_n(MPSolver solver, String name, List<MPVariable> xs,
             MPVariable y, Double n) {
         MPConstraint constraint = solver.makeConstraint(n, MPSolver.infinity(), name);

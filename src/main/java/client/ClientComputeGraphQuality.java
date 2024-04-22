@@ -15,6 +15,7 @@ import updater.impl.graph.jgrapht.JgraphtRootedGraphGenerator;
 import updater.impl.maven.project.MavenProjectLoader;
 import updater.impl.metrics.MetricMaxValueNormalizer;
 import updater.impl.preferences.SimplePreferences;
+import updater.impl.process.graphbased.lpga.LPGAGraphGenerator;
 import util.helpers.system.LoggerHelpers;
 
 import java.nio.file.Path;

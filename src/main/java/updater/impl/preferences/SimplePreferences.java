@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,23 +21,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+// TODO: not DRY
 /**
  * A simple implementation of update {@link Preferences}.
  */
 public class SimplePreferences implements Preferences {
-    private final Map<MetricType, Double> preferences;
-    private final List<Constraint> constraints;
+    private Map<MetricType, Double> preferences;
+    private List<Constraint> constraints;
+    private Focus releaseFocus;
+    private Focus changeFocus;
+    private Set<Selector> releaseSelectors;
+    private double defaultCost;
+
+    public static final double HIGH_COST = 999999.9;
+    public static final double LOW_COST = 0.0;
 
     public SimplePreferences(Path path) {
-        Map<String, Object> confMap = getYmlMap(path);
-        this.preferences = generatePreferences(confMap);
-        this.constraints = generateConstraints(confMap);
+        this.setup(getYmlMap(path));
     }
 
     public SimplePreferences(String conf) {
-        Map<String, Object> confMap = getYmlMap(conf);
-        this.preferences = generatePreferences(confMap);
-        this.constraints = generateConstraints(confMap);
+        this.setup(getYmlMap(conf));
+    }
+
+    private void setup(Map<String, Object> conf) {
+        this.preferences = generatePreferences(conf);
+        this.constraints = generateConstraints(conf);
+        this.releaseFocus = generateReleaseFocus(conf);
+        this.releaseSelectors = generateReleaseSelectors(conf);
+        this.changeFocus = generateChangeFocus(conf);
+        this.defaultCost = generateDefaultCost(conf);
     }
 
     @Override
@@ -123,6 +137,67 @@ public class SimplePreferences implements Preferences {
         }
         return generatedConstraints;
     }
+    
+    private Focus generateReleaseFocus(Map<String, Object> confMap) {
+        final String RELEASES = "releases";
+        final String FOCUS = "focus";
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
+            try {
+                return Focus.valueOf(f.toUpperCase());
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown focus strategy for releases: " + f);
+            }
+        }
+        LoggerHelpers.instance().warning("focus strategy for releases is undefined or ill-defined, focus ALL is used)");
+        return Focus.ALL;
+    }
+
+    private Focus generateChangeFocus(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String FOCUS = "focus";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
+            try {
+                return Focus.valueOf(f.toUpperCase());
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown focus strategy for costs: " + f);
+            }
+        }
+        LoggerHelpers.instance().warning("focus strategy for costs is undefined or ill-defined, focus ALL is used)");
+        return Focus.ALL;
+    }
+
+    private Set<Selector> generateReleaseSelectors(Map<String, Object> confMap) {
+        final String RELEASES = "releases";
+        final String SELECTORS = "selectors";
+        Set<Selector> selectors = new HashSet<>();
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs && (rs.containsKey(SELECTORS) && rs.get(SELECTORS) instanceof List ss)) {
+            for (Object o: ss) {
+                if (o instanceof String s) {
+                    try {
+                        Selector selector = Selector.valueOf(s);
+                        selectors.add(selector);
+                    } catch (Exception e) {
+                        LoggerHelpers.instance().warning("unknown selector " + s);
+                    }
+                } else {
+                    LoggerHelpers.instance().warning("unknown selector " + o);
+                }
+            }
+        } else {
+            LoggerHelpers.instance().warning("selector strategy for releases is undefined or ill-defined, selectors [] is used)");
+        }
+        return selectors;
+    }
+
+    private double generateDefaultCost(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String DEFAULT_COST = "default";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof Double dc)) {
+            return dc;
+        }
+        LoggerHelpers.instance().warning("default value for costs is undefined or ill-defined, value "+HIGH_COST+" is used)");
+        return HIGH_COST;
+    }
 
     private Map<String, Object> getYmlMap(Path path) {
         Yaml yaml = new Yaml();
@@ -150,4 +225,26 @@ public class SimplePreferences implements Preferences {
     public List<Constraint> constraints() {
         return this.constraints;
     }
+
+    @Override
+    public Focus releaseFocus() {
+        return this.releaseFocus;
+    }
+
+    // FIXME: data leak
+    @Override
+    public Set<Selector> releaseSelectors() {
+        return this.releaseSelectors;
+    }
+    
+    @Override
+    public Focus changeFocus() {
+        return this.changeFocus;
+    }
+
+    @Override 
+    public double defaultCost() {
+        return this.defaultCost;
+    }
+
 }

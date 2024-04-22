@@ -17,6 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// FIXME: take preferences into account
+// releases:
+//  - focuses: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
+//  - selection: [MORE_RECENT] # combination of MORE_RECENT, NO_PATCHES (can be empty)
 public class GoblinWeaverHelpers {
 
     private GoblinWeaverHelpers() {

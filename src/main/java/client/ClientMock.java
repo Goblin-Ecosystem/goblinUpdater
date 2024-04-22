@@ -209,7 +209,7 @@ public class ClientMock {
                   - metric: COST
                     coef: 0.6
                 constraints:
-                  - constraint: COSTLIMIT
+                  - constraint: COST_LIMIT
                     value: 0.9
                   # - constraint: PRESENCE
                   #   value: "b:b:2"
@@ -217,6 +217,14 @@ public class ClientMock {
                     value: "h:h:999"
                   - constraint: ABSENCE
                     value: "h:h:999"
+                releases:
+                  - focus: NONE
+                  - selectors: []
+                costs:
+                  - focus: NONE
+                  - default: 0.0
+                  - tool-direct: NONE
+                  - tool-indirect: NONE
                       """;
         Preferences preferences = new SimplePreferences(sPreferences);
         // create solver and resolve update

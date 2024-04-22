@@ -1,0 +1,85 @@
+@startuml
+package util {
+    package api {
+        class Identifiable<T> {
+            + id(): T
+        }
+        class CustomGraph<N,E> {
+            + {static} {final} ROOT_ID: String = "ROOT"
+            + addNode(node: N): ()
+            + addEdgeFromNodeId(fromId: String, toId: String, edge: E): ()
+            + removeNode(node: N): ()
+            + nodes(): Set<N>
+            + edges(): Set<E>
+            + {default} nodes(p: Predicate<N>): Set<N>
+            + {default} edges(p: Predicate<E>): Set<E>
+            + source(edge: E): N
+            + target(edge: E): N
+            + {default} getNode(id: String): Optional<N>
+            + {default} rootNode(): Optional<N>
+            + outgoingEdgesOf(node: N): Set<E>
+            + incomingEdgesOf(node: E): Set<E>
+            + copy(): CustomGraph<N,E>
+        }
+        CustomGraph .up.> Identifiable : N < Identifiable<String>
+    }
+    package helpers {
+        package maven {
+            class MavenLocalRepository {
+                + {static} instance(): MavenLocalRepository
+                + clearLocalRepo(): ()
+                + downloadArtifact(artifactId: String): String
+            }
+        }
+        package or {
+            class OrHelpers {
+                + {static} printTime(problem: MPSolver): ()
+                + {static} printSolution(problem: MPSolver, onlyNonZero: boolean): ()
+                + {static} printProblem(problem: MPSolver): ()
+                + {static} x_eq_v(solver: MPSolver, name: String, x: MPVariable, v: int): () // x = v
+                + {static} x_le_v(solver: MPSolver, name: String, x: MPVaraible, v: double): () // x <= v
+                + {static} x_eq_y(solver: MPSolver, name: String, x: MPVariable, y: MPVariable) // x = y
+                + {static} x_ge_y(solver: MPSolver, name: String, x: MPVariable, y: MPVariable) // x >= y
+                + {static} sum_xi_eq_k_times_y(solver: MPSolver, name: String, xs: List<MPVariable>, k: int, y: MPVariable): () // sum(x_i) = k * y
+                + {static} sum_ki_times_xi_eq_k_times_y(solver: MPSolver, name: String, ts: List<Tuple2<MPVariable, Double>>, k: Double, y: MPVariable): () // sum(k_i * x_i) = k * y
+                + {static} sum_xi_ge_y_plus_n(solver: MPSolver, name: String, xs: List<MPVariable>, y: MPVariable, n: Double): () // sum(x_i) >= y + n
+                + {static} sum_ki_times_xi_ge_y_plus_n(solver: MPSolver, name: String, ts: List<Tuple2<MPVariable, Double>>, y: MPVariable, n: Double): () // sum(k_i * x_i) >= y + n
+                + {static} y_ge_sum_ki_times_xi_plus_n(solver: MPSolver, name: String, y: MPVariable, ts: List<Tuple2<MPVariable, Double>>, n: Double): () // Y >= sum(k_i * x_i) + n
+            }
+        }
+        package system {
+            class FileHelpers {
+                + {static} createDirectory(directoryPath: String): ()
+                + {static} deleteDirectoryIfExists(directoryPath: String): ()
+            }
+            class LoggerHelpers {
+                + {static} instance(): LoggerHelpers
+                + setLevel(level: Level): ()
+                + low(msg: String): ()
+                + info(msg: String): ()
+                + warning(msg: String): ()
+                + error(msg: String): ()
+                + fatal(msg: String): ()
+            }
+            enum Level {
+                LOW, INFO, WARN, ERROR, FATAL
+            }
+            LoggerHelpers +-- Level
+            class MemoryUsageTracker {
+                + {static} getInstance(): MemoryUsageTrack
+                + checkAndUpdateMaxMemoryUsage: ()
+                + printMemoryUsageMax(): ()
+
+            }
+            class SystemHelpers {
+                + {static} execCommand(processBuilder: ProcessBuilder): List<String>
+            }
+        }
+    }
+    class IdGenerator {
+        + {static} instance(): IdGenerator
+        + nextId(): int
+        + nextId(prefix: String): int
+    }
+}
+@enduml
