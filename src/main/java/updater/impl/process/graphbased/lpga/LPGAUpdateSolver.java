@@ -81,11 +81,21 @@ public class LPGAUpdateSolver implements UpdateSolver {
         }
 
         private void visit(MPSolver problem, CostLimitConstraint clc) {
-                OrHelpers.x_le_v(problem, "constraint on cost limit", GraphLP.totalCostVariable(problem), clc.limit());
+                MPVariable v = GraphLP.totalCostVariable(problem);
+                if (v != null) {
+                        OrHelpers.x_le_v(problem, "constraint on cost limit", v, clc.limit());
+                } else {
+                        LoggerHelpers.instance().warning("cost limit not used: no cost metric");
+                }
         }
-
+        
         private void visit(MPSolver problem, CveLimitConstraint clc) {
-                OrHelpers.x_le_v(problem, "constraint on cve limit", GraphLP.totalCveVariable(problem), clc.limit());
+                MPVariable v = GraphLP.totalCveVariable(problem);
+                if (v != null) {
+                        OrHelpers.x_le_v(problem, "constraint on cve limit", v, clc.limit());
+                } else {
+                        LoggerHelpers.instance().warning("cve limit not used: no cve metric");
+                }
         }
 
         private <N extends UpdateNode, E extends UpdateEdge> void integrateConstraints(

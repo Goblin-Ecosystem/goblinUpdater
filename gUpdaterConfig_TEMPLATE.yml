@@ -18,7 +18,7 @@ constraints:
   # list (possibly empty) of constraints with constraint: and value:
   # a constraint can be one of:
   # - constraint: COST_LIMIT and value: double -> maximum value of total cost of solution
-  # - constraint: CVE_LIMIT and value: double -> maximum value of total CVE of solution
+  # - constraint: CVE_LIMIT and value: double -> maximum value of total CVE of solution (not used if CVE is not part of the metrics)
   # - constraint: PRESENCE and value: some id -> id must be present in solution
   # - constraint: ABSENCE and value: some id -> id must be absent in solution
   # notes:

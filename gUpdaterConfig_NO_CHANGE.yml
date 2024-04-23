@@ -1,0 +1,25 @@
+#
+# update configuration file
+#
+# scenario for legacy update at root level:
+# - do not change anything (for comparison purposes only)
+# - indeed changes without change edges are still possible (if multiple versions in graph)
+# 
+metrics:
+  - metric: FRESHNESS
+    coef: 1.0
+  - metric: COST
+    coef: 0.0
+constraints:
+  - constraint: COST_LIMIT
+    value: 0.0
+  - constraint: CVE_LIMIT
+    value: 0.0
+releases:
+  focus: NONE
+  selectors: []
+costs:
+  focus: NONE
+  default: MAX
+  tool-direct: NONE
+  tool-indirect: NONE
