@@ -2,7 +2,7 @@ package updater.impl.preferences;
 
 import updater.api.preferences.Constraint;
 
-public record PresenceConstraint(String id) implements Constraint<String> {
+public record CveLimitConstraint(double limit) implements Constraint<Double> {
 
     @Override
     public boolean isFocus() {
@@ -15,17 +15,17 @@ public record PresenceConstraint(String id) implements Constraint<String> {
     }
 
     @Override
-    public String value() {
-        return id;
+    public Double value() {
+        return limit;
     }
 
     @Override
     public String code() {
-        return "PRESENCE";
+        return "CVE_LIMIT";
     }
 
     @Override
     public String repr() {
-        return String.format("%n  - constraint: %s%n    value: \"%s\"", code(), value());
+        return String.format("%n  - constraint: %s%n    value: %s", code(), value());
     }
 }

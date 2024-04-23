@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,23 +21,67 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+// TODO: not DRY
 /**
  * A simple implementation of update {@link Preferences}.
  */
 public class SimplePreferences implements Preferences {
-    private final Map<MetricType, Double> preferences;
-    private final List<Constraint> constraints;
+    private Map<MetricType, Double> preferences;
+    private List<Constraint> constraints;
+    private Focus releaseFocus;
+    private Focus changeFocus;
+    private Set<Selector> releaseSelectors;
+    private DefaultCost defaultCost;
+    private DirectTool directTool;
+    private IndirectTool indirectTool;
+
+    public static final double HIGH_COST = 999999.9;
+    public static final double LOW_COST = 0.0;
 
     public SimplePreferences(Path path) {
-        Map<String, Object> confMap = getYmlMap(path);
-        this.preferences = generatePreferences(confMap);
-        this.constraints = generateConstraints(confMap);
+        this.setup(getYmlMap(path));
     }
 
     public SimplePreferences(String conf) {
-        Map<String, Object> confMap = getYmlMap(conf);
-        this.preferences = generatePreferences(confMap);
-        this.constraints = generateConstraints(confMap);
+        this.setup(getYmlMap(conf));
+    }
+
+    private void setup(Map<String, Object> conf) {
+        this.preferences = generatePreferences(conf);
+        this.constraints = generateConstraints(conf);
+        this.releaseFocus = generateReleaseFocus(conf);
+        this.releaseSelectors = generateReleaseSelectors(conf);
+        this.changeFocus = generateChangeFocus(conf);
+        this.defaultCost = generateDefaultCost(conf);
+        this.directTool = getDirectTool(conf);
+        this.indirectTool = getIndirectTool(conf);
+    }
+
+    @Override
+    public String repr() {
+        return String.format("""
+
+                metrics:%s
+                constraints:%s
+                releases:
+                  focus: %s
+                  selectors: [%s]
+                costs:
+                  focus: %s
+                  default: %s # %s
+                  tool-direct: %s
+                  tool-indirect: %s
+                      """,
+                this.metrics().stream().map(m -> String.format("%n  - metric: %s%n    coef: %s", m.toString(), this.coefficientFor(m).get())).collect(Collectors.joining()),
+                this.constraints().stream().map(Constraint::repr).collect(Collectors.joining()),
+                this.releaseFocus(),
+                this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
+                this.changeFocus(),
+                this.defaultCost(),
+                this.defaultCost.toDouble(),
+                this.directTool(),
+                this.indirectTool()
+                );
     }
 
     @Override
@@ -105,7 +150,8 @@ public class SimplePreferences implements Preferences {
                     Optional<Object> cType = Optional.ofNullable(c.get(CONSTRAINT));
                     Optional<Object> cValue = Optional.ofNullable(c.get(VALUE));
                     if (cType.isPresent() && (cType.get() instanceof String ct) && cValue.isPresent()) {
-                        Optional<Constraint> cc = SimpleConstraintCreator.instance().create(ct.toUpperCase(), cValue.get());
+                        Optional<Constraint> cc = SimpleConstraintCreator.instance().create(ct.toUpperCase(),
+                                cValue.get());
                         if (cc.isPresent()) {
                             generatedConstraints.add(cc.get());
                         } else {
@@ -119,9 +165,138 @@ public class SimplePreferences implements Preferences {
                 }
             }
         } else {
-            LoggerHelpers.instance().info("no "+CONSTRAINTS+" list in config");
+            LoggerHelpers.instance().info("no " + CONSTRAINTS + " list in config");
         }
         return generatedConstraints;
+    }
+
+    private Focus generateReleaseFocus(Map<String, Object> confMap) {
+        final String RELEASES = "releases";
+        final String FOCUS = "focus";
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
+                && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
+            try {
+                Focus focus = Focus.valueOf(f.toUpperCase());
+                if (focus != Focus.ROOT) {
+                    LoggerHelpers.instance().warning("releases focus strategy " + f + " not yet implemented, releases focus strategy ROOT is used");
+                    focus = Focus.ROOT;
+                }
+                return focus;
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown releases focus strategy: " + f);
+            }
+        }
+        LoggerHelpers.instance().warning("releases focus strategy is undefined or ill-defined, releases focus strategy ROOT is used");
+        return Focus.ROOT;
+    }
+
+    private Focus generateChangeFocus(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String FOCUS = "focus";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
+                && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
+            try {
+                Focus focus = Focus.valueOf(f.toUpperCase());
+                if (focus == Focus.CONSTRAINTS) {
+                    LoggerHelpers.instance().warning("costs focus strategy " + f + " not yet implemented, costs focus strategy ROOT is used");
+                    focus = Focus.ROOT;
+                }
+                return focus;
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown costs focus strategy: " + f);
+            }
+        }
+        LoggerHelpers.instance().warning("costs focus strategy is undefined or ill-defined, costs focus ROOT is used");
+        return Focus.ROOT;
+    }
+
+    private Set<Selector> generateReleaseSelectors(Map<String, Object> confMap) {
+        final String RELEASES = "releases";
+        final String SELECTORS = "selectors";
+        Set<Selector> selectors = new HashSet<>();
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
+                && (rs.containsKey(SELECTORS) && rs.get(SELECTORS) instanceof List ss)) {
+            for (Object o : ss) {
+                if (o instanceof String s) {
+                    try {
+                        Selector selector = Selector.valueOf(s.toUpperCase());
+                        if (selector != Selector.MORE_RECENT) {
+                            LoggerHelpers.instance().warning("releases selector strategy " + s + " not yet implemented");
+                        } else {
+                            selectors.add(selector);
+                        }
+                    } catch (Exception e) {
+                        LoggerHelpers.instance().warning("unknown selector " + s);
+                    }
+                } else {
+                    LoggerHelpers.instance().warning("unknown selector " + o);
+                }
+            }
+        } else {
+            LoggerHelpers.instance()
+                    .warning("releases selector strategy is undefined or ill-defined, releases selector strategy [MORE_RECENT] is used");
+            selectors = Set.of(Selector.MORE_RECENT);
+        }
+        if (selectors.isEmpty()) {
+            LoggerHelpers.instance()
+                    .warning("releases selector strategy is undefined or ill-defined, releases selector strategy [MORE_RECENT] is used");
+            selectors = Set.of(Selector.MORE_RECENT);
+        }
+        return selectors;
+    }
+
+    private DefaultCost generateDefaultCost(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String DEFAULT_COST = "default";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
+                && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof String dc)) {
+                    try {
+                        return DefaultCost.valueOf(dc.toUpperCase());
+                    } catch (Exception e) {
+                        LoggerHelpers.instance().warning("unknown default cost " + dc + ", value " + DefaultCost.MAX + " is used");
+                        return DefaultCost.MAX;
+                    }
+        }
+        LoggerHelpers.instance()
+                .warning("default value for costs is undefined or ill-defined, value " + DefaultCost.MAX + " is used");
+        return DefaultCost.MAX;
+    }
+
+    private DirectTool getDirectTool(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String TOOL_DIRECT = "tool-direct";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_DIRECT) && cs.get(TOOL_DIRECT) instanceof String td)) {
+            try {
+                return DirectTool.valueOf(td.toUpperCase());
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown direct cost computation tool " + td + ", value " + DirectTool.MARACAS + " is used");
+                return DirectTool.MARACAS;
+            }
+        }
+        LoggerHelpers.instance()
+                .warning("direct cost computation tool is undefined or ill-defined, value " + DirectTool.MARACAS + " is used");
+        return DirectTool.MARACAS;
+    }
+
+    private IndirectTool getIndirectTool(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String TOOL_INDIRECT = "tool-indirect";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_INDIRECT) && cs.get(TOOL_INDIRECT) instanceof String ti)) {
+            try {
+                IndirectTool indirectTool = IndirectTool.valueOf(ti.toUpperCase());
+                if (indirectTool == IndirectTool.JAPICMP) {
+                    LoggerHelpers.instance().warning("indirect cost computation tool " + ti + " not yet implemented, indirect cost computation tool NONE is used");
+                    indirectTool = IndirectTool.NONE;
+                }
+                return indirectTool;
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown indirect cost computation tool " + ti + ", value " + DirectTool.NONE + " is used");
+                return IndirectTool.NONE;
+            }
+        }
+        LoggerHelpers.instance()
+                .warning("indirect cost computation tool is undefined or ill-defined, value " + IndirectTool.NONE + " is used");
+        return IndirectTool.NONE;
     }
 
     private Map<String, Object> getYmlMap(Path path) {
@@ -150,4 +325,36 @@ public class SimplePreferences implements Preferences {
     public List<Constraint> constraints() {
         return this.constraints;
     }
+
+    @Override
+    public Focus releaseFocus() {
+        return this.releaseFocus;
+    }
+
+    // FIXME: data leak
+    @Override
+    public Set<Selector> releaseSelectors() {
+        return this.releaseSelectors;
+    }
+
+    @Override
+    public Focus changeFocus() {
+        return this.changeFocus;
+    }
+
+    @Override
+    public DefaultCost defaultCost() {
+        return this.defaultCost;
+    }
+
+    @Override
+    public DirectTool directTool() {
+        return directTool;
+    }
+
+    @Override
+    public IndirectTool indirectTool() {
+        return indirectTool;
+    }
+
 }

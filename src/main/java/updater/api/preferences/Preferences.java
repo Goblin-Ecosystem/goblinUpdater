@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import updater.api.metrics.MetricType;
 import util.helpers.system.LoggerHelpers;
@@ -12,6 +13,61 @@ import util.helpers.system.LoggerHelpers;
  * Interface for update preferences.
  */
 public interface Preferences {
+
+    /**
+     * External representation.
+     */
+    public String repr();
+
+    /**
+     * Print preferences.
+     */
+    default void print() {
+        LoggerHelpers.instance().info(this.repr());
+    }
+
+    /**
+     * Focus for the generation of alternative releases / change edges
+     */
+    public enum Focus {
+        NONE, ROOT, CONSTRAINTS, ALL;
+    }
+
+    /**
+     * Selectors of alternative releases
+     */
+    public enum Selector {
+        MORE_RECENT, NO_PATCHES;
+    }
+
+    /**
+     * Possible tools for direct cost computation.
+     */
+    public enum DirectTool {
+        NONE, MARACAS;
+    }
+
+    /**
+     * Possible tools for indirect cost computation
+     */
+    public enum IndirectTool {
+        NONE, JAPICMP;
+    }
+
+    /**
+     * Default cost values
+     */
+    public enum DefaultCost {
+        MIN, MAX;
+
+        public double toDouble() {
+            return switch(this) {
+                case MIN -> 0.0;
+                case MAX -> 99999999.9;
+            };
+        }
+    }
+
     /**
      * Get the set of quality metrics that are of interest for the user.
      * 
@@ -93,4 +149,47 @@ public interface Preferences {
      * Returns the preference constraints.
      */
     List<Constraint> constraints();
+
+    /**
+     * Returns the focus for releases
+     */
+    Focus releaseFocus();
+
+    /**
+     * Returns the focus for change edges
+     */
+    Focus changeFocus();
+
+    /*
+     * Default value for costs
+     */
+    DefaultCost defaultCost();
+
+    /** 
+     * Returns the selectors
+     */
+    Set<Selector> releaseSelectors();
+
+    /**
+     * Returns the ids for focuses (
+     * 
+     * related to some constraints)
+     */
+    default Set<String> constraintFocuses() {
+        return constraints().stream()
+            .filter(Constraint::isFocus)
+            .map(Constraint::focus)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the tool used for direct cost computation.
+     */
+    DirectTool directTool();
+
+    /**
+     * Returns the tool used for indirect cost computation.
+     */
+    IndirectTool indirectTool();
+
 }

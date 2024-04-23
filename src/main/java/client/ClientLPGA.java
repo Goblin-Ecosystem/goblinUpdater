@@ -1,5 +1,6 @@
 package client;
 
+import updater.api.preferences.Preferences;
 import updater.api.process.Updater;
 import updater.api.project.Project;
 import updater.api.project.ProjectLoader;
@@ -25,13 +26,14 @@ public class ClientLPGA {
         Path preferencesPath = Path.of(System.getProperty("confFile"));
         Path updatePath = Path.of("..");
 
+        Preferences preferences = new SimplePreferences(preferencesPath);
         ProjectLoader loader = new MavenProjectLoader();
         Updater updater = new LPGAUpdater();
 
+        preferences.print();
         Optional<Project> updatedProject = loader
                 .load(projectPath)
-                .flatMap(project -> updater.update(project,
-                        new SimplePreferences(preferencesPath)));
+                .flatMap(project -> updater.update(project, preferences));
         MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
         if (updatedProject.isPresent())
             updatedProject.get().dump(updatePath);

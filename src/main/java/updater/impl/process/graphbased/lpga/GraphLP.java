@@ -13,6 +13,7 @@ public class GraphLP {
     }
 
     public static final String COST_VARIABLE_NAME = "COST";
+    public static final String CVE_VARIABLE_NAME = "Quality[CVE]";
     public static final String QUALITY_VARIABLE_NAME = "QUALITY";
 
     private static final String NA_PATTERN = "[%s]";
@@ -42,6 +43,10 @@ public class GraphLP {
 
     public static MPVariable totalCostVariable(MPSolver s) {
         return s.lookupVariableOrNull(COST_VARIABLE_NAME);
+    }
+
+    public static MPVariable totalCveVariable(MPSolver s) {
+        return s.lookupVariableOrNull(CVE_VARIABLE_NAME);
     }
 
     public static MPVariable totalQualityVariable(MPSolver s) {
