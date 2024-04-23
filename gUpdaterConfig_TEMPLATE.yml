@@ -33,21 +33,22 @@ constraints:
   - constraint: ABSENCE
     value: "groupe:artifact:version"
 releases:
-  # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-  # (!!) by now only ROOT is supported
+  # either NONE, ROOT (default), CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
+  # (!!) by now only ROOT is supported (other -> ROOT)
   focus: ROOT
-  # combination of MORE_RECENT, NO_PATCHES (can be empty to select all)
-  # (!!) by now only MORE_RECENT is supported
+  # combination of MORE_RECENT, NO_PATCHES
+  # can be empty to select all, default is [MORE_RECENT]
+  # (!!) by now only [MORE_RECENT] is supported (others -> [MORE_RECENT])
   selectors: [MORE_RECENT]
 costs:
-   # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-   # (!!) by now only NONE, ROOT, and ALL are supported
+   # either NONE, ROOT (default), CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
+   # (!!) by now CONSTRAINTS is not supported (-> ROOT)
   focus: ROOT
   # default value for unknown costs, MAX or MIN
   default: MAX
   # tool used to compute costs at root level, either NONE or MARACAS
-  # (!!) by now only MARACAS is supported
+  # (!!) by now NONE is not supported (-> MARACAS)
   tool-direct: MARACAS
   # tool used to compute costs at non-root level, either NONE or JAPICMP
-  # (!!) by now only NONE is supported
+  # (!!) by now JAPICMP is not supported (-> NONE)
   tool-indirect: NONE

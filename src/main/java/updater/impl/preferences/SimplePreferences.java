@@ -169,13 +169,18 @@ public class SimplePreferences implements Preferences {
         if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
                 && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
             try {
-                return Focus.valueOf(f.toUpperCase());
+                Focus focus = Focus.valueOf(f.toUpperCase());
+                if (focus != Focus.ROOT) {
+                    LoggerHelpers.instance().warning("releases focus strategy " + f + " not yet implemented, releases focus strategy ROOT is used");
+                    focus = Focus.ROOT;
+                }
+                return focus;
             } catch (Exception e) {
-                LoggerHelpers.instance().warning("unknown focus strategy for releases: " + f);
+                LoggerHelpers.instance().warning("unknown releases focus strategy: " + f);
             }
         }
-        LoggerHelpers.instance().warning("focus strategy for releases is undefined or ill-defined, focus ALL is used)");
-        return Focus.ALL;
+        LoggerHelpers.instance().warning("releases focus strategy is undefined or ill-defined, releases focus strategy ROOT is used");
+        return Focus.ROOT;
     }
 
     private Focus generateChangeFocus(Map<String, Object> confMap) {
@@ -184,13 +189,18 @@ public class SimplePreferences implements Preferences {
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
                 && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
             try {
-                return Focus.valueOf(f.toUpperCase());
+                Focus focus = Focus.valueOf(f.toUpperCase());
+                if (focus == Focus.CONSTRAINTS) {
+                    LoggerHelpers.instance().warning("costs focus strategy " + f + " not yet implemented, costs focus strategy ROOT is used");
+                    focus = Focus.ROOT;
+                }
+                return focus;
             } catch (Exception e) {
-                LoggerHelpers.instance().warning("unknown focus strategy for costs: " + f);
+                LoggerHelpers.instance().warning("unknown costs focus strategy: " + f);
             }
         }
-        LoggerHelpers.instance().warning("focus strategy for costs is undefined or ill-defined, focus ALL is used)");
-        return Focus.ALL;
+        LoggerHelpers.instance().warning("costs focus strategy is undefined or ill-defined, costs focus ROOT is used");
+        return Focus.ROOT;
     }
 
     private Set<Selector> generateReleaseSelectors(Map<String, Object> confMap) {
@@ -203,7 +213,11 @@ public class SimplePreferences implements Preferences {
                 if (o instanceof String s) {
                     try {
                         Selector selector = Selector.valueOf(s);
-                        selectors.add(selector);
+                        if (selector != Selector.MORE_RECENT) {
+                            LoggerHelpers.instance().warning("releases selector strategy " + s + " not yet implemented");
+                        } else {
+                            selectors.add(selector);
+                        }
                     } catch (Exception e) {
                         LoggerHelpers.instance().warning("unknown selector " + s);
                     }
@@ -213,7 +227,13 @@ public class SimplePreferences implements Preferences {
             }
         } else {
             LoggerHelpers.instance()
-                    .warning("selector strategy for releases is undefined or ill-defined, selectors [] is used)");
+                    .warning("releases selector strategy is undefined or ill-defined, releases selector strategy [MORE_RECENT] is used");
+            selectors = Set.of(Selector.MORE_RECENT);
+        }
+        if (selectors.isEmpty()) {
+            LoggerHelpers.instance()
+                    .warning("releases selector strategy is undefined or ill-defined, releases selector strategy [MORE_RECENT] is used");
+            selectors = Set.of(Selector.MORE_RECENT);
         }
         return selectors;
     }

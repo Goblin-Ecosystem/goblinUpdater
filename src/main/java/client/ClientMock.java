@@ -218,8 +218,8 @@ public class ClientMock {
                   - constraint: ABSENCE
                     value: "h:h:999"
                 releases:
-                  focus: NONE
-                  selectors: [MORE_RECENT, NO_PATCHES]
+                  focus: ROOT
+                  selectors: [MORE_RECENT]
                 costs:
                   focus: NONE
                   default: MIN

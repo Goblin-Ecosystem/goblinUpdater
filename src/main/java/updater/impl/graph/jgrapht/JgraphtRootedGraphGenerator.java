@@ -163,10 +163,8 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             Preferences updatePreferences) {
         Set<UpdateNode> focuses = switch (updatePreferences.changeFocus()) {
             case NONE -> Set.of();
-            case ROOT -> graph.rootNode().map(Set::of).orElse(Set.of());
-            case CONSTRAINTS -> Set.of(); // FIXME: support this
             case ALL -> graph.releaseNodes();
-            default -> graph.releaseNodes();
+            default -> graph.rootNode().map(Set::of).orElse(Set.of());
         };
         generateChangeEdgeWithFocuses(projectPath, graph, focuses, updatePreferences);
     }
