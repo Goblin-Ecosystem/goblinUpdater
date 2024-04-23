@@ -205,7 +205,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
             UpdateNode releaseToCompute = graph.target(changeEdge);
             Optional<UpdateNode> artifactOfReleaseToCompute = graph.artifactOf(releaseToCompute);
             Optional<UpdateNode> currentRelease = artifactOfReleaseToCompute.flatMap(a -> graph.currentDependencyRelease(source, a));
-            double cost = preferences.defaultCost();
+            double cost = preferences.defaultCost().toDouble();
             if (currentRelease.isPresent()) {
                 if (sourceIsRoot) {
                     cost = MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute);

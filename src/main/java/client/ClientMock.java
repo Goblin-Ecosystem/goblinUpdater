@@ -222,7 +222,7 @@ public class ClientMock {
                   selectors: [MORE_RECENT, NO_PATCHES]
                 costs:
                   focus: NONE
-                  default: 0.0
+                  default: MIN
                   tool-direct: NONE
                   tool-indirect: NONE
                       """;

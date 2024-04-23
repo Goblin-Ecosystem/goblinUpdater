@@ -43,8 +43,8 @@ costs:
    # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
    # (!!) by now only NONE, ROOT, and ALL are supported
   focus: ROOT
-  # default value for unknown costs, a double
-  default: 9999999.9
+  # default value for unknown costs, MAX or MIN
+  default: MAX
   # tool used to compute costs at root level, either NONE or MARACAS
   # (!!) by now only MARACAS is supported
   tool-direct: MARACAS

@@ -41,6 +41,20 @@ public interface Preferences {
     }
 
     /**
+     * Default cost values
+     */
+    public enum DefaultCost {
+        MIN, MAX;
+
+        public double toDouble() {
+            return switch(this) {
+                case MIN -> 0.0;
+                case MAX -> 99999999.9;
+            };
+        }
+    }
+
+    /**
      * Get the set of quality metrics that are of interest for the user.
      * 
      * @return the set of quality metrics that are of interest for the user.
@@ -135,7 +149,7 @@ public interface Preferences {
     /*
      * Default value for costs
      */
-    double defaultCost();
+    DefaultCost defaultCost();
 
     /** 
      * Returns the selectors

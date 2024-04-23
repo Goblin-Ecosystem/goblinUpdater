@@ -31,7 +31,7 @@ public class SimplePreferences implements Preferences {
     private Focus releaseFocus;
     private Focus changeFocus;
     private Set<Selector> releaseSelectors;
-    private double defaultCost;
+    private DefaultCost defaultCost;
 
     public static final double HIGH_COST = 999999.9;
     public static final double LOW_COST = 0.0;
@@ -64,7 +64,7 @@ public class SimplePreferences implements Preferences {
                   selectors: [%s]
                 costs:
                   focus: %s
-                  default: %s
+                  default: %s # %s
                   tool-direct: MARACAS
                   tool-indirect: NONE
                       """,
@@ -73,7 +73,8 @@ public class SimplePreferences implements Preferences {
                 this.releaseFocus(),
                 this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
                 this.changeFocus(),
-                this.defaultCost());
+                this.defaultCost(),
+                this.defaultCost.toDouble());
     }
 
     @Override
@@ -217,16 +218,21 @@ public class SimplePreferences implements Preferences {
         return selectors;
     }
 
-    private double generateDefaultCost(Map<String, Object> confMap) {
+    private DefaultCost generateDefaultCost(Map<String, Object> confMap) {
         final String COSTS = "costs";
         final String DEFAULT_COST = "default";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
-                && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof Double dc)) {
-            return dc;
+                && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof String dc)) {
+                    try {
+                        return DefaultCost.valueOf(dc);
+                    } catch (Exception e) {
+                        LoggerHelpers.instance().warning("unknown default cost " + dc + ", value " + DefaultCost.MAX + " is used");
+                        return DefaultCost.MAX;
+                    }
         }
         LoggerHelpers.instance()
-                .warning("default value for costs is undefined or ill-defined, value " + HIGH_COST + " is used)");
-        return HIGH_COST;
+                .warning("default value for costs is undefined or ill-defined, value " + DefaultCost.MAX + " is used");
+        return DefaultCost.MAX;
     }
 
     private Map<String, Object> getYmlMap(Path path) {
@@ -273,7 +279,7 @@ public class SimplePreferences implements Preferences {
     }
 
     @Override
-    public double defaultCost() {
+    public DefaultCost defaultCost() {
         return this.defaultCost;
     }
 
