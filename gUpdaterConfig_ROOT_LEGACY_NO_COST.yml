@@ -2,8 +2,8 @@
 # update configuration file
 #
 # scenario for legacy update at root level:
-# - we do not want any CVE (constraint)
-# - cost is more important than quality debt
+# - we may accept CVE (but give a big weight to it)
+# - we do not want any COST (constraint)
 # - popularity and freshness are balanced
 # - potential for change (releases) is only computed at root level
 # - potential for change (releases) uses only MORE_RECENT versions
@@ -14,15 +14,15 @@
 #
 metrics:
   - metric: CVE
-    coef: 0.0
+    coef: 0.6
   - metric: FRESHNESS
-    coef: 0.5
+    coef: 0.2
   - metric: POPULARITY_1_YEAR
-    coef: 0.5
+    coef: 0.2
   - metric: COST
-    coef: 0.8
+    coef: 0.0
 constraints:
-  - constraint: CVE_LIMIT
+  - constraint: COST_LIMIT
     value: 0.0
 releases:
   focus: ROOT

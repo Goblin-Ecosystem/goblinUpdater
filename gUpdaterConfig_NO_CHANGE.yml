@@ -6,6 +6,8 @@
 # - indeed changes without change edges are still possible (if multiple versions in graph)
 # 
 metrics:
+  - metric: CVE
+    coef: 0.0
   - metric: FRESHNESS
     coef: 1.0
   - metric: COST

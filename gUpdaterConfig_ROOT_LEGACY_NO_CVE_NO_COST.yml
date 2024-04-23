@@ -13,6 +13,8 @@
 # - no cost limit
 #
 metrics:
+  - metric: CVE
+    coef: 0.0
   - metric: FRESHNESS
     coef: 0.5
   - metric: POPULARITY_1_YEAR

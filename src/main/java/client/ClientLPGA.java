@@ -21,7 +21,7 @@ public class ClientLPGA {
 
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
-        LoggerHelpers.instance().setLevel(Level.INFO);
+        LoggerHelpers.instance().setLevel(Level.LOW);
         Path projectPath = Path.of(System.getProperty("projectPath"));
         Path preferencesPath = Path.of(System.getProperty("confFile"));
         Path updatePath = Path.of("..");
