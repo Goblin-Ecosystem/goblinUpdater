@@ -144,7 +144,8 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         creators.stream().forEach(t -> {
             Object maybes = weaverJsonGraph.get(t._1());
             if ((maybes != null) && (maybes instanceof JSONArray os)) {
-                os.parallelStream()
+                // os.parallelStream()
+                os.stream()
                         .filter(JSONObject.class::isInstance)
                         .forEach(n -> t._2().accept((JSONObject) n));
             }
