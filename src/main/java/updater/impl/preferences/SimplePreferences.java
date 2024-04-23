@@ -54,6 +54,29 @@ public class SimplePreferences implements Preferences {
     }
 
     @Override
+    public String repr() {
+        return String.format("""
+
+                metrics:%s
+                constraints:%s
+                releases:
+                  focus: %s
+                  selectors: [%s]
+                costs:
+                  focus: %s
+                  default: %s
+                  tool-direct: MARACAS
+                  tool-indirect: NONE
+                      """,
+                this.metrics().stream().map(m -> String.format("%n  - metric: %s%n    coef: %s", m.toString(), this.coefficientFor(m).get())).collect(Collectors.joining()),
+                this.constraints().stream().map(Constraint::repr).collect(Collectors.joining()),
+                this.releaseFocus(),
+                this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
+                this.changeFocus(),
+                this.defaultCost());
+    }
+
+    @Override
     public Set<MetricType> qualityMetrics() {
         return preferences.keySet().stream().filter(MetricType::isQualityMetric).collect(Collectors.toSet());
     }
@@ -119,7 +142,8 @@ public class SimplePreferences implements Preferences {
                     Optional<Object> cType = Optional.ofNullable(c.get(CONSTRAINT));
                     Optional<Object> cValue = Optional.ofNullable(c.get(VALUE));
                     if (cType.isPresent() && (cType.get() instanceof String ct) && cValue.isPresent()) {
-                        Optional<Constraint> cc = SimpleConstraintCreator.instance().create(ct.toUpperCase(), cValue.get());
+                        Optional<Constraint> cc = SimpleConstraintCreator.instance().create(ct.toUpperCase(),
+                                cValue.get());
                         if (cc.isPresent()) {
                             generatedConstraints.add(cc.get());
                         } else {
@@ -133,15 +157,16 @@ public class SimplePreferences implements Preferences {
                 }
             }
         } else {
-            LoggerHelpers.instance().info("no "+CONSTRAINTS+" list in config");
+            LoggerHelpers.instance().info("no " + CONSTRAINTS + " list in config");
         }
         return generatedConstraints;
     }
-    
+
     private Focus generateReleaseFocus(Map<String, Object> confMap) {
         final String RELEASES = "releases";
         final String FOCUS = "focus";
-        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
+                && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
             try {
                 return Focus.valueOf(f.toUpperCase());
             } catch (Exception e) {
@@ -155,7 +180,8 @@ public class SimplePreferences implements Preferences {
     private Focus generateChangeFocus(Map<String, Object> confMap) {
         final String COSTS = "costs";
         final String FOCUS = "focus";
-        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
+                && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
             try {
                 return Focus.valueOf(f.toUpperCase());
             } catch (Exception e) {
@@ -170,8 +196,9 @@ public class SimplePreferences implements Preferences {
         final String RELEASES = "releases";
         final String SELECTORS = "selectors";
         Set<Selector> selectors = new HashSet<>();
-        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs && (rs.containsKey(SELECTORS) && rs.get(SELECTORS) instanceof List ss)) {
-            for (Object o: ss) {
+        if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
+                && (rs.containsKey(SELECTORS) && rs.get(SELECTORS) instanceof List ss)) {
+            for (Object o : ss) {
                 if (o instanceof String s) {
                     try {
                         Selector selector = Selector.valueOf(s);
@@ -184,7 +211,8 @@ public class SimplePreferences implements Preferences {
                 }
             }
         } else {
-            LoggerHelpers.instance().warning("selector strategy for releases is undefined or ill-defined, selectors [] is used)");
+            LoggerHelpers.instance()
+                    .warning("selector strategy for releases is undefined or ill-defined, selectors [] is used)");
         }
         return selectors;
     }
@@ -192,10 +220,12 @@ public class SimplePreferences implements Preferences {
     private double generateDefaultCost(Map<String, Object> confMap) {
         final String COSTS = "costs";
         final String DEFAULT_COST = "default";
-        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof Double dc)) {
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
+                && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof Double dc)) {
             return dc;
         }
-        LoggerHelpers.instance().warning("default value for costs is undefined or ill-defined, value "+HIGH_COST+" is used)");
+        LoggerHelpers.instance()
+                .warning("default value for costs is undefined or ill-defined, value " + HIGH_COST + " is used)");
         return HIGH_COST;
     }
 
@@ -236,13 +266,13 @@ public class SimplePreferences implements Preferences {
     public Set<Selector> releaseSelectors() {
         return this.releaseSelectors;
     }
-    
+
     @Override
     public Focus changeFocus() {
         return this.changeFocus;
     }
 
-    @Override 
+    @Override
     public double defaultCost() {
         return this.defaultCost;
     }

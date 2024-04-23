@@ -18,10 +18,10 @@ constraints:
   # - constraint: PRESENCE and value: some id
   # - constraint: ABSENCE and value: some id
 releases:
-  - focus: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-  - selectors: [MORE_RECENT] # combination of MORE_RECENT, NO_PATCHES (can be empty to select all)
+  focus: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
+  selectors: [MORE_RECENT] # combination of MORE_RECENT, NO_PATCHES (can be empty to select all)
 costs:
-  - focus: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-  - default: 9999999.9 # default value for unknown costs
-  - tool-direct: MARACAS # either NONE or MARACAS
-  - tool-indirect: NONE # either NONE or JAPICMP
+  focus: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
+  default: 9999999.9 # default value for unknown costs
+  tool-direct: MARACAS # either NONE or MARACAS
+  tool-indirect: NONE # either NONE or JAPICMP

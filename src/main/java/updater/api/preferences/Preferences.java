@@ -15,6 +15,18 @@ import util.helpers.system.LoggerHelpers;
 public interface Preferences {
 
     /**
+     * External representation.
+     */
+    public String repr();
+
+    /**
+     * Print preferences.
+     */
+    default void print() {
+        LoggerHelpers.instance().info(this.repr());
+    }
+
+    /**
      * Focus for the generation of alternative releases / change edges
      */
     public enum Focus {
@@ -25,7 +37,7 @@ public interface Preferences {
      * Selectors of alternative releases
      */
     public enum Selector {
-        MORE_RECENT, NO_PATCH;
+        MORE_RECENT, NO_PATCHES;
     }
 
     /**

@@ -210,23 +210,22 @@ public class ClientMock {
                     coef: 0.6
                 constraints:
                   - constraint: COST_LIMIT
-                    value: 0.9
-                  # - constraint: PRESENCE
-                  #   value: "b:b:2"
+                    value: 1.0
                   - constraint: PRESENCE
-                    value: "h:h:999"
+                    value: "b:b:2"
                   - constraint: ABSENCE
                     value: "h:h:999"
                 releases:
-                  - focus: NONE
-                  - selectors: []
+                  focus: NONE
+                  selectors: [MORE_RECENT, NO_PATCHES]
                 costs:
-                  - focus: NONE
-                  - default: 0.0
-                  - tool-direct: NONE
-                  - tool-indirect: NONE
+                  focus: NONE
+                  default: 0.0
+                  tool-direct: NONE
+                  tool-indirect: NONE
                       """;
         Preferences preferences = new SimplePreferences(sPreferences);
+        preferences.print();
         // create solver and resolve update
         UpdateSolver solver = new LPGAUpdateSolver();
         // Optional<UpdateGraph<UpdateNode, UpdateEdge>> gprime = 

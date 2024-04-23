@@ -1,13 +1,28 @@
 package updater.api.preferences;
 
-public interface Constraint {
+public interface Constraint<T> {
     /**
      * Returns whether the constraint is related to a focus or not.
      */
     boolean isFocus();
 
     /**
-     * Return the focus of the constraint.
+     * Returns the focus of the constraint.
      */
     String focus();
+
+    /**
+     * Returns the code of the constraint.
+     */
+    String code();
+
+    /**
+     * Returns the value of the constraint.
+     */
+    T value();
+
+    /**
+     * Returns the representation.
+     */
+    String repr();
 }
