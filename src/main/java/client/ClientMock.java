@@ -211,6 +211,8 @@ public class ClientMock {
                 constraints:
                   - constraint: COST_LIMIT
                     value: 1.0
+                  - constraint: CVE_LIMIT
+                    value: 1.0
                   - constraint: PRESENCE
                     value: "b:b:2"
                   - constraint: ABSENCE

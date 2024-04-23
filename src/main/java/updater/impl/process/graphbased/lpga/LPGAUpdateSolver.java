@@ -15,6 +15,7 @@ import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.UpdateSolver;
 import updater.impl.preferences.AbsenceConstraint;
 import updater.impl.preferences.CostLimitConstraint;
+import updater.impl.preferences.CveLimitConstraint;
 import updater.impl.preferences.PresenceConstraint;
 import util.helpers.or.OrHelpers;
 import util.helpers.system.LoggerHelpers;
@@ -83,6 +84,10 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 OrHelpers.x_le_v(problem, "constraint on cost limit", GraphLP.totalCostVariable(problem), clc.limit());
         }
 
+        private void visit(MPSolver problem, CveLimitConstraint clc) {
+                OrHelpers.x_le_v(problem, "constraint on cve limit", GraphLP.totalCveVariable(problem), clc.limit());
+        }
+
         private <N extends UpdateNode, E extends UpdateEdge> void integrateConstraints(
                         UpdateGraph<N, E> updateGraph,
                         Preferences preferences,
@@ -94,6 +99,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         } else if (c instanceof PresenceConstraint pc) {
                                 visit(updateGraph, problem, pc);
                         } else if (c instanceof CostLimitConstraint clc) {
+                                visit(problem, clc);
+                        } else if (c instanceof CveLimitConstraint clc) {
                                 visit(problem, clc);
                         }
                 }

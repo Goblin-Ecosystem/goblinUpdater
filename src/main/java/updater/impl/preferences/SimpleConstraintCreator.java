@@ -23,6 +23,8 @@ public class SimpleConstraintCreator implements ConstraintCreator {
             case "PRESENCE" -> (value instanceof String s) ? Optional.of(new PresenceConstraint(s)) : Optional.empty();
             case "COST_LIMIT" ->
                 (value instanceof Double n) ? Optional.of(new CostLimitConstraint(n)) : Optional.empty();
+            case "CVE_LIMIT" ->
+                (value instanceof Double n) ? Optional.of(new CveLimitConstraint(n)) : Optional.empty();
             default -> Optional.empty();
         };
     }

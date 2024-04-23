@@ -479,7 +479,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         // FIXME: root needs info too
         qualities.put("a:a:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         qualities.put("b:b:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
-        qualities.put("b:b:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("b:b:2", new MetricMap<>(Map.of(CVE, 1.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         qualities.put("h:h:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         qualities.put("h:h:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         qualities.put("e:e:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
