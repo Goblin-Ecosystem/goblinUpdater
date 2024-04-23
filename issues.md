@@ -2,8 +2,6 @@
 
 ## Bugs
 
-- Do not use CVE_LIMIT is CVE is not part of the metrics
-
 ## Ideas
 
 - replace constraints CVE_LIMIT and COST_LIMIT by LIMIT with an added metric
