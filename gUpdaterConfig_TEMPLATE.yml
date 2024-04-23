@@ -46,9 +46,8 @@ costs:
   focus: ROOT
   # default value for unknown costs, MAX or MIN
   default: MAX
-  # tool used to compute costs at root level, either NONE or MARACAS
-  # (!!) by now NONE is not supported (-> MARACAS)
+  # tool used to compute costs at root level, either NONE or MARACAS (default)
   tool-direct: MARACAS
-  # tool used to compute costs at non-root level, either NONE or JAPICMP
+  # tool used to compute costs at non-root level, either NONE (default) or JAPICMP
   # (!!) by now JAPICMP is not supported (-> NONE)
   tool-indirect: NONE

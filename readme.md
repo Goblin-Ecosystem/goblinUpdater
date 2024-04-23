@@ -23,7 +23,7 @@ To run Goblin Updater, you have first to run the Goblin Weaver server. More info
     ```sh
     java -Dneo4jUri="bolt://localhost:7687/" -Dneo4jUser="neo4j" -Dneo4jPassword="goblindb" -jar ./target/goblinWeaver-1.0.0.jar noUpdate
     ```
-    
+
 3. run Goblin Updater in a second terminal
     ```sh
     java -DweaverUrl=<WEAVER URL> -DprojectPath=<PROJECT TO ANALYSE> -DconfFile=<CONFIGURATION FILE> -jar <JAR FILE>
@@ -92,10 +92,9 @@ costs:
   focus: ROOT
   # default value for unknown costs, MAX or MIN
   default: MAX
-  # tool used to compute costs at root level, either NONE or MARACAS
-  # (!!) by now NONE is not supported (-> MARACAS)
+  # tool used to compute costs at root level, either NONE or MARACAS (default)
   tool-direct: MARACAS
-  # tool used to compute costs at non-root level, either NONE or JAPICMP
+  # tool used to compute costs at non-root level, either NONE (default) or JAPICMP
   # (!!) by now JAPICMP is not supported (-> NONE)
   tool-indirect: NONE
   ```

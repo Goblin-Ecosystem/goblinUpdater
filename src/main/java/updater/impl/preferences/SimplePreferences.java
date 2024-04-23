@@ -32,6 +32,8 @@ public class SimplePreferences implements Preferences {
     private Focus changeFocus;
     private Set<Selector> releaseSelectors;
     private DefaultCost defaultCost;
+    private DirectTool directTool;
+    private IndirectTool indirectTool;
 
     public static final double HIGH_COST = 999999.9;
     public static final double LOW_COST = 0.0;
@@ -51,6 +53,8 @@ public class SimplePreferences implements Preferences {
         this.releaseSelectors = generateReleaseSelectors(conf);
         this.changeFocus = generateChangeFocus(conf);
         this.defaultCost = generateDefaultCost(conf);
+        this.directTool = getDirectTool(conf);
+        this.indirectTool = getIndirectTool(conf);
     }
 
     @Override
@@ -65,8 +69,8 @@ public class SimplePreferences implements Preferences {
                 costs:
                   focus: %s
                   default: %s # %s
-                  tool-direct: MARACAS
-                  tool-indirect: NONE
+                  tool-direct: %s
+                  tool-indirect: %s
                       """,
                 this.metrics().stream().map(m -> String.format("%n  - metric: %s%n    coef: %s", m.toString(), this.coefficientFor(m).get())).collect(Collectors.joining()),
                 this.constraints().stream().map(Constraint::repr).collect(Collectors.joining()),
@@ -74,7 +78,10 @@ public class SimplePreferences implements Preferences {
                 this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
                 this.changeFocus(),
                 this.defaultCost(),
-                this.defaultCost.toDouble());
+                this.defaultCost.toDouble(),
+                this.directTool(),
+                this.indirectTool()
+                );
     }
 
     @Override
@@ -212,7 +219,7 @@ public class SimplePreferences implements Preferences {
             for (Object o : ss) {
                 if (o instanceof String s) {
                     try {
-                        Selector selector = Selector.valueOf(s);
+                        Selector selector = Selector.valueOf(s.toUpperCase());
                         if (selector != Selector.MORE_RECENT) {
                             LoggerHelpers.instance().warning("releases selector strategy " + s + " not yet implemented");
                         } else {
@@ -244,7 +251,7 @@ public class SimplePreferences implements Preferences {
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
                 && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof String dc)) {
                     try {
-                        return DefaultCost.valueOf(dc);
+                        return DefaultCost.valueOf(dc.toUpperCase());
                     } catch (Exception e) {
                         LoggerHelpers.instance().warning("unknown default cost " + dc + ", value " + DefaultCost.MAX + " is used");
                         return DefaultCost.MAX;
@@ -253,6 +260,43 @@ public class SimplePreferences implements Preferences {
         LoggerHelpers.instance()
                 .warning("default value for costs is undefined or ill-defined, value " + DefaultCost.MAX + " is used");
         return DefaultCost.MAX;
+    }
+
+    private DirectTool getDirectTool(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String TOOL_DIRECT = "tool-direct";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_DIRECT) && cs.get(TOOL_DIRECT) instanceof String td)) {
+            try {
+                return DirectTool.valueOf(td.toUpperCase());
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown direct cost computation tool " + td + ", value " + DirectTool.MARACAS + " is used");
+                return DirectTool.MARACAS;
+            }
+        }
+        LoggerHelpers.instance()
+                .warning("direct cost computation tool is undefined or ill-defined, value " + DirectTool.MARACAS + " is used");
+        return DirectTool.MARACAS;
+    }
+
+    private IndirectTool getIndirectTool(Map<String, Object> confMap) {
+        final String COSTS = "costs";
+        final String TOOL_INDIRECT = "tool-indirect";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_INDIRECT) && cs.get(TOOL_INDIRECT) instanceof String ti)) {
+            try {
+                IndirectTool indirectTool = IndirectTool.valueOf(ti.toUpperCase());
+                if (indirectTool == IndirectTool.JAPICMP) {
+                    LoggerHelpers.instance().warning("indirect cost computation tool " + ti + " not yet implemented, indirect cost computation tool NONE is used");
+                    indirectTool = IndirectTool.NONE;
+                }
+                return indirectTool;
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown indirect cost computation tool " + ti + ", value " + DirectTool.NONE + " is used");
+                return IndirectTool.NONE;
+            }
+        }
+        LoggerHelpers.instance()
+                .warning("indirect cost computation tool is undefined or ill-defined, value " + IndirectTool.NONE + " is used");
+        return IndirectTool.NONE;
     }
 
     private Map<String, Object> getYmlMap(Path path) {
@@ -301,6 +345,16 @@ public class SimplePreferences implements Preferences {
     @Override
     public DefaultCost defaultCost() {
         return this.defaultCost;
+    }
+
+    @Override
+    public DirectTool directTool() {
+        return directTool;
+    }
+
+    @Override
+    public IndirectTool indirectTool() {
+        return indirectTool;
     }
 
 }

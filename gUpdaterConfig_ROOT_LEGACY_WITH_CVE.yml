@@ -1,0 +1,32 @@
+#
+# update configuration file
+#
+# scenario for legacy update at root level:
+# - we may accept CVE (but give a big weight to it)
+# - popularity and freshness are balanced
+# - cost is more important than quality debt
+# - potential for change (releases) is only computed at root level
+# - potential for change (releases) uses only MORE_RECENT versions
+# - change edges are only computed at root level
+# - costs are computed with MARACAS
+# - pessimistic view of unknown costs
+# - no cost limit
+#
+metrics:
+  - metric: CVE
+    coef: 0.6
+  - metric: FRESHNESS
+    coef: 0.2
+  - metric: POPULARITY_1_YEAR
+    coef: 0.2
+  - metric: COST
+    coef: 0.8
+constraints:
+releases:
+  focus: ROOT
+  selectors: [MORE_RECENT]
+costs:
+  focus: ROOT
+  default: MAX
+  tool-direct: MARACAS
+  tool-indirect: NONE

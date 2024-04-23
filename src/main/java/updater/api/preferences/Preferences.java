@@ -41,6 +41,20 @@ public interface Preferences {
     }
 
     /**
+     * Possible tools for direct cost computation.
+     */
+    public enum DirectTool {
+        NONE, MARACAS;
+    }
+
+    /**
+     * Possible tools for indirect cost computation
+     */
+    public enum IndirectTool {
+        NONE, JAPICMP;
+    }
+
+    /**
      * Default cost values
      */
     public enum DefaultCost {
@@ -167,5 +181,15 @@ public interface Preferences {
             .map(Constraint::focus)
             .collect(Collectors.toSet());
     }
+
+    /**
+     * Returns the tool used for direct cost computation.
+     */
+    DirectTool directTool();
+
+    /**
+     * Returns the tool used for indirect cost computation.
+     */
+    IndirectTool indirectTool();
 
 }

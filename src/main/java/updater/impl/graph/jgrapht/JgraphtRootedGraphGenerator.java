@@ -195,21 +195,36 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     // we compute the cost for a change edge (source, releaseToCompute)
     // given source -dep-> artifactOfReleaseToCompute -ver-> releaseToCompute (compared)
     // and   source -dep-> artifactOfReleaseToCompute -ver-> currentRelease (used)
-    // FIXME: check correct default costs
+    // if problem: cost = default
+    // if source is ROOT:
+    //  - if tool-direct is NONE: cost = default
+    //  - if tool-direct is MARACAS: cost = computed using Maracas
+    // if source is not ROOT:
+    //  - if tool-indirect is NONE: cost = default
+    //  - if tool-indirect is JAPICMP: cost = computed using Japicmp
     private void computeChangeEdgeValues(UpdateGraph<UpdateNode, UpdateEdge> graph, Path projectPath, Preferences preferences) {
         graph.changeEdges().forEach(changeEdge -> {
             UpdateNode source = graph.source(changeEdge);
-            boolean sourceIsRoot = source.id().equals(CustomGraph.ROOT_ID);
             UpdateNode releaseToCompute = graph.target(changeEdge);
             Optional<UpdateNode> artifactOfReleaseToCompute = graph.artifactOf(releaseToCompute);
             Optional<UpdateNode> currentRelease = artifactOfReleaseToCompute.flatMap(a -> graph.currentDependencyRelease(source, a));
-            double cost = preferences.defaultCost().toDouble();
-            if (currentRelease.isPresent()) {
-                if (sourceIsRoot) {
-                    cost = MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute);
-                }
-            } else {
+            double cost;
+            if (!currentRelease.isPresent()) {
                 LoggerHelpers.instance().error(String.format("Unable to find current used release for change %s -> %s", source.id(), releaseToCompute.id()));
+                cost = preferences.defaultCost().toDouble();
+            } else {
+                boolean sourceIsRoot = source.id().equals(CustomGraph.ROOT_ID);
+                if (sourceIsRoot) {
+                    cost = switch (preferences.directTool()) {
+                        case NONE -> preferences.defaultCost().toDouble();
+                        case MARACAS -> MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute);
+                    };
+                } else {
+                    cost = switch (preferences.indirectTool()) {
+                        case NONE -> preferences.defaultCost().toDouble();
+                        case JAPICMP -> preferences.defaultCost().toDouble(); // TODO: add japicmp helper
+                    };
+                }
             }
             changeEdge.put(SimpleMetricType.COST, cost);
         });
