@@ -73,6 +73,18 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
+     * Direct dependents of a node (should be an artifact node). Default method that can be refined in classes for optimizing.
+     * @param node the node to find the direct dependents of (should be an artifact node)
+     * @return the set of nodes that are direct dependents of node (empty if none).
+     */
+    default Set<N> directDependents(N node) {
+        return incomingEdgesOf(node).stream()
+                .filter(UpdateEdge::isDependency)
+                .map(e -> source(e))
+                .collect(Collectors.toSet());
+    }
+
+    /**
      * Versions of a node (should be an artifact node). Default method than can be refined in classes for optimizing.
      * @param node the node to find the versions of (should be an artifact node)
      * @return the set of nodes that are versions of node (empty if none).

@@ -8,6 +8,7 @@ import com.github.maracas.brokenuse.DeltaImpact;
 import com.github.maracas.delta.Delta;
 
 import updater.api.graph.structure.UpdateNode;
+import updater.api.preferences.Preferences;
 import util.helpers.maven.MavenLocalRepository;
 import util.helpers.system.LoggerHelpers;
 
@@ -19,7 +20,7 @@ public class MaracasHelpers {
     private MaracasHelpers() {
     }
 
-    public static double computeChangeCost(Path projectPath, UpdateNode currentRelease, UpdateNode artifactRelease) {
+    public static double computeChangeCost(Path projectPath, UpdateNode currentRelease, UpdateNode artifactRelease, Preferences updatePreferences) {
         if (currentRelease.equals(artifactRelease)) {
             return 0.0;
         }
@@ -40,7 +41,7 @@ public class MaracasHelpers {
             return brokenUses.size();
         } catch (Exception e) {
             LoggerHelpers.instance().error("Maracas fail:\n" + e.getMessage());
-            return 9999999.0;
+            return updatePreferences.defaultCost().toDouble();
         }
     }
 }

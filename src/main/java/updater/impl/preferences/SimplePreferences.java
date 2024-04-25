@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public class SimplePreferences implements Preferences {
     private Map<MetricType, Double> preferences;
-    private List<Constraint> constraints;
+    private List<Constraint<String>> constraints;
     private Focus releaseFocus;
     private Focus changeFocus;
     private Set<Selector> releaseSelectors;
@@ -138,12 +138,12 @@ public class SimplePreferences implements Preferences {
         return metricsAndCoefMap;
     }
 
-    private List<Constraint> generateConstraints(Map<String, Object> confMap) {
+    private List<Constraint<String>> generateConstraints(Map<String, Object> confMap) {
         final String CONSTRAINTS = "constraints";
         final String CONSTRAINT = "constraint";
         final String VALUE = "value";
         final String INVALID_CONSTRAINT = "invalid constraint config: ";
-        List<Constraint> generatedConstraints = new ArrayList<>();
+        List<Constraint<String>> generatedConstraints = new ArrayList<>();
         if (confMap.containsKey(CONSTRAINTS) && (confMap.get(CONSTRAINTS) instanceof List cs)) {
             for (Object o : cs) {
                 if (o instanceof Map c) {
@@ -322,7 +322,7 @@ public class SimplePreferences implements Preferences {
 
     // FIXME: data leak
     @Override
-    public List<Constraint> constraints() {
+    public List<Constraint<String>> constraints() {
         return this.constraints;
     }
 

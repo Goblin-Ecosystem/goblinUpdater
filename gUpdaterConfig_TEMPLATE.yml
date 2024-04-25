@@ -41,13 +41,11 @@ releases:
   # (!!) by now only [MORE_RECENT] is supported (others -> [MORE_RECENT])
   selectors: [MORE_RECENT]
 costs:
-   # either NONE, ROOT (default), CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-   # (!!) by now CONSTRAINTS is not supported (-> ROOT)
+   # either NONE, ROOT (default), CONSTRAINTS, or ALL
   focus: ROOT
   # default value for unknown costs, MAX or MIN
   default: MAX
   # tool used to compute costs at root level, either NONE or MARACAS (default)
   tool-direct: MARACAS
   # tool used to compute costs at non-root level, either NONE (default) or JAPICMP
-  # (!!) by now JAPICMP is not supported (-> NONE)
   tool-indirect: NONE

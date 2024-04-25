@@ -1,35 +1,43 @@
 package updater.impl.graph.jgrapht;
 
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
+import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.RootedGraphGenerator;
+import updater.helpers.JapicmpHelpers;
 import updater.helpers.MaracasHelpers;
-import updater.impl.graph.structure.edges.*;
-import updater.impl.graph.structure.nodes.*;
+import updater.impl.graph.structure.edges.ChangeEdge;
+import updater.impl.graph.structure.edges.DependencyEdge;
+import updater.impl.graph.structure.edges.VersionEdge;
+import updater.impl.graph.structure.nodes.AbstractNode;
+import updater.impl.graph.structure.nodes.ArtifactNode;
+import updater.impl.graph.structure.nodes.ReleaseNode;
 import updater.impl.metrics.SimpleMetricDeclarator;
-
-import java.util.Optional;
-import java.util.HashSet;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import updater.impl.metrics.SimpleMetricType;
+import updater.impl.preferences.AbsenceConstraint;
 import util.IdGenerator;
 import util.api.CustomGraph;
 import util.helpers.system.LoggerHelpers;
-
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.List;
-import java.util.Map;
 
 public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
@@ -154,76 +162,147 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         return graph;
     }
 
-    // FIXME: deal with preferences
-    // costs.focuses in NONE, ROOT, (CONSTRAINTS), ALL
-    // costs.default is a double
-    // costs.tool-direct either (NONE) or MARACAS
-    // costs.tool-indirect either NONE or (JAPICMP)
+    // TODO: Option to choose from the two modes
     @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Preferences updatePreferences) {
+        LoggerHelpers.instance().info("Generate change edges");
+        generateChangeEdgeReleaseMode(projectPath, graph, updatePreferences);
+        // generateChangeEdgeArtifactMode(projectPath, graph, updatePreferences);
+        LoggerHelpers.instance().info("Change edges size: " + graph.edges(UpdateEdge::isChange).size());
+        LoggerHelpers.instance().info("Compute change edge values");
+        computeChangeEdgeValues(graph, projectPath, updatePreferences);
+    }
+
+    private Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
+
+    private Set<UpdateNode> absenceLibraries(UpdateGraph<UpdateNode, UpdateEdge> graph, Preferences updatePreferences) {
+        Function<Constraint<String>, Optional<UpdateNode>> absence = c -> (c instanceof AbsenceConstraint ac) ? graph.getNode(ac.focus()) : Optional.empty();
+        return updatePreferences.constraints().stream()
+            .flatMap(absence.andThen(Optional::stream))
+            .filter(hasSeveralVersions)
+            .collect(Collectors.toSet());
+    }
+
+    // depends on costs:focus:
+    // NONE:        F={},                                                   CE = {f => r | f \in F, f-dep->l, l-ver->r} = {}
+    // ALL:         F=N^R,                                                  CE = {f => r | f \in F, f-dep->l, l-ver->r}
+    // CONSTRAINTS: F={f | r \in constraint focuses, l-ver->r, f-dep->l}    CE = {f => r | f \in F, f-dep->l, l-ver->r}
+    // ROOT:        F={root},                                               CE = {f => r | f \in F, f-dep->l, l-ver->r}
+    // default is ROOT.
+    // optimization: use {f => r | f \in F, f-dep->l, |{r | l-ver->r}|>=2, l-ver->r}
+    //        instead of {f => r | f \in F, f-dep->l, l-ver->r}.
+    public void generateChangeEdgeReleaseMode(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             Preferences updatePreferences) {
         Set<UpdateNode> focuses = switch (updatePreferences.changeFocus()) {
             case NONE -> Set.of();
             case ALL -> graph.releaseNodes();
+            case CONSTRAINTS -> absenceLibraries(graph, updatePreferences).stream()
+                                    .flatMap(l -> graph.directDependents(l).stream())
+                                    .collect(Collectors.toSet());
             default -> graph.rootNode().map(Set::of).orElse(Set.of());
         };
-        generateChangeEdgeWithFocuses(projectPath, graph, focuses, updatePreferences);
+        generateChangeEdgeWithReleaseFocuses(graph, focuses);
+    }
+
+    // depends on costs:focus:
+    // NONE:        F={},                                       CE = {d => r | f \in F-, d-dep->f, l-ver->r} = {}
+    // ALL:         F=N^L,                                      CE = {d => r | f \in F-, d-dep->f, l-ver->r}
+    // CONSTRAINTS: F={l | r \in constraint focuses, l-ver->r}  CE = {d => r | f \in F-, d-dep->f, l-ver->r}
+    // ROOT:        F={l | root-dep->l},                        CE = {d => r | f \in F-, d-dep->f, l-ver->r}
+    // default is ROOT.
+    // optimization: use F- = {l | l \in F, |{r | l-ver->r}| >= 2} instead of F.
+    public void generateChangeEdgeArtifactMode(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Preferences updatePreferences) {
+        Set<UpdateNode> focuses = switch (updatePreferences.changeFocus()) {
+            case NONE -> Set.of();
+            case ALL -> graph.nodes(((Predicate<UpdateNode>) (UpdateNode::isArtifact))
+                    .and(hasSeveralVersions));
+            case CONSTRAINTS -> absenceLibraries(graph, updatePreferences);
+            default -> graph.rootDirectDependencies().stream()
+                    .filter(hasSeveralVersions)
+                    .collect(Collectors.toSet());
+        };
+        generateChangeEdgeWithArtifactFocuses(graph, focuses);
     }
 
     // a focus f is a release for which we compute change edges
     // it is done for all f -dep-> l -ver-> ri
-    private void generateChangeEdgeWithFocuses(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph, Set<UpdateNode> focuses, Preferences preferences) {
-        // prepare things
+    // TODO: is copy needed?
+    private void generateChangeEdgeWithReleaseFocuses(UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Set<UpdateNode> focuses) {
         UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         IdGenerator generator = IdGenerator.instance();
-        // step 1 : create change edges between focuses and direct dependencies
-        LoggerHelpers.instance().info("Generate change edges");
-        focuses.forEach(f -> constructChangeEdgeWithFocus(generator, graph, graphCopy, f));
-        LoggerHelpers.instance().info("Change edges size: " + graph.edges(UpdateEdge::isChange).size());
-        // step 2: compute change edge costs
-        LoggerHelpers.instance().info("Compute change edge values");
-        computeChangeEdgeValues(graph, projectPath, preferences);
+        focuses.forEach(f -> constructChangeEdgeWithReleaseFocus(generator, graph, graphCopy, f));
     }
 
-    private void constructChangeEdgeWithFocus(IdGenerator generator, UpdateGraph<UpdateNode, UpdateEdge> graph, UpdateGraph<UpdateNode, UpdateEdge> graphCopy, UpdateNode focus) {
+    // focus is a release node
+    // {f => r | f \in F, f-dep->l, |{r | l-ver->r}|>=2, l-ver->r}
+    private void constructChangeEdgeWithReleaseFocus(IdGenerator generator, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            UpdateGraph<UpdateNode, UpdateEdge> graphCopy, UpdateNode focus) {
         graphCopy.outgoingEdgesOf(focus).stream()
-            .filter(UpdateEdge::isDependency)
-            .forEach(edge -> graphCopy.versions(graphCopy.target(edge))
-                .forEach(release -> graph.addEdgeFromNodeId(focus.id(), release.id(),
-                        new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))));
+                .filter(UpdateEdge::isDependency)
+                .map(edge -> graphCopy.versions(graphCopy.target(edge)))
+                .filter(rs -> rs.size() >= 2)
+                .flatMap(Set::stream)
+                .forEach(r -> graph.addEdgeFromNodeId(focus.id(), r.id(),
+                        new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of())));
+    }
+
+    // a focus f is an artifact for which we compute change edges
+    // it is done for all di -dep-> f -ver-> rj
+    // TODO: is copy needed?
+    private void generateChangeEdgeWithArtifactFocuses(UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Set<UpdateNode> focuses) {
+        UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
+        IdGenerator generator = IdGenerator.instance();
+        focuses.forEach(f -> constructChangeEdgeWithArtifactFocus(generator, graph, graphCopy, f));
+    }
+
+    // focus is an artifact node
+    // TODO:
+    private void constructChangeEdgeWithArtifactFocus(IdGenerator generator, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            UpdateGraph<UpdateNode, UpdateEdge> graphCopy, UpdateNode focus) {
     }
 
     // we compute the cost for a change edge (source, releaseToCompute)
-    // given source -dep-> artifactOfReleaseToCompute -ver-> releaseToCompute (compared)
-    // and   source -dep-> artifactOfReleaseToCompute -ver-> currentRelease (used)
+    // given source -dep-> artifactOfReleaseToCompute -ver-> releaseToCompute
+    // (compared)
+    // and source -dep-> artifactOfReleaseToCompute -ver-> currentRelease (used)
     // if problem: cost = default
     // if source is ROOT:
-    //  - if tool-direct is NONE: cost = default
-    //  - if tool-direct is MARACAS: cost = computed using Maracas
+    // - if tool-direct is NONE: cost = default
+    // - if tool-direct is MARACAS: cost = computed using Maracas
     // if source is not ROOT:
-    //  - if tool-indirect is NONE: cost = default
-    //  - if tool-indirect is JAPICMP: cost = computed using Japicmp
-    private void computeChangeEdgeValues(UpdateGraph<UpdateNode, UpdateEdge> graph, Path projectPath, Preferences preferences) {
+    // - if tool-indirect is NONE: cost = default
+    // - if tool-indirect is JAPICMP: cost = computed using Japicmp
+    // TODO: discuss integration of MARACAS and JAPICMP costs but for case with 0.0 limit
+    private void computeChangeEdgeValues(UpdateGraph<UpdateNode, UpdateEdge> graph, Path projectPath,
+            Preferences preferences) {
         graph.changeEdges().forEach(changeEdge -> {
             UpdateNode source = graph.source(changeEdge);
             UpdateNode releaseToCompute = graph.target(changeEdge);
             Optional<UpdateNode> artifactOfReleaseToCompute = graph.artifactOf(releaseToCompute);
-            Optional<UpdateNode> currentRelease = artifactOfReleaseToCompute.flatMap(a -> graph.currentDependencyRelease(source, a));
+            Optional<UpdateNode> currentRelease = artifactOfReleaseToCompute
+                    .flatMap(a -> graph.currentDependencyRelease(source, a));
             double cost;
             if (!currentRelease.isPresent()) {
-                LoggerHelpers.instance().error(String.format("Unable to find current used release for change %s -> %s", source.id(), releaseToCompute.id()));
+                LoggerHelpers.instance().error(String.format("Unable to find current used release for change %s -> %s",
+                        source.id(), releaseToCompute.id()));
                 cost = preferences.defaultCost().toDouble();
             } else {
                 boolean sourceIsRoot = source.id().equals(CustomGraph.ROOT_ID);
                 if (sourceIsRoot) {
                     cost = switch (preferences.directTool()) {
                         case NONE -> preferences.defaultCost().toDouble();
-                        case MARACAS -> MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute);
+                        case MARACAS ->
+                            MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute, preferences);
                     };
                 } else {
                     cost = switch (preferences.indirectTool()) {
                         case NONE -> preferences.defaultCost().toDouble();
-                        case JAPICMP -> preferences.defaultCost().toDouble(); // TODO: add japicmp helper
+                        case JAPICMP ->
+                            JapicmpHelpers.computeChangeCost(currentRelease.get(), releaseToCompute);
                     };
                 }
             }

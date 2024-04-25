@@ -148,7 +148,7 @@ public interface Preferences {
     /**
      * Returns the preference constraints.
      */
-    List<Constraint> constraints();
+    List<Constraint<String>> constraints();
 
     /**
      * Returns the focus for releases
