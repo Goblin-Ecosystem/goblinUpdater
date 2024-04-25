@@ -29,10 +29,16 @@
             <artifactId>jgrapht-core</artifactId>
             <version>1.5.2</version>
         </dependency>
+        <!--Compile analysis-->
         <dependency>
             <groupId>com.github.maracas</groupId>
             <artifactId>maracas-core</artifactId>
             <version>0.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.siom79.japicmp</groupId>
+            <artifactId>japicmp</artifactId>
+            <version>0.21.1</version>
         </dependency>
         <!--Maven aether-->
         <dependency>
