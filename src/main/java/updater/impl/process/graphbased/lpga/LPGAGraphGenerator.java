@@ -32,7 +32,7 @@ public class LPGAGraphGenerator implements GraphGenerator<UpdateNode, UpdateEdge
         Set<MetricType> metricsToCompute = updatePreferences.qualityMetrics(); // TODO: OK ? We have ones to compute and others to get from the weaver. isComputed can be used.
         // 1. Generate rooted dependency graph
         long startTime = System.currentTimeMillis();
-        JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getDirectNewPossibilitiesWithTransitiveRootedGraph(project.getDirectDependencies(), metricsToCompute);
+        JSONObject jsonDirectPossibilitiesRootedGraph = GoblinWeaverHelpers.getSuperGraph(project.getDirectDependencies(), metricsToCompute, updatePreferences);
         MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
         RootedGraphGenerator jgraphtGraphGenerator = new JgraphtRootedGraphGenerator();
         UpdateGraph<UpdateNode, UpdateEdge> updateGraph = jgraphtGraphGenerator.generateRootedGraphFromJsonObject(jsonDirectPossibilitiesRootedGraph, metricsToCompute);

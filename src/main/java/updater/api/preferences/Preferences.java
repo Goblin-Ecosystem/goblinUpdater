@@ -34,6 +34,13 @@ public interface Preferences {
     }
 
     /**
+     * Mode for change edges
+     */
+    public enum Mode {
+        RELEASES, ARTIFACTS;
+    }
+
+    /**
      * Selectors of alternative releases
      */
     public enum Selector {
@@ -159,6 +166,11 @@ public interface Preferences {
      * Returns the focus for change edges
      */
     Focus changeFocus();
+
+    /**
+     * Return the mode for change edges
+     */
+    Mode changeMode();
 
     /*
      * Default value for costs

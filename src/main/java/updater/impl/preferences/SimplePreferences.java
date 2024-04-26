@@ -30,6 +30,7 @@ public class SimplePreferences implements Preferences {
     private List<Constraint<String>> constraints;
     private Focus releaseFocus;
     private Focus changeFocus;
+    private Mode changeMode;
     private Set<Selector> releaseSelectors;
     private DefaultCost defaultCost;
     private DirectTool directTool;
@@ -37,6 +38,9 @@ public class SimplePreferences implements Preferences {
 
     public static final double HIGH_COST = 999999.9;
     public static final double LOW_COST = 0.0;
+
+    public static final String COSTS = "costs";
+    public static final String RELEASES = "releases";
 
     public SimplePreferences(Path path) {
         this.setup(getYmlMap(path));
@@ -52,6 +56,7 @@ public class SimplePreferences implements Preferences {
         this.releaseFocus = generateReleaseFocus(conf);
         this.releaseSelectors = generateReleaseSelectors(conf);
         this.changeFocus = generateChangeFocus(conf);
+        this.changeMode = generateChangeMode(conf);
         this.defaultCost = generateDefaultCost(conf);
         this.directTool = getDirectTool(conf);
         this.indirectTool = getIndirectTool(conf);
@@ -63,20 +68,24 @@ public class SimplePreferences implements Preferences {
 
                 metrics:%s
                 constraints:%s
-                releases:
+                %s:
                   focus: %s
                   selectors: [%s]
-                costs:
+                %s:
                   focus: %s
+                  mode: %s
                   default: %s # %s
                   tool-direct: %s
                   tool-indirect: %s
                       """,
                 this.metrics().stream().map(m -> String.format("%n  - metric: %s%n    coef: %s", m.toString(), this.coefficientFor(m).get())).collect(Collectors.joining()),
                 this.constraints().stream().map(Constraint::repr).collect(Collectors.joining()),
+                RELEASES,
                 this.releaseFocus(),
                 this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
+                COSTS,
                 this.changeFocus(),
+                this.changeMode(),
                 this.defaultCost(),
                 this.defaultCost.toDouble(),
                 this.directTool(),
@@ -171,7 +180,6 @@ public class SimplePreferences implements Preferences {
     }
 
     private Focus generateReleaseFocus(Map<String, Object> confMap) {
-        final String RELEASES = "releases";
         final String FOCUS = "focus";
         if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
                 && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
@@ -191,17 +199,11 @@ public class SimplePreferences implements Preferences {
     }
 
     private Focus generateChangeFocus(Map<String, Object> confMap) {
-        final String COSTS = "costs";
         final String FOCUS = "focus";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
                 && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
             try {
-                Focus focus = Focus.valueOf(f.toUpperCase());
-                if (focus == Focus.CONSTRAINTS) {
-                    LoggerHelpers.instance().warning("costs focus strategy " + f + " not yet implemented, costs focus strategy ROOT is used");
-                    focus = Focus.ROOT;
-                }
-                return focus;
+                return Focus.valueOf(f.toUpperCase());
             } catch (Exception e) {
                 LoggerHelpers.instance().warning("unknown costs focus strategy: " + f);
             }
@@ -209,9 +211,21 @@ public class SimplePreferences implements Preferences {
         LoggerHelpers.instance().warning("costs focus strategy is undefined or ill-defined, costs focus ROOT is used");
         return Focus.ROOT;
     }
+    
+    private Mode generateChangeMode(Map<String, Object> confMap) {
+        final String MODE = "mode";
+        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(MODE) && cs.get(MODE) instanceof String m)) {
+            try {
+                return Mode.valueOf(m.toUpperCase());
+            } catch (Exception e) {
+                LoggerHelpers.instance().warning("unknown costs model strategy: " + m);
+            }
+        }
+        LoggerHelpers.instance().warning("costs focus mode is undefined or ill-defined, costs focus RELEASES is used");
+        return Mode.RELEASES;
+    }
 
     private Set<Selector> generateReleaseSelectors(Map<String, Object> confMap) {
-        final String RELEASES = "releases";
         final String SELECTORS = "selectors";
         Set<Selector> selectors = new HashSet<>();
         if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
@@ -246,7 +260,6 @@ public class SimplePreferences implements Preferences {
     }
 
     private DefaultCost generateDefaultCost(Map<String, Object> confMap) {
-        final String COSTS = "costs";
         final String DEFAULT_COST = "default";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
                 && (cs.containsKey(DEFAULT_COST) && cs.get(DEFAULT_COST) instanceof String dc)) {
@@ -263,7 +276,6 @@ public class SimplePreferences implements Preferences {
     }
 
     private DirectTool getDirectTool(Map<String, Object> confMap) {
-        final String COSTS = "costs";
         final String TOOL_DIRECT = "tool-direct";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_DIRECT) && cs.get(TOOL_DIRECT) instanceof String td)) {
             try {
@@ -279,16 +291,10 @@ public class SimplePreferences implements Preferences {
     }
 
     private IndirectTool getIndirectTool(Map<String, Object> confMap) {
-        final String COSTS = "costs";
         final String TOOL_INDIRECT = "tool-indirect";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(TOOL_INDIRECT) && cs.get(TOOL_INDIRECT) instanceof String ti)) {
             try {
-                IndirectTool indirectTool = IndirectTool.valueOf(ti.toUpperCase());
-                if (indirectTool == IndirectTool.JAPICMP) {
-                    LoggerHelpers.instance().warning("indirect cost computation tool " + ti + " not yet implemented, indirect cost computation tool NONE is used");
-                    indirectTool = IndirectTool.NONE;
-                }
-                return indirectTool;
+                return indirectTool = IndirectTool.valueOf(ti.toUpperCase());
             } catch (Exception e) {
                 LoggerHelpers.instance().warning("unknown indirect cost computation tool " + ti + ", value " + DirectTool.NONE + " is used");
                 return IndirectTool.NONE;
@@ -340,6 +346,11 @@ public class SimplePreferences implements Preferences {
     @Override
     public Focus changeFocus() {
         return this.changeFocus;
+    }
+
+    @Override 
+    public Mode changeMode() {
+        return this.changeMode;
     }
 
     @Override

@@ -1,6 +1,9 @@
 package updater.helpers;
 
 import updater.api.metrics.MetricType;
+import updater.api.preferences.Preferences;
+import updater.api.preferences.Preferences.Focus;
+import updater.api.preferences.Preferences.Selector;
 import updater.api.project.Dependency;
 import util.helpers.system.LoggerHelpers;
 
@@ -19,11 +22,22 @@ import java.util.stream.Collectors;
 
 // FIXME: take preferences into account
 // releases:
-//  - focuses: ROOT # either NONE, ROOT, CONSTRAINTS (root + all libs of releases in ABSENCE), or ALL
-//  - selection: [MORE_RECENT] # combination of MORE_RECENT, NO_PATCHES (can be empty)
+//  - focuses: either NONE, ROOT, CONSTRAINTS, or ALL
+//  - selection: combination of MORE_RECENT, NO_PATCHES (can be empty meaning NO FILTER)
 public class GoblinWeaverHelpers {
 
     private GoblinWeaverHelpers() {
+    }
+
+    public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
+        Focus releaseFocus = preferences.releaseFocus();
+        Set<Selector> releaseSelection = preferences.releaseSelectors();
+        return switch (releaseFocus) {
+            case NONE -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
+            case ALL -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
+            case CONSTRAINTS -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
+            default -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
+        };
     }
 
     private static final String API_URL = System.getProperty("weaverUrl");

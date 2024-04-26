@@ -53,7 +53,7 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
-     * Direct dependencies of a node (should be a release node). Default method than can be refined in classes for optimizing.
+     * Direct dependencies (artifacts) of a node (should be a release node). Default method than can be refined in classes for optimizing.
      * @param node the node to find the direct dependencies of (should be a release node)
      * @return the set of nodes that are direct dependencies of node (empty if none).
      */
@@ -65,7 +65,7 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
-     * Direct dependencies of the root node. Default method than can be refined in classes for optimizing.
+     * Direct dependencies (artifacts) of the root node. Default method than can be refined in classes for optimizing.
      * @return the of nodes that are direct dependencies the root (empty if none).
      */
     default Set<N> rootDirectDependencies() {
@@ -73,7 +73,7 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
-     * Direct dependents of a node (should be an artifact node). Default method that can be refined in classes for optimizing.
+     * Direct dependents (releases) of a node (should be an artifact node). Default method that can be refined in classes for optimizing.
      * @param node the node to find the direct dependents of (should be an artifact node)
      * @return the set of nodes that are direct dependents of node (empty if none).
      */
@@ -85,7 +85,7 @@ public interface UpdateGraph<N extends UpdateNode, E extends UpdateEdge> extends
     }
 
     /**
-     * Versions of a node (should be an artifact node). Default method than can be refined in classes for optimizing.
+     * Versions (releases) of a node (should be an artifact node). Default method than can be refined in classes for optimizing.
      * @param node the node to find the versions of (should be an artifact node)
      * @return the set of nodes that are versions of node (empty if none).
      */
