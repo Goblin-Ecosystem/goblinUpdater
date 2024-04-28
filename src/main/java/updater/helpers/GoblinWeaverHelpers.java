@@ -31,13 +31,27 @@ public class GoblinWeaverHelpers {
 
     public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
         Focus releaseFocus = preferences.releaseFocus();
-        Set<Selector> releaseSelection = preferences.releaseSelectors();
-        return switch (releaseFocus) {
-            case NONE -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
-            case ALL -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
-            case CONSTRAINTS -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
-            default -> getDirectNewPossibilitiesWithTransitiveRootedGraph(directDependencies, metrics);
-        };
+        boolean moreRecent = preferences.releaseSelectors().contains(Selector.MORE_RECENT);
+
+        String apiRoute;
+
+        switch (releaseFocus) {
+            case NONE:
+                apiRoute = "/graph/rootedGraph";
+                break;
+            case ALL:
+                apiRoute = moreRecent ? "/graph/allPossibilitiesRooted" : "/graph/allNewPossibilitiesRooted";
+                break;
+            case CONSTRAINTS:
+                apiRoute = moreRecent ? "/graph/directNewPossibilitiesWithTransitiveRooted" : "//graph/directNewPossibilitiesWithTransitiveRooted";
+                break;
+            default:
+                apiRoute = moreRecent
+                        ? "/graph/directNewPossibilitiesWithTransitiveRooted"
+                        : "/graph/directPossibilitiesWithTransitiveRooted";
+                break;
+        }
+        return getGraph(directDependencies, metrics, apiRoute);
     }
 
     private static final String API_URL = System.getProperty("weaverUrl");
@@ -70,10 +84,9 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
-    public static JSONObject getRootedGraph(Set<Dependency> directDependencies,
-                                                            Set<MetricType> metrics) {
-        LoggerHelpers.instance().info("Get rooted graph");
-        String apiRoute = "/graph/rootedGraph";
+    private static JSONObject getGraph(Set<Dependency> directDependencies,
+                                            Set<MetricType> metrics, String apiRoute) {
+        LoggerHelpers.instance().info("Get graph from Goblin Weaver");
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
@@ -85,58 +98,11 @@ public class GoblinWeaverHelpers {
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
-    // GPGA
-    public static JSONObject getAllPossibilitiesRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> metrics) {
-        LoggerHelpers.instance().info("Get all possibilities graph");
-        String apiRoute = "/graph/allPossibilitiesRooted";
-
-        JSONObject bodyJsonObject = new JSONObject();
-        JSONArray releasesArray = new JSONArray();
-        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
-        bodyJsonObject.put("releases", releasesArray);
-        JSONArray metricsArray = new JSONArray();
-        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", metricsArray);
-        return executeQuery(bodyJsonObject, apiRoute);
-    }
-
-    // LPLA
+    // LPLA TODO: delete ?
     public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies,
             Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get direct all possibilities graph");
         String apiRoute = "/graph/directPossibilitiesRooted";
-
-        JSONObject bodyJsonObject = new JSONObject();
-        JSONArray releasesArray = new JSONArray();
-        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
-        bodyJsonObject.put("releases", releasesArray);
-        JSONArray metricsArray = new JSONArray();
-        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", metricsArray);
-        return executeQuery(bodyJsonObject, apiRoute);
-    }
-
-    // LPGA
-    public static JSONObject getDirectNewPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> metrics) {
-        LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
-        String apiRoute = "/graph/directNewPossibilitiesWithTransitiveRooted";
-
-        JSONObject bodyJsonObject = new JSONObject();
-        JSONArray releasesArray = new JSONArray();
-        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
-        bodyJsonObject.put("releases", releasesArray);
-        JSONArray metricsArray = new JSONArray();
-        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", metricsArray);
-        return executeQuery(bodyJsonObject, apiRoute);
-    }
-
-    public static JSONObject getDirectPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
-                                                                             Set<MetricType> metrics) {
-        LoggerHelpers.instance().info("Get direct all possibilities with transitive graph");
-        String apiRoute = "/graph/directPossibilitiesWithTransitiveRooted";
 
         JSONObject bodyJsonObject = new JSONObject();
         JSONArray releasesArray = new JSONArray();
@@ -154,5 +120,10 @@ public class GoblinWeaverHelpers {
         releaseJsonObject.put("artifactId", directDependency.artifactId());
         releaseJsonObject.put("version", directDependency.version());
         return releaseJsonObject;
+    }
+
+    public static JSONObject getDirectNewPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
+                                                                                Set<MetricType> metrics) {
+        return getGraph(directDependencies, metrics, "/graph/directNewPossibilitiesWithTransitiveRooted");
     }
 }
