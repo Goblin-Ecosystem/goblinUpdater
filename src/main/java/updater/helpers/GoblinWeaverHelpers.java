@@ -32,7 +32,6 @@ public class GoblinWeaverHelpers {
     public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
         Focus releaseFocus = preferences.releaseFocus();
         boolean moreRecent = preferences.releaseSelectors().contains(Selector.MORE_RECENT);
-
         String apiRoute;
 
         switch (releaseFocus) {
@@ -40,10 +39,12 @@ public class GoblinWeaverHelpers {
                 apiRoute = "/graph/rootedGraph";
                 break;
             case ALL:
-                apiRoute = moreRecent ? "/graph/allPossibilitiesRooted" : "/graph/allNewPossibilitiesRooted";
+                // TODO: all new
+                apiRoute = moreRecent ? "/graph/allPossibilitiesRooted" : "/graph/allPossibilitiesRooted";
                 break;
             case CONSTRAINTS:
-                apiRoute = moreRecent ? "/graph/directNewPossibilitiesWithTransitiveRooted" : "//graph/directNewPossibilitiesWithTransitiveRooted";
+                // TODO: constraints & constraints new
+                apiRoute = moreRecent ? "/graph/directNewPossibilitiesWithTransitiveRooted" : "/graph/directNewPossibilitiesWithTransitiveRooted";
                 break;
             default:
                 apiRoute = moreRecent
