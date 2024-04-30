@@ -1,6 +1,7 @@
 package updater.helpers;
 
 import updater.api.metrics.MetricType;
+import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
 import updater.api.preferences.Preferences.Focus;
 import updater.api.preferences.Preferences.Selector;
@@ -17,6 +18,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,28 +34,31 @@ public class GoblinWeaverHelpers {
 
     public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
         Focus releaseFocus = preferences.releaseFocus();
-        boolean moreRecent = preferences.releaseSelectors().contains(Selector.MORE_RECENT);
-        String apiRoute;
-
+        Set<String> libToExpendsGa = new HashSet<>();
         switch (releaseFocus) {
             case NONE:
-                apiRoute = "/graph/rootedGraph";
+                // Rooted graph case, no expends
                 break;
             case ALL:
-                // TODO: all new
-                apiRoute = moreRecent ? "/graph/allPossibilitiesRooted" : "/graph/allPossibilitiesRooted";
+                // All possibilities case, expends all
+                libToExpendsGa.add("all");
                 break;
             case CONSTRAINTS:
-                // TODO: constraints & constraints new
-                apiRoute = moreRecent ? "/graph/directNewPossibilitiesWithTransitiveRooted" : "/graph/directNewPossibilitiesWithTransitiveRooted";
+                // constraints case, expends desired libs
+                List<Constraint<String>> constraints = preferences.constraints();
+                for (Constraint<String> constraint : constraints){
+                    if (constraint.code().equals("ABSENCE")){
+                        String gavId = constraint.value();
+                        libToExpendsGa.add(gavId.substring(0, gavId.lastIndexOf(':')));
+                    }
+                }
                 break;
             default:
-                apiRoute = moreRecent
-                        ? "/graph/directNewPossibilitiesWithTransitiveRooted"
-                        : "/graph/directPossibilitiesWithTransitiveRooted";
+                // Direct possibilities case, expends direct dependencies libs
+                libToExpendsGa.addAll(directDependencies.stream().map(Dependency::getGa).collect(Collectors.toSet()));
                 break;
         }
-        return getGraph(directDependencies, metrics, apiRoute);
+        return graphTraversing(directDependencies.stream().map(Dependency::getGav).collect(Collectors.toSet()), libToExpendsGa, preferences.releaseSelectors(), metrics);
     }
 
     private static final String API_URL = System.getProperty("weaverUrl");
@@ -85,17 +91,29 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
-    private static JSONObject getGraph(Set<Dependency> directDependencies,
-                                            Set<MetricType> metrics, String apiRoute) {
+    private static JSONObject graphTraversing(Set<String> startReleasesGav, Set<String> libToExpendsGa,
+                                              Set<Selector> filters, Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get graph from Goblin Weaver");
+        String apiRoute = "/graph/traversing";
 
         JSONObject bodyJsonObject = new JSONObject();
-        JSONArray releasesArray = new JSONArray();
-        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
-        bodyJsonObject.put("releases", releasesArray);
+
+        JSONArray startReleasesArray = new JSONArray();
+        startReleasesArray.addAll(startReleasesGav);
+        bodyJsonObject.put("startReleasesGav", startReleasesArray);
+
+        JSONArray libToExpendsGaArray = new JSONArray();
+        libToExpendsGaArray.addAll(libToExpendsGa);
+        bodyJsonObject.put("libToExpendsGa", libToExpendsGaArray);
+
+        JSONArray filtersArray = new JSONArray();
+        filtersArray.addAll(filters.stream().map(Selector::toString).collect(Collectors.toList()));
+        bodyJsonObject.put("filters", filtersArray);
+
         JSONArray metricsArray = new JSONArray();
         metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
         bodyJsonObject.put("addedValues", metricsArray);
+
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
@@ -121,10 +139,5 @@ public class GoblinWeaverHelpers {
         releaseJsonObject.put("artifactId", directDependency.artifactId());
         releaseJsonObject.put("version", directDependency.version());
         return releaseJsonObject;
-    }
-
-    public static JSONObject getDirectNewPossibilitiesWithTransitiveRootedGraph(Set<Dependency> directDependencies,
-                                                                                Set<MetricType> metrics) {
-        return getGraph(directDependencies, metrics, "/graph/directNewPossibilitiesWithTransitiveRooted");
     }
 }
