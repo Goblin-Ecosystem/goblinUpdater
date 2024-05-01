@@ -35,6 +35,13 @@ public class GoblinWeaverHelpers {
     public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
         Focus releaseFocus = preferences.releaseFocus();
         Set<String> libToExpendsGa = new HashSet<>();
+        Set<String> releaseToHaveGav = new HashSet<>();
+        preferences.constraints().forEach(c -> {
+            switch (c.code()) {
+                case "ABSENCE" -> libToExpendsGa.add(c.value().substring(0, c.value().lastIndexOf(':')));
+                case "PRESENCE" -> releaseToHaveGav.add(c.value());
+            }
+        });
         switch (releaseFocus) {
             case NONE:
                 // Rooted graph case, no expends
@@ -44,21 +51,15 @@ public class GoblinWeaverHelpers {
                 libToExpendsGa.add("all");
                 break;
             case CONSTRAINTS:
-                // constraints case, expends desired libs
-                List<Constraint<String>> constraints = preferences.constraints();
-                for (Constraint<String> constraint : constraints){
-                    if (constraint.code().equals("ABSENCE")){
-                        String gavId = constraint.value();
-                        libToExpendsGa.add(gavId.substring(0, gavId.lastIndexOf(':')));
-                    }
-                }
+                // constraints case
                 break;
             default:
                 // Direct possibilities case, expends direct dependencies libs
                 libToExpendsGa.addAll(directDependencies.stream().map(Dependency::getGa).collect(Collectors.toSet()));
                 break;
         }
-        return graphTraversing(directDependencies.stream().map(Dependency::getGav).collect(Collectors.toSet()), libToExpendsGa, preferences.releaseSelectors(), metrics);
+        return graphTraversing(directDependencies.stream().map(Dependency::getGav).collect(Collectors.toSet()),
+                libToExpendsGa, releaseToHaveGav, preferences.releaseSelectors(), metrics);
     }
 
     private static final String API_URL = System.getProperty("weaverUrl");
@@ -91,7 +92,7 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
-    private static JSONObject graphTraversing(Set<String> startReleasesGav, Set<String> libToExpendsGa,
+    private static JSONObject graphTraversing(Set<String> startReleasesGav, Set<String> libToExpendsGa, Set<String> releaseToHaveGav,
                                               Set<Selector> filters, Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get graph from Goblin Weaver");
         String apiRoute = "/graph/traversing";
@@ -105,6 +106,10 @@ public class GoblinWeaverHelpers {
         JSONArray libToExpendsGaArray = new JSONArray();
         libToExpendsGaArray.addAll(libToExpendsGa);
         bodyJsonObject.put("libToExpendsGa", libToExpendsGaArray);
+
+        JSONArray releaseToHaveGavArray = new JSONArray();
+        releaseToHaveGavArray.addAll(releaseToHaveGav);
+        bodyJsonObject.put("releaseToHaveGav", releaseToHaveGavArray);
 
         JSONArray filtersArray = new JSONArray();
         filtersArray.addAll(filters.stream().map(Selector::toString).collect(Collectors.toList()));
