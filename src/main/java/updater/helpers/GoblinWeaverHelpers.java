@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// FIXME: take preferences into account
 // releases:
 //  - focuses: either NONE, ROOT, CONSTRAINTS, or ALL
 //  - selection: combination of MORE_RECENT, NO_PATCHES (can be empty meaning NO FILTER)
@@ -120,22 +119,6 @@ public class GoblinWeaverHelpers {
         metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
         bodyJsonObject.put("addedValues", metricsArray);
 
-        return executeQuery(bodyJsonObject, apiRoute);
-    }
-
-    // LPLA TODO: delete ?
-    public static JSONObject getDirectPossibilitiesRootedGraph(Set<Dependency> directDependencies,
-            Set<MetricType> metrics) {
-        LoggerHelpers.instance().info("Get direct all possibilities graph");
-        String apiRoute = "/graph/directPossibilitiesRooted";
-
-        JSONObject bodyJsonObject = new JSONObject();
-        JSONArray releasesArray = new JSONArray();
-        directDependencies.forEach(d -> releasesArray.add(getReleaseJsonObject(d)));
-        bodyJsonObject.put("releases", releasesArray);
-        JSONArray metricsArray = new JSONArray();
-        metricsArray.addAll(metrics.stream().map(MetricType::toString).collect(Collectors.toList()));
-        bodyJsonObject.put("addedValues", metricsArray);
         return executeQuery(bodyJsonObject, apiRoute);
     }
 
