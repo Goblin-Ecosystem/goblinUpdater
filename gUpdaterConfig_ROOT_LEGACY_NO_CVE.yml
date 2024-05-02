@@ -29,7 +29,6 @@ releases:
   selectors: [MORE_RECENT]
 costs:
   focus: ROOT
-  mode: RELEASES
   default: MAX
   tool-direct: MARACAS
   tool-indirect: NONE

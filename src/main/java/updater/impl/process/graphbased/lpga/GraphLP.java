@@ -7,6 +7,8 @@ import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
 
+import java.util.Optional;
+
 public class GraphLP {
 
     private GraphLP() {
@@ -33,12 +35,12 @@ public class GraphLP {
         return nodeVariableName(n, NR_PATTERN);
     }
 
-    public static <N extends UpdateNode> MPVariable artifactVariable(MPSolver s, N n) {
-        return s.lookupVariableOrNull(artifactVariableName(n));
+    public static <N extends UpdateNode> Optional<MPVariable> artifactVariable(MPSolver s, N n) {
+        return Optional.ofNullable(s.lookupVariableOrNull(artifactVariableName(n)));
     }
 
-    public static <N extends UpdateNode> MPVariable releaseVariable(MPSolver s, N n) {
-        return s.lookupVariableOrNull(releaseVariableName(n));
+    public static <N extends UpdateNode> Optional<MPVariable> releaseVariable(MPSolver s, N n) {
+        return Optional.ofNullable(s.lookupVariableOrNull(releaseVariableName(n)));
     }
 
     public static MPVariable totalCostVariable(MPSolver s) {

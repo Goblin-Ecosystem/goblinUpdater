@@ -3,7 +3,7 @@ package updater.helpers;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
-import updater.api.preferences.Preferences.Focus;
+import updater.api.preferences.Preferences.ReleaseFocus;
 import updater.api.preferences.Preferences.Selector;
 import updater.api.project.Dependency;
 import util.helpers.system.LoggerHelpers;
@@ -33,7 +33,7 @@ public class GoblinWeaverHelpers {
     }
 
     public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
-        Focus releaseFocus = preferences.releaseFocus();
+        ReleaseFocus releaseFocus = preferences.releaseFocus();
         Set<String> libToExpendsGa = new HashSet<>();
         Set<String> releaseToHaveGav = new HashSet<>();
         preferences.constraints().forEach(c -> {
@@ -46,12 +46,16 @@ public class GoblinWeaverHelpers {
             case NONE:
                 // Rooted graph case, no expends
                 break;
-            case ALL:
+            case GLOBAL:
                 // All possibilities case, expends all
                 libToExpendsGa.add("all");
                 break;
             case CONSTRAINTS:
                 // constraints case
+                break;
+            case LOCAL:
+                break;
+            case LOCAL_AND_CONSTRAINTS:
                 break;
             default:
                 // Direct possibilities case, expends direct dependencies libs

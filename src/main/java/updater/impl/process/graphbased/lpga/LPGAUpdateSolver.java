@@ -60,24 +60,53 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 }
         }
 
-        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, AbsenceConstraint ac) {
-                N node = updateGraph.nodes(n -> n.id().equals(ac.id())).stream().findFirst().orElse(null);
+        private boolean isReleaseId(String id) {
+                return id.split(":").length == 3;
+        }
+
+        private boolean isLibraryId(String id) {
+                return id.split(":").length == 3;
+        }
+
+        private <N extends UpdateNode, E extends UpdateEdge> void helper(UpdateGraph<N, E> updateGraph,
+                        MPSolver problem, String id, String type) {
+                N node = updateGraph.nodes(n -> n.id().equals(id)).stream().findFirst().orElse(null);
                 if (node != null) {
-                        MPVariable v = GraphLP.releaseVariable(problem, node);
-                        OrHelpers.x_eq_v(problem, "constraint on absence of " + ac.id(), v , 0);
+                        Optional<MPVariable> v;
+                        if (isReleaseId(id)) {
+                                v = GraphLP.releaseVariable(problem, node);
+                                if (v.isPresent()) {
+                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), 0);
+                                } else {
+                                        LoggerHelpers.instance().warning("Problematic node id: " + id);
+
+                                }
+                        } else if (isLibraryId(id)) {
+                                v = GraphLP.artifactVariable(problem, node);
+                                if (v.isPresent()) {
+                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), 0);
+                                } else {
+                                        LoggerHelpers.instance().warning("Problematic node id: " + id);
+
+                                }
+                        } else {
+                                LoggerHelpers.instance().warning("Problematic node id: " + id);
+                        }
                 } else {
-                        LoggerHelpers.instance().warning("Unknown node id: " + ac.id());
+                        LoggerHelpers.instance().warning("Unknown node id: " + id);
                 }
         }
 
-        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N,E> updateGraph, MPSolver problem, PresenceConstraint pc) {
-                N node = updateGraph.nodes(n -> n.id().equals(pc.id())).stream().findFirst().orElse(null);
-                if (node != null) {
-                        MPVariable v = GraphLP.releaseVariable(problem, node);
-                        OrHelpers.x_eq_v(problem, "constraint on presence of " + pc.id(), v , 1);
-                } else {
-                        LoggerHelpers.instance().warning("Unknown node id: " + pc.id());
-                }
+        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N, E> updateGraph, MPSolver problem,
+                        AbsenceConstraint ac) {
+                String id = ac.id();
+                helper(updateGraph, problem, id, "absence");
+        }
+
+        private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N, E> updateGraph, MPSolver problem,
+                        PresenceConstraint pc) {
+                String id = pc.id();
+                helper(updateGraph, problem, id, "presence");
         }
 
         private void visit(MPSolver problem, CostLimitConstraint clc) {
@@ -88,7 +117,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         LoggerHelpers.instance().warning("cost limit not used: no cost metric");
                 }
         }
-        
+
         private void visit(MPSolver problem, CveLimitConstraint clc) {
                 MPVariable v = GraphLP.totalCveVariable(problem);
                 if (v != null) {
@@ -118,8 +147,9 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
         private <N extends UpdateNode, E extends UpdateEdge> MPSolver createProblem(UpdateGraph<N, E> updateGraph,
                         Preferences updatePreferences) {
-                // TODO: select the best solver. CBC, CLP, GLPK, CP-SAT, ... 
-                // Taking care with the correct treatment for "binary" variables (that should be 0 or 1 not 0.5 for example)
+                // TODO: select the best solver. CBC, CLP, GLPK, CP-SAT, ...
+                // Taking care with the correct treatment for "binary" variables (that should be
+                // 0 or 1 not 0.5 for example)
                 // GLOP is not working correctly with binary variables. (all linear solvers?)
                 // CBC is good, no setNumThreads still.
                 MPSolver solver = MPSolver.createSolver("CBC");
@@ -141,10 +171,9 @@ public class LPGAUpdateSolver implements UpdateSolver {
 
                 // create a constraint stating that the variable for the root node equals 1
                 // (ROOT)
-                updateGraph.rootNode().ifPresent(n -> OrHelpers.x_eq_v(solver,
-                                "ROOT",
-                                GraphLP.releaseVariable(solver, n),
-                                1));
+                updateGraph.rootNode()
+                                .map(n -> GraphLP.releaseVariable(solver, n))
+                                .ifPresent(n -> OrHelpers.x_eq_v(solver, "ROOT", n.get(), 1));
 
                 // create constraints for versions (VER)
                 // for all a in artifactNodes, sum_{r in versions(a)} (var_r) = var_a
@@ -153,22 +182,28 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 // for all a in artifactNodes, sum_{r in dependants(a)} (var_r) >= var_a
                 for (N a : artifactNodes) {
                         String aName = GraphLP.artifactVariableName(a);
-                        MPVariable vA = GraphLP.artifactVariable(solver, a);
-                        List<MPVariable> releases = versionEdges.stream()
-                                        .filter(e -> updateGraph.source(e) == a)
-                                        .map(updateGraph::target)
-                                        .map(r -> GraphLP.releaseVariable(solver, r))
-                                        .toList();
-                        OrHelpers.sum_xi_eq_k_times_y(solver,
-                                        "VERSIONS of " + GraphLP.artifactVariableName(a),
-                                        releases,
-                                        1, vA);
-                        List<MPVariable> dependants = dependencyEdges.stream()
-                                        .filter(e -> updateGraph.target(e) == a)
-                                        .map(updateGraph::source)
-                                        .map(r -> GraphLP.releaseVariable(solver, r))
-                                        .toList();
-                        OrHelpers.sum_xi_ge_y_plus_n(solver, "DEP1 " + aName, dependants, vA, 0.0);
+                        Optional<MPVariable> vA = GraphLP.artifactVariable(solver, a);
+                        if (vA.isPresent()) {
+                                List<MPVariable> releases = versionEdges.stream()
+                                                .filter(e -> updateGraph.source(e) == a)
+                                                .map(updateGraph::target)
+                                                .map(r -> GraphLP.releaseVariable(solver, r))
+                                                .filter(Optional::isPresent)
+                                                .map(Optional::get)
+                                                .toList();
+                                OrHelpers.sum_xi_eq_k_times_y(solver,
+                                                "VERSIONS of " + GraphLP.artifactVariableName(a),
+                                                releases,
+                                                1, vA.get());
+                                List<MPVariable> dependants = dependencyEdges.stream()
+                                                .filter(e -> updateGraph.target(e) == a)
+                                                .map(updateGraph::source)
+                                                .map(r -> GraphLP.releaseVariable(solver, r))
+                                                .filter(Optional::isPresent)
+                                                .map(Optional::get)
+                                                .toList();
+                                OrHelpers.sum_xi_ge_y_plus_n(solver, "DEP1 " + aName, dependants, vA.get(), 0.0);
+                        }
                 }
 
                 // create constraints for dependencies (DEP2)
@@ -178,9 +213,10 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         N target = updateGraph.target(d);
                         String sName = GraphLP.releaseVariableName(source);
                         String tName = GraphLP.artifactVariableName(target);
-                        MPVariable sVar = GraphLP.releaseVariable(solver, source);
-                        MPVariable tVar = GraphLP.artifactVariable(solver, target);
-                        OrHelpers.x_ge_y(solver, "DEP2 " + sName + " " + tName, tVar, sVar);
+                        Optional<MPVariable> sVar = GraphLP.releaseVariable(solver, source);
+                        Optional<MPVariable> tVar = GraphLP.artifactVariable(solver, target);
+                        if (sVar.isPresent() && tVar.isPresent())
+                                OrHelpers.x_ge_y(solver, "DEP2 " + sName + " " + tName, tVar.get(), sVar.get());
                 }
                 LoggerHelpers.instance().info(dependencyEdges.size() + " dependency edges");
 
@@ -192,13 +228,16 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         N target = updateGraph.target(e);
                         String sName = GraphLP.releaseVariableName(source);
                         String tName = GraphLP.releaseVariableName(target);
-                        MPVariable sVar = GraphLP.releaseVariable(solver, source);
-                        MPVariable tVar = GraphLP.releaseVariable(solver, target);
+                        Optional<MPVariable> sVar = GraphLP.releaseVariable(solver, source);
+                        Optional<MPVariable> tVar = GraphLP.releaseVariable(solver, target);
                         MPVariable eVar = GraphLP.changeVariable(solver, updateGraph, e);
-                        OrHelpers.x_ge_y(solver, "CHG2 " + sName + " " + tName, sVar, eVar);
-                        OrHelpers.x_ge_y(solver, "CHG1 " + sName + " " + tName, tVar, eVar);
-                        OrHelpers.y_ge_sum_ki_times_xi_plus_n(solver, "CHG 3 " + sName + " " + tName,
-                                        eVar, List.of(Tuple.of(sVar, 1.0), Tuple.of(tVar, 1.0)), -1.0);
+                        if (sVar.isPresent() && tVar.isPresent()) {
+                                OrHelpers.x_ge_y(solver, "CHG2 " + sName + " " + tName, sVar.get(), eVar);
+                                OrHelpers.x_ge_y(solver, "CHG1 " + sName + " " + tName, tVar.get(), eVar);
+                                OrHelpers.y_ge_sum_ki_times_xi_plus_n(solver, "CHG 3 " + sName + " " + tName,
+                                                eVar, List.of(Tuple.of(sVar.get(), 1.0), Tuple.of(tVar.get(), 1.0)),
+                                                -1.0);
+                        }
                 }
                 LoggerHelpers.instance().info(changeEdges.size() + " change edges");
 
@@ -211,7 +250,8 @@ public class LPGAUpdateSolver implements UpdateSolver {
                                 .orElseThrow(() -> new IllegalArgumentException("No cost added value defined"));
 
                 // Aggregative variables
-                MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, GraphLP.QUALITY_VARIABLE_NAME);
+                MPVariable totalQuality = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY,
+                                GraphLP.QUALITY_VARIABLE_NAME);
                 MPVariable totalCost = solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, GraphLP.COST_VARIABLE_NAME);
 
                 // Quality variables
@@ -220,7 +260,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 // if there is at least a metric for which it is not the case then a form of
                 // Strategy should be used.
                 Map<MetricType, MPVariable> qualityVariables = new HashMap<>();
-                Function<MetricType, Function<UpdateNode, Tuple2<MPVariable, Double>>> nq2t = q -> r -> Tuple
+                Function<MetricType, Function<UpdateNode, Tuple2<Optional<MPVariable>, Double>>> nq2t = q -> r -> Tuple
                                 .of(GraphLP.releaseVariable(solver, r), r
                                                 .get(q).orElseThrow(
                                                                 () -> new IllegalArgumentException("missing quality "
@@ -228,10 +268,14 @@ public class LPGAUpdateSolver implements UpdateSolver {
                 for (MetricType q : updatePreferences.qualityMetrics()) {
                         qualityVariables.put(q,
                                         solver.makeNumVar(0.0, Double.POSITIVE_INFINITY, "Quality[" + q + "]"));
-                        List<Tuple2<MPVariable, Double>> qualities = updateGraph.releaseNodes().stream()
+                        List<Tuple2<Optional<MPVariable>, Double>> qualities = updateGraph.releaseNodes().stream()
                                         .map(nq2t.apply(q)).toList();
-                        OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "Quality[" + q + "] Constraint",
-                                        qualities, 1.0, qualityVariables.get(q));
+                        if (qualities.stream().allMatch(t -> t._1().isPresent())) {
+                                List<Tuple2<MPVariable, Double>> qualities2 = qualities.stream()
+                                                .map(t -> Tuple.of(t._1().get(), t._2())).toList();
+                                OrHelpers.sum_ki_times_xi_eq_k_times_y(solver, "Quality[" + q + "] Constraint",
+                                                qualities2, 1.0, qualityVariables.get(q));
+                        }
                 }
 
                 // Constraint for total quality

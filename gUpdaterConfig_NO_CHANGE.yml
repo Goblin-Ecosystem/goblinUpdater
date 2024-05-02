@@ -22,7 +22,6 @@ releases:
   selectors: []
 costs:
   focus: NONE
-  mode: RELEASES
   default: MAX
   tool-direct: NONE
   tool-indirect: NONE

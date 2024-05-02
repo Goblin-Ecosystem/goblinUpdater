@@ -28,9 +28,8 @@ import java.util.stream.Collectors;
 public class SimplePreferences implements Preferences {
     private Map<MetricType, Double> preferences;
     private List<Constraint<String>> constraints;
-    private Focus releaseFocus;
-    private Focus changeFocus;
-    private Mode changeMode;
+    private ReleaseFocus releaseFocus;
+    private ChangeFocus changeFocus;
     private Set<Selector> releaseSelectors;
     private DefaultCost defaultCost;
     private DirectTool directTool;
@@ -56,7 +55,6 @@ public class SimplePreferences implements Preferences {
         this.releaseFocus = generateReleaseFocus(conf);
         this.releaseSelectors = generateReleaseSelectors(conf);
         this.changeFocus = generateChangeFocus(conf);
-        this.changeMode = generateChangeMode(conf);
         this.defaultCost = generateDefaultCost(conf);
         this.directTool = getDirectTool(conf);
         this.indirectTool = getIndirectTool(conf);
@@ -73,7 +71,6 @@ public class SimplePreferences implements Preferences {
                   selectors: [%s]
                 %s:
                   focus: %s
-                  mode: %s
                   default: %s # %s
                   tool-direct: %s
                   tool-indirect: %s
@@ -85,7 +82,6 @@ public class SimplePreferences implements Preferences {
                 this.releaseSelectors().stream().map(Object::toString).collect(Collectors.joining(", ")),
                 COSTS,
                 this.changeFocus(),
-                this.changeMode(),
                 this.defaultCost(),
                 this.defaultCost.toDouble(),
                 this.directTool(),
@@ -179,52 +175,34 @@ public class SimplePreferences implements Preferences {
         return generatedConstraints;
     }
 
-    private Focus generateReleaseFocus(Map<String, Object> confMap) {
+    private ReleaseFocus generateReleaseFocus(Map<String, Object> confMap) {
         final String FOCUS = "focus";
         if (confMap.containsKey(RELEASES) && confMap.get(RELEASES) instanceof Map rs
                 && (rs.containsKey(FOCUS) && rs.get(FOCUS) instanceof String f)) {
             try {
-                Focus focus = Focus.valueOf(f.toUpperCase());
-                if (focus != Focus.ROOT) {
-                    LoggerHelpers.instance().warning("releases focus strategy " + f + " not yet implemented, releases focus strategy ROOT is used");
-                    focus = Focus.ROOT;
-                }
-                return focus;
+                return ReleaseFocus.valueOf(f.toUpperCase());
             } catch (Exception e) {
                 LoggerHelpers.instance().warning("unknown releases focus strategy: " + f);
             }
         }
         LoggerHelpers.instance().warning("releases focus strategy is undefined or ill-defined, releases focus strategy ROOT is used");
-        return Focus.ROOT;
+        return ReleaseFocus.LOCAL;
     }
 
-    private Focus generateChangeFocus(Map<String, Object> confMap) {
+    private ChangeFocus generateChangeFocus(Map<String, Object> confMap) {
         final String FOCUS = "focus";
         if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs
                 && (cs.containsKey(FOCUS) && cs.get(FOCUS) instanceof String f)) {
             try {
-                return Focus.valueOf(f.toUpperCase());
+                return ChangeFocus.valueOf(f.toUpperCase());
             } catch (Exception e) {
                 LoggerHelpers.instance().warning("unknown costs focus strategy: " + f);
             }
         }
         LoggerHelpers.instance().warning("costs focus strategy is undefined or ill-defined, costs focus ROOT is used");
-        return Focus.ROOT;
+        return ChangeFocus.LOCAL;
     }
     
-    private Mode generateChangeMode(Map<String, Object> confMap) {
-        final String MODE = "mode";
-        if (confMap.containsKey(COSTS) && confMap.get(COSTS) instanceof Map cs && (cs.containsKey(MODE) && cs.get(MODE) instanceof String m)) {
-            try {
-                return Mode.valueOf(m.toUpperCase());
-            } catch (Exception e) {
-                LoggerHelpers.instance().warning("unknown costs model strategy: " + m);
-            }
-        }
-        LoggerHelpers.instance().warning("costs focus mode is undefined or ill-defined, costs focus RELEASES is used");
-        return Mode.RELEASES;
-    }
-
     private Set<Selector> generateReleaseSelectors(Map<String, Object> confMap) {
         final String SELECTORS = "selectors";
         Set<Selector> selectors = new HashSet<>();
@@ -333,7 +311,7 @@ public class SimplePreferences implements Preferences {
     }
 
     @Override
-    public Focus releaseFocus() {
+    public ReleaseFocus releaseFocus() {
         return this.releaseFocus;
     }
 
@@ -344,13 +322,8 @@ public class SimplePreferences implements Preferences {
     }
 
     @Override
-    public Focus changeFocus() {
+    public ChangeFocus changeFocus() {
         return this.changeFocus;
-    }
-
-    @Override 
-    public Mode changeMode() {
-        return this.changeMode;
     }
 
     @Override

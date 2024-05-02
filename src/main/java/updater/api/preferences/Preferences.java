@@ -27,17 +27,17 @@ public interface Preferences {
     }
 
     /**
-     * Focus for the generation of alternative releases / change edges
+     * Focus for the generation of alternative releases
      */
-    public enum Focus {
-        NONE, ROOT, CONSTRAINTS, ALL;
+    public enum ReleaseFocus {
+        NONE, LOCAL, CONSTRAINTS, LOCAL_AND_CONSTRAINTS, GLOBAL;
     }
 
     /**
-     * Mode for change edges
+     * Focus for the generation of alternative change edges
      */
-    public enum Mode {
-        RELEASES, ARTIFACTS;
+    public enum ChangeFocus {
+        NONE, LOCAL, LOCAL_AND_CONSTRAINTS, CONSTRAINTS, GLOBAL;
     }
 
     /**
@@ -160,17 +160,12 @@ public interface Preferences {
     /**
      * Returns the focus for releases
      */
-    Focus releaseFocus();
+    ReleaseFocus releaseFocus();
 
     /**
      * Returns the focus for change edges
      */
-    Focus changeFocus();
-
-    /**
-     * Return the mode for change edges
-     */
-    Mode changeMode();
+    ChangeFocus changeFocus();
 
     /*
      * Default value for costs

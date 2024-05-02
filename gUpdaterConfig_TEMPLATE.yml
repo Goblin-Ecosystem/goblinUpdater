@@ -43,8 +43,6 @@ releases:
 costs:
    # either NONE, ROOT (default), CONSTRAINTS, or ALL
   focus: ROOT
-  # either RELEASES (default) or ARTIFACTS
-  mode: RELEASES
   # default value for NONE or unknown costs, MAX or MIN
   default: MAX
   # tool used to compute costs at root level, either NONE or MARACAS (default)

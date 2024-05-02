@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.degrees;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -23,7 +24,6 @@ import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricType;
 import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
-import updater.api.preferences.Preferences.Mode;
 import updater.api.process.graphbased.RootedGraphGenerator;
 import updater.helpers.JapicmpHelpers;
 import updater.helpers.MaracasHelpers;
@@ -36,6 +36,7 @@ import updater.impl.graph.structure.nodes.ReleaseNode;
 import updater.impl.metrics.SimpleMetricDeclarator;
 import updater.impl.metrics.SimpleMetricType;
 import updater.impl.preferences.AbsenceConstraint;
+import updater.impl.preferences.PresenceConstraint;
 import util.IdGenerator;
 import util.api.CustomGraph;
 import util.helpers.system.LoggerHelpers;
@@ -168,11 +169,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             Preferences updatePreferences) {
         LoggerHelpers.instance().info("Generate change edges");
-        if (updatePreferences.changeMode().equals(Mode.RELEASES)) {
-            generateChangeEdgeReleaseMode(projectPath, graph, updatePreferences);
-        } else if (updatePreferences.changeMode().equals(Mode.ARTIFACTS)) {
-            generateChangeEdgeArtifactMode(projectPath, graph, updatePreferences);
-        }
+        generateChangeEdgeWork(projectPath, graph, updatePreferences);
         LoggerHelpers.instance().info("Change edges size: " + graph.edges(UpdateEdge::isChange).size());
         LoggerHelpers.instance().info("Compute change edge values");
         computeChangeEdgeValues(graph, projectPath, updatePreferences);
@@ -180,67 +177,64 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
     private Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
 
-    private Set<UpdateNode> absenceLibraries(UpdateGraph<UpdateNode, UpdateEdge> graph, Preferences updatePreferences) {
-        Function<Constraint<String>, Optional<UpdateNode>> absence = c -> (c instanceof AbsenceConstraint ac)
-                ? graph.getNode(ac.focus())
-                : Optional.empty();
-        UnaryOperator<Optional<UpdateNode>> libraryOf = on -> on.flatMap(graph::artifactOf);
-        return updatePreferences.constraints().stream() // <<Constraint>>
-                .flatMap(absence.andThen(libraryOf).andThen(Optional::stream)) // <<?UpdateNode(Release)>> <<
-                                                                               // ?UpdateNode(Artifact)>> <<
-                                                                               // <<UpdateNode(Artifact)>> >>
-                                                                               // <<UpdateNode(Artifact)>>
-                .filter(hasSeveralVersions) // <<UpdateNode(Release)>>
+    private Optional<String> getArtifactId(String id) {
+        String [] parts = id.split(":");
+        return switch (parts.length) {
+            case 2 -> Optional.of(id);
+            case 3 -> Optional.of(String.format("%s:%s", parts[0], parts[1]));
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> getReleaseId(String id) {
+        String [] parts = id.split(":");
+        return switch (parts.length) {
+            case 3 -> Optional.of(id);
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> getLibraryFromConstraint(Constraint<String> constraint) {
+        if (constraint instanceof AbsenceConstraint ac) {
+            return getArtifactId(ac.value());
+        } else if (constraint instanceof PresenceConstraint pc) {
+            return getArtifactId(pc.value());
+        } else {
+            return Optional.empty();
+        }
+
+    }
+
+    private Set<UpdateNode> constrainedLibraries(UpdateGraph<UpdateNode, UpdateEdge> graph, Preferences updatePreferences) {
+        return updatePreferences.constraints().stream()
+                .map(this::getLibraryFromConstraint)
+                .filter(Optional::isPresent).map(Optional::get)
+                .map(graph::getNode)
+                .filter(Optional::isPresent).map(Optional::get)
+                .filter(hasSeveralVersions)
                 .collect(Collectors.toSet());
     }
 
-    // depends on costs:focus:
-    // NONE: F={}, CE = {f => r | f \in F, f-dep->l, l-ver->r} = {}
-    // ALL: F=N^R, CE = {f => r | f \in F, f-dep->l, l-ver->r}
-    // CONSTRAINTS: F={f | r \in constraint focuses, l-ver->r, f-dep->l} CE = {f =>
-    // r | f \in F, f-dep->l, l-ver->r}
-    // ROOT: F={root}, CE = {f => r | f \in F, f-dep->l, l-ver->r}
-    // default is ROOT.
-    // optimization: use {f => r | f \in F, f-dep->l, |{r | l-ver->r}|>=2, l-ver->r}
-    // instead of {f => r | f \in F, f-dep->l, l-ver->r}.
-    // TODO: should CONSTRAINTS mode be updated not to target all dependencies of
-    // the dependents of l?
-    // argument pro: scenario where we fork + update the indirect deps
-    // argument against: we compute a change on non mandatory parts (yet, if we have
-    // them it is useful)
-    public void generateChangeEdgeReleaseMode(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
+    public void generateChangeEdgeWork(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             Preferences updatePreferences) {
-        Set<UpdateNode> focuses = switch (updatePreferences.changeFocus()) {
-            case NONE -> Set.of();
-            case ALL -> graph.releaseNodes();
-            case CONSTRAINTS -> absenceLibraries(graph, updatePreferences).stream()
-                    .flatMap(l -> graph.directDependents(l).stream())
-                    .collect(Collectors.toSet());
-            default -> graph.rootNode().map(Set::of).orElse(Set.of());
-        };
-        generateChangeEdgeWithReleaseFocuses(graph, focuses);
-    }
-
-    // depends on costs:focus:
-    // NONE: F={}, CE = {d => r | f \in F-, d-dep->f, f-ver->r} = {}
-    // ALL: F=N^L, CE = {d => r | f \in F-, d-dep->f, f-ver->r}
-    // CONSTRAINTS: F={l | r \in constraint focuses, l-ver->r} CE = {d => r | f \in
-    // F-, d-dep->f, f-ver->r}
-    // ROOT: F={l | root-dep->l}, CE = {d => r | f \in F-, d-dep->f, f-ver->r}
-    // default is ROOT.
-    // optimization: use F- = {l | l \in F, |{r | l-ver->r}| >= 2} instead of F.
-    public void generateChangeEdgeArtifactMode(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
-            Preferences updatePreferences) {
-        Set<UpdateNode> focuses = switch (updatePreferences.changeFocus()) {
-            case NONE -> Set.of();
-            case ALL -> graph.nodes(((Predicate<UpdateNode>) (UpdateNode::isArtifact))
-                    .and(hasSeveralVersions));
-            case CONSTRAINTS -> absenceLibraries(graph, updatePreferences);
-            default -> graph.rootDirectDependencies().stream()
-                    .filter(hasSeveralVersions)
-                    .collect(Collectors.toSet());
-        };
-        generateChangeEdgeWithArtifactFocuses(graph, focuses);
+        switch (updatePreferences.changeFocus()) {
+            case NONE:
+                generateChangeEdgeWithReleaseFocuses(graph, Set.of());
+                break;
+            case GLOBAL:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.releaseNodes());
+                break;
+            case LOCAL:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.rootNode().map(Set::of).orElse(Set.of()));
+                break;
+                case CONSTRAINTS:
+                generateChangeEdgeWithArtifactFocuses(graph, constrainedLibraries(graph, updatePreferences));
+                break;
+            case LOCAL_AND_CONSTRAINTS:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.rootNode().map(Set::of).orElse(Set.of()));
+                generateChangeEdgeWithArtifactFocuses(graph, constrainedLibraries(graph, updatePreferences));
+                break;
+        }
     }
 
     // a focus f is a release for which we compute change edges
