@@ -147,7 +147,7 @@ public class GoblinWeaverHelpers {
         return releaseJsonObject;
     }
 
-    // TODO: DRY Put on helper
+    // TODO: DRY Put on helper, same in JgraphtRootedGraphGenerator
     private static Optional<String> getLibraryFromConstraint(Constraint<String> constraint) {
         if (constraint instanceof AbsenceConstraint ac) {
             return getArtifactId(ac.value());
