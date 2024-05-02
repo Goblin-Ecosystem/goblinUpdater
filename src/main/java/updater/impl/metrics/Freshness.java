@@ -7,7 +7,7 @@ import updater.api.metrics.MetricType;
 import static updater.impl.metrics.SimpleMetricType.*;
 
 public class Freshness implements Metric {
-    private double score;
+    private final double score;
 
     public Freshness(JSONObject nodeJsonObject) {
         JSONObject valueJsonObject = (JSONObject) nodeJsonObject.get(type().toJsonKey());

@@ -35,10 +35,7 @@ public class ClientLPGA {
                 .load(projectPath)
                 .flatMap(project -> updater.update(project, preferences));
         MemoryUsageTracker.getInstance().checkAndUpdateMaxMemoryUsage();
-        if (updatedProject.isPresent())
-            updatedProject.get().dump(updatePath);
-        else
-            LoggerHelpers.instance().error("Could not update project");
+        updatedProject.ifPresent(project -> project.dump(updatePath));
         MemoryUsageTracker.getInstance().printMemoryUsageMax();
         long endTime = System.currentTimeMillis();
         LoggerHelpers.instance().info("Total execution time (ms): "+ (endTime - startTime));

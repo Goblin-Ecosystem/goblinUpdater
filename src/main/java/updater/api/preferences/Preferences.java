@@ -17,7 +17,7 @@ public interface Preferences {
     /**
      * External representation.
      */
-    public String repr();
+    String repr();
 
     /**
      * Print preferences.
@@ -29,42 +29,42 @@ public interface Preferences {
     /**
      * Focus for the generation of alternative releases
      */
-    public enum ReleaseFocus {
-        NONE, LOCAL, CONSTRAINTS, LOCAL_AND_CONSTRAINTS, GLOBAL;
+    enum ReleaseFocus {
+        NONE, LOCAL, CONSTRAINTS, LOCAL_AND_CONSTRAINTS, GLOBAL
     }
 
     /**
      * Focus for the generation of alternative change edges
      */
-    public enum ChangeFocus {
-        NONE, LOCAL, LOCAL_AND_CONSTRAINTS, CONSTRAINTS, GLOBAL;
+    enum ChangeFocus {
+        NONE, LOCAL, LOCAL_AND_CONSTRAINTS, CONSTRAINTS, GLOBAL
     }
 
     /**
      * Selectors of alternative releases
      */
-    public enum Selector {
-        MORE_RECENT, NO_PATCHES;
+    enum Selector {
+        MORE_RECENT, NO_PATCHES
     }
 
     /**
      * Possible tools for direct cost computation.
      */
-    public enum DirectTool {
-        NONE, MARACAS;
+    enum DirectTool {
+        NONE, MARACAS
     }
 
     /**
      * Possible tools for indirect cost computation
      */
-    public enum IndirectTool {
-        NONE, JAPICMP;
+    enum IndirectTool {
+        NONE, JAPICMP
     }
 
     /**
      * Default cost values
      */
-    public enum DefaultCost {
+    enum DefaultCost {
         MIN, MAX;
 
         public double toDouble() {

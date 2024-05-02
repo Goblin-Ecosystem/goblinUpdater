@@ -29,11 +29,11 @@ import java.util.Optional;
 public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     public enum NodeType {
-        RELEASE, ARTIFACT;
+        RELEASE, ARTIFACT
     }
 
     public enum EdgeType {
-        VERSION, DEPENDENCY, CHANGE;
+        VERSION, DEPENDENCY, CHANGE
     }
 
     public record Node001(String id, NodeType type, MetricContainer<MetricType> metrics) implements UpdateNode {
@@ -127,8 +127,8 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     }
 
-    private Set<UpdateNode> nodes;
-    private Set<UpdateEdge> edges;
+    private final Set<UpdateNode> nodes;
+    private final Set<UpdateEdge> edges;
     private UpdateNode root;
 
     private UpdateNode addNode(String id, NodeType type, MetricContainer<MetricType> metrics) {

@@ -9,10 +9,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.units.qual.degrees;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -175,7 +173,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         computeChangeEdgeValues(graph, projectPath, updatePreferences);
     }
 
-    private Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
+    private final Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
 
     private Optional<String> getArtifactId(String id) {
         String [] parts = id.split(":");

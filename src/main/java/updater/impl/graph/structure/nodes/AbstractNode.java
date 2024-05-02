@@ -11,7 +11,7 @@ import java.util.Map;
 
 public abstract class AbstractNode implements UpdateNode {
     private final String id;
-    private MetricContainer<MetricType> metricMap;
+    private final MetricContainer<MetricType> metricMap;
 
     protected AbstractNode(String id, Map<MetricType, Double> metricMap) {
         if (!hasValidId(id)) {
@@ -59,11 +59,8 @@ public abstract class AbstractNode implements UpdateNode {
             return false;
         AbstractNode other = (AbstractNode) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 
 }

@@ -10,7 +10,7 @@ import updater.api.metrics.MetricType;
 
 public class MetricMap<T extends MetricType> implements MetricContainer<T> {
 
-    private Map<T, Double> map;
+    private final Map<T, Double> map;
 
     public MetricMap(Map<T, Double> map) {
         if (map == null)
