@@ -173,7 +173,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         computeChangeEdgeValues(graph, projectPath, updatePreferences);
     }
 
-    private Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
+    private final Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
 
     private Optional<String> getArtifactId(String id) {
         String [] parts = id.split(":");

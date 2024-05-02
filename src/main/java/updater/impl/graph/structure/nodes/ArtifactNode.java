@@ -18,7 +18,7 @@ public class ArtifactNode extends AbstractNode {
         super(id, metricMap);
     }
 
-    private static final boolean isValidId(String id) {
+    private static boolean isValidId(String id) {
         return id.split(":").length == 2; // FIXME: check more thoroughly
     }
 

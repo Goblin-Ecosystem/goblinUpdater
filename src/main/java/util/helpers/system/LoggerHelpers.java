@@ -6,12 +6,12 @@ import java.time.format.DateTimeFormatter;
 public class LoggerHelpers {
 
     public enum Level {
-        LOW, INFO, WARN, ERROR, FATAL;
+        LOW, INFO, WARN, ERROR, FATAL
     }
 
     private Level level;
 
-    private static LoggerHelpers instance = new LoggerHelpers(Level.INFO);
+    private static final LoggerHelpers instance = new LoggerHelpers(Level.INFO);
 
     public static LoggerHelpers instance() {
         return instance;
