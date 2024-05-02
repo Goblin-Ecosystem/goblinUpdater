@@ -69,14 +69,14 @@ public class LPGAUpdateSolver implements UpdateSolver {
         }
 
         private <N extends UpdateNode, E extends UpdateEdge> void helper(UpdateGraph<N, E> updateGraph,
-                        MPSolver problem, String id, String type) {
+                        MPSolver problem, String id, String type, int value) {
                 N node = updateGraph.nodes(n -> n.id().equals(id)).stream().findFirst().orElse(null);
                 if (node != null) {
                         Optional<MPVariable> v;
                         if (isReleaseId(id)) {
                                 v = GraphLP.releaseVariable(problem, node);
                                 if (v.isPresent()) {
-                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), 0);
+                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), value);
                                 } else {
                                         LoggerHelpers.instance().warning("Problematic node id: " + id);
 
@@ -84,7 +84,7 @@ public class LPGAUpdateSolver implements UpdateSolver {
                         } else if (isLibraryId(id)) {
                                 v = GraphLP.artifactVariable(problem, node);
                                 if (v.isPresent()) {
-                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), 0);
+                                        OrHelpers.x_eq_v(problem, "constraint on " + type + " of " + id, v.get(), value);
                                 } else {
                                         LoggerHelpers.instance().warning("Problematic node id: " + id);
 
@@ -100,13 +100,13 @@ public class LPGAUpdateSolver implements UpdateSolver {
         private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N, E> updateGraph, MPSolver problem,
                         AbsenceConstraint ac) {
                 String id = ac.id();
-                helper(updateGraph, problem, id, "absence");
+                helper(updateGraph, problem, id, "absence", 0);
         }
 
         private <N extends UpdateNode, E extends UpdateEdge> void visit(UpdateGraph<N, E> updateGraph, MPSolver problem,
                         PresenceConstraint pc) {
                 String id = pc.id();
-                helper(updateGraph, problem, id, "presence");
+                helper(updateGraph, problem, id, "presence", 1);
         }
 
         private void visit(MPSolver problem, CostLimitConstraint clc) {

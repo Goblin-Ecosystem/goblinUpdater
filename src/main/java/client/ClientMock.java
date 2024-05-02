@@ -20,7 +20,7 @@ public class ClientMock {
 
     public static void main(String[] args) {
         // default log level (DO NOT USE LOW FOR BIG GRAPHS)
-        LoggerHelpers.instance().setLevel(Level.INFO); // LOW, INFO, ...
+        LoggerHelpers.instance().setLevel(Level.LOW); // LOW, INFO, ...
         // inputs
         final int EXAMPLE = 1;
         UpdateGraph<UpdateNode, UpdateEdge> g = switch (EXAMPLE) {
@@ -213,8 +213,10 @@ public class ClientMock {
                     value: 1.0
                   - constraint: CVE_LIMIT
                     value: 1.0
-                  - constraint: PRESENCE
-                    value: "b:b:2"
+                  # - constraint: PRESENCE
+                  #   value: "b:b:2"
+                  - constraint: ABSENCE
+                    value: "b:b:1"
                   - constraint: ABSENCE
                     value: "h:h:999"
                 releases:
