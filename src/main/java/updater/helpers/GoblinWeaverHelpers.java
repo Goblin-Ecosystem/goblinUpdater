@@ -6,6 +6,8 @@ import updater.api.preferences.Preferences;
 import updater.api.preferences.Preferences.ReleaseFocus;
 import updater.api.preferences.Preferences.Selector;
 import updater.api.project.Dependency;
+import updater.impl.preferences.AbsenceConstraint;
+import updater.impl.preferences.PresenceConstraint;
 import util.helpers.system.LoggerHelpers;
 
 import org.json.simple.JSONArray;
@@ -19,7 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,16 +34,9 @@ public class GoblinWeaverHelpers {
     private GoblinWeaverHelpers() {
     }
 
-    public static JSONObject getSuperGraph(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
+    public static JSONObject getGraphFromPreferences(Set<Dependency> directDependencies, Set<MetricType> metrics, Preferences preferences) {
         ReleaseFocus releaseFocus = preferences.releaseFocus();
         Set<String> libToExpendsGa = new HashSet<>();
-        Set<String> releaseToHaveGav = new HashSet<>();
-        preferences.constraints().forEach(c -> {
-            switch (c.code()) {
-                case "ABSENCE" -> libToExpendsGa.add(c.value().substring(0, c.value().lastIndexOf(':')));
-                case "PRESENCE" -> releaseToHaveGav.add(c.value());
-            }
-        });
         switch (releaseFocus) {
             case NONE:
                 // Rooted graph case, no expends
@@ -51,19 +46,25 @@ public class GoblinWeaverHelpers {
                 libToExpendsGa.add("all");
                 break;
             case CONSTRAINTS:
-                // constraints case
+                // constraints case, expends constrained libs
+                libToExpendsGa.addAll(preferences.constraints().stream()
+                        .map(GoblinWeaverHelpers::getLibraryFromConstraint)
+                        .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet()));
                 break;
             case LOCAL:
+                // Direct possibilities case, expends direct dependencies libs
+                libToExpendsGa.addAll(directDependencies.stream().map(Dependency::getGa).collect(Collectors.toSet()));
                 break;
             case LOCAL_AND_CONSTRAINTS:
-                break;
-            default:
-                // Direct possibilities case, expends direct dependencies libs
+                // constraints and direct possibilities case
+                libToExpendsGa.addAll(preferences.constraints().stream()
+                        .map(GoblinWeaverHelpers::getLibraryFromConstraint)
+                        .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet()));
                 libToExpendsGa.addAll(directDependencies.stream().map(Dependency::getGa).collect(Collectors.toSet()));
                 break;
         }
         return graphTraversing(directDependencies.stream().map(Dependency::getGav).collect(Collectors.toSet()),
-                libToExpendsGa, releaseToHaveGav, preferences.releaseSelectors(), metrics);
+                libToExpendsGa, preferences.releaseSelectors(), metrics);
     }
 
     private static final String API_URL = System.getProperty("weaverUrl");
@@ -96,7 +97,7 @@ public class GoblinWeaverHelpers {
         return null;
     }
 
-    private static JSONObject graphTraversing(Set<String> startReleasesGav, Set<String> libToExpendsGa, Set<String> releaseToHaveGav,
+    private static JSONObject graphTraversing(Set<String> startReleasesGav, Set<String> libToExpendsGa,
                                               Set<Selector> filters, Set<MetricType> metrics) {
         LoggerHelpers.instance().info("Get graph from Goblin Weaver");
         String apiRoute = "/graph/traversing";
@@ -110,10 +111,6 @@ public class GoblinWeaverHelpers {
         JSONArray libToExpendsGaArray = new JSONArray();
         libToExpendsGaArray.addAll(libToExpendsGa);
         bodyJsonObject.put("libToExpendsGa", libToExpendsGaArray);
-
-        JSONArray releaseToHaveGavArray = new JSONArray();
-        releaseToHaveGavArray.addAll(releaseToHaveGav);
-        bodyJsonObject.put("releaseToHaveGav", releaseToHaveGavArray);
 
         JSONArray filtersArray = new JSONArray();
         filtersArray.addAll(filters.stream().map(Selector::toString).collect(Collectors.toList()));
@@ -148,5 +145,26 @@ public class GoblinWeaverHelpers {
         releaseJsonObject.put("artifactId", directDependency.artifactId());
         releaseJsonObject.put("version", directDependency.version());
         return releaseJsonObject;
+    }
+
+    // TODO: DRY Put on helper
+    private static Optional<String> getLibraryFromConstraint(Constraint<String> constraint) {
+        if (constraint instanceof AbsenceConstraint ac) {
+            return getArtifactId(ac.value());
+        } else if (constraint instanceof PresenceConstraint pc) {
+            return getArtifactId(pc.value());
+        } else {
+            return Optional.empty();
+        }
+
+    }
+
+    private static Optional<String> getArtifactId(String id) {
+        String [] parts = id.split(":");
+        return switch (parts.length) {
+            case 2 -> Optional.of(id);
+            case 3 -> Optional.of(String.format("%s:%s", parts[0], parts[1]));
+            default -> Optional.empty();
+        };
     }
 }
