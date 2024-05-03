@@ -9,8 +9,8 @@ ACTUAL=$2
 touch ${OUTPUT}
 echo "# Tests at ${NOW}" >> ${OUTPUT}	
 for f in ${FILES[@]}; do
-	expected=${f}_${EXPECTED}.log
-	actual=${f}_${ACTUAL}.log
+	expected=${f}${EXPECTED}.log
+	actual=${f}${ACTUAL}.log
 	echo "## Comparison for ${f} (actual: ${actual} vs expected: ${expected})" >> ${OUTPUT}
 	echo "" >> ${OUTPUT}
 	./compare.sh ${expected} ${actual} >> ${OUTPUT}
