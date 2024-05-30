@@ -1,10 +1,6 @@
 #
 # update configuration file
 #
-# scenario for legacy update at root level:
-# - do not change anything (for comparison purposes only)
-# - indeed changes without change edges are still possible (if multiple versions in graph)
-# 
 metrics:
   - metric: CVE
     coef: 0.0

@@ -1,0 +1,177 @@
+# Tests at 2024-05-03_18:26:06
+## Comparison for test_CVE-0_COST-0 (actual: test_CVE-0_COST-0_new_feat-strategies.log vs expected: test_CVE-0_COST-0_new.log)
+
+4,6c4,6
+< Get direct all possibilities with transitive graph
+< Graph size: 2846 vertices, 8372 edges
+< Time to generate graph (ms): 482
+---
+> Get graph from Goblin Weaver
+> Graph size: 2846 vertices, 8371 edges
+> Time to generate graph (ms): 1606
+9c9
+< Dependency edges size: 6141
+---
+> Dependency edges size: 6140
+14,15c14,15
+< Time to generate generate change edges (ms) : 32298
+< Time to normalize metrics (ms): 9
+---
+> Time to generate generate change edges (ms) : 32987
+> Time to normalize metrics (ms): 10
+17c17
+< 6141 dependency edges
+---
+> 6140 dependency edges
+20,22c20,22
+< Time to solve (ms): 972
+< Max memory usage (Mo): 803
+< Total execution time (ms): 35258
+---
+> Time to solve (ms): 1000
+> Max memory usage (Mo): 579
+> Total execution time (ms): 37116
+
+## Comparison for test_CVE-0_COST-1 (actual: test_CVE-0_COST-1_new_feat-strategies.log vs expected: test_CVE-0_COST-1_new.log)
+
+4,6c4,6
+< Get direct all possibilities with transitive graph
+< Graph size: 2846 vertices, 8372 edges
+< Time to generate graph (ms): 458
+---
+> Get graph from Goblin Weaver
+> Graph size: 2846 vertices, 8371 edges
+> Time to generate graph (ms): 1822
+9c9
+< Dependency edges size: 6141
+---
+> Dependency edges size: 6140
+14,15c14,15
+< Time to generate generate change edges (ms) : 32671
+< Time to normalize metrics (ms): 9
+---
+> Time to generate generate change edges (ms) : 33933
+> Time to normalize metrics (ms): 10
+17c17
+< 6141 dependency edges
+---
+> 6140 dependency edges
+20,22c20,22
+< Time to solve (ms): 1043
+< Max memory usage (Mo): 914
+< Total execution time (ms): 35685
+---
+> Time to solve (ms): 1061
+> Max memory usage (Mo): 644
+> Total execution time (ms): 38347
+
+## Comparison for test_CVE-1_COST-0 (actual: test_CVE-1_COST-0_new_feat-strategies.log vs expected: test_CVE-1_COST-0_new.log)
+
+4,6c4,6
+< Get direct all possibilities with transitive graph
+< Graph size: 2846 vertices, 8372 edges
+< Time to generate graph (ms): 485
+---
+> Get graph from Goblin Weaver
+> Graph size: 2846 vertices, 8371 edges
+> Time to generate graph (ms): 2160
+9c9
+< Dependency edges size: 6141
+---
+> Dependency edges size: 6140
+14,15c14,15
+< Time to generate generate change edges (ms) : 31714
+< Time to normalize metrics (ms): 10
+---
+> Time to generate generate change edges (ms) : 33398
+> Time to normalize metrics (ms): 9
+17c17
+< 6141 dependency edges
+---
+> 6140 dependency edges
+20c20
+< -- Computed in 657 ms
+---
+> -- Computed in 758 ms
+679,684c679,684
+< ROOT==>org.springframework.boot:spring-boot-starter-web:3.2.1 (e8385) : 1.0
+< ROOT==>org.neo4j.driver:neo4j-java-driver:5.7.0 (e8421) : 1.0
+< ROOT==>org.springframework.boot:spring-boot-starter-test:2.7.18 (e8409) : 1.0
+< ROOT==>org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0 (e8372) : 1.0
+< ROOT==>org.springframework.boot:spring-boot-starter-validation:3.2.1 (e8441) : 1.0
+< QUALITY : 64571.61695272659
+---
+> ROOT==>org.springframework.boot:spring-boot-starter-web:3.2.1 (e8383) : 1.0
+> ROOT==>org.springframework.boot:spring-boot-starter-test:2.7.18 (e8408) : 1.0
+> ROOT==>org.neo4j.driver:neo4j-java-driver:5.7.0 (e8441) : 1.0
+> ROOT==>org.springframework.boot:spring-boot-starter-validation:3.2.1 (e8428) : 1.0
+> ROOT==>org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0 (e8392) : 1.0
+> QUALITY : 64571.616952726574
+687,690c687,690
+< Quality[POPULARITY_1_YEAR] : 317138.817370409
+< Time to solve (ms): 1327
+< Max memory usage (Mo): 336
+< Total execution time (ms): 35030
+---
+> Quality[POPULARITY_1_YEAR] : 317138.8173704089
+> Time to solve (ms): 1438
+> Max memory usage (Mo): 777
+> Total execution time (ms): 38506
+
+## Comparison for test_CVE-1_COST-1 (actual: test_CVE-1_COST-1_new_feat-strategies.log vs expected: test_CVE-1_COST-1_new.log)
+
+5,7c5,7
+< Get direct all possibilities with transitive graph
+< Graph size: 2846 vertices, 8372 edges
+< Time to generate graph (ms): 485
+---
+> Get graph from Goblin Weaver
+> Graph size: 2846 vertices, 8371 edges
+> Time to generate graph (ms): 6815
+10c10
+< Dependency edges size: 6141
+---
+> Dependency edges size: 6140
+15,16c15,16
+< Time to generate generate change edges (ms) : 31215
+< Time to normalize metrics (ms): 8
+---
+> Time to generate generate change edges (ms) : 32849
+> Time to normalize metrics (ms): 11
+18c18
+< 6141 dependency edges
+---
+> 6140 dependency edges
+21c21
+< -- Computed in 715 ms
+---
+> -- Computed in 806 ms
+680,688c680,688
+< ROOT==>org.springframework.boot:spring-boot-starter-web:3.2.1 (e8385) : 1.0
+< ROOT==>org.springframework.boot:spring-boot-starter-test:2.7.18 (e8409) : 1.0
+< ROOT==>org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0 (e8372) : 1.0
+< ROOT==>org.springframework.boot:spring-boot-starter-validation:3.2.1 (e8441) : 1.0
+< ROOT==>org.neo4j.driver:neo4j-java-driver:5.16.0 (e8424) : 1.0
+< QUALITY : 64570.19314663178
+< COST : 1.8000000012730058E-4
+< Quality[POPULARITY_1_YEAR] : 317138.9782869898
+< Quality[FRESHNESS] : 2380.5426869622743
+---
+> ROOT==>org.springframework.boot:spring-boot-starter-web:3.2.1 (e8383) : 1.0
+> ROOT==>org.springframework.boot:spring-boot-starter-test:2.7.18 (e8408) : 1.0
+> ROOT==>org.neo4j.driver:neo4j-java-driver:5.16.0 (e8444) : 1.0
+> ROOT==>org.springframework.boot:spring-boot-starter-validation:3.2.1 (e8428) : 1.0
+> ROOT==>org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0 (e8392) : 1.0
+> QUALITY : 64570.19314663176
+> COST : 1.6000000013782764E-4
+> Quality[POPULARITY_1_YEAR] : 317138.97828698973
+> Quality[FRESHNESS] : 2380.542686962274
+690,692c690,692
+< Time to solve (ms): 1354
+< Max memory usage (Mo): 345
+< Total execution time (ms): 34557
+---
+> Time to solve (ms): 1516
+> Max memory usage (Mo): 501
+> Total execution time (ms): 42808
+
