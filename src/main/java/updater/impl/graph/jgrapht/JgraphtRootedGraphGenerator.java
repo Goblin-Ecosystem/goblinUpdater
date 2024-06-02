@@ -317,7 +317,7 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
                     cost = switch (preferences.indirectTool()) {
                         case NONE -> preferences.defaultCost().toDouble();
                         case JAPICMP ->
-                            JapicmpHelpers.computeChangeCost(currentRelease.get(), releaseToCompute);
+                            JapicmpHelpers.computeChangeCost(currentRelease.get(), releaseToCompute, preferences);
                     };
                 }
             }

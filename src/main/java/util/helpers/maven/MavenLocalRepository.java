@@ -62,7 +62,6 @@ public class MavenLocalRepository {
 
     public String downloadArtifact(String artifactId) {
         Artifact artifact = new DefaultArtifact(artifactId);
-
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(artifact);
         request.addRepository(centralRepo);
