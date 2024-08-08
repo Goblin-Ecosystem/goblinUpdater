@@ -1,3 +1,15 @@
+# Goblin updater
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.txt)
+
+The Goblin updater formulates the dependency update problem as a multi-objective optimization problem. This approach allows for the update of dependencies with a global perspective, considering all direct and indirect dependencies. It also enables developers to specify their preferences regarding the quality factors they want to maximize and the costs of updating they want to minimize. The update problem is encoded as a linear program whose solution is an optimal update strategy that aligns with developer priorities and minimizes incompatibilities.
+
+An example of usage of this tool is available here: TODO
+
+## Requirements
+- Java 17
+- An active Neo4j database containing the Maven Central dependency graph available here: https://zenodo.org/records/11104819
+- A Goblin weaver API available here: https://github.com/Goblin-Ecosystem/goblinWeaver
+
 ## Source code structure
 
 - client : clients
