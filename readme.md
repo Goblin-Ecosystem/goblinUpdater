@@ -20,6 +20,9 @@ An example of experiments with this tool is available here: https://zenodo.org/r
 - util : utilities that are not specific to Goblin updater
 
 ## JAR generation
+This project is dependent on the [Maracas](https://github.com/alien-tools/maracas) tool.
+Maracas is available on GitHub Packages, so you need to configure your Maven to use this dependency by editing your '~/.m2/settings.xml' file.
+More inforomation on GitHub Packages configuration here: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
 
 ```sh
 mvn clean package
