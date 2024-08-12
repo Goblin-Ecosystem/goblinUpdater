@@ -1,36 +1,43 @@
 package updater.impl.graph.jgrapht;
 
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import updater.api.graph.structure.UpdateEdge;
 import updater.api.graph.structure.UpdateGraph;
 import updater.api.graph.structure.UpdateNode;
-import updater.api.metrics.MetricNormalizer;
 import updater.api.metrics.MetricType;
+import updater.api.preferences.Constraint;
 import updater.api.preferences.Preferences;
 import updater.api.process.graphbased.RootedGraphGenerator;
+import updater.helpers.JapicmpHelpers;
 import updater.helpers.MaracasHelpers;
-import updater.impl.graph.structure.edges.*;
-import updater.impl.graph.structure.nodes.*;
-import updater.impl.metrics.MetricMaxValueNormalizer;
+import updater.impl.graph.structure.edges.ChangeEdge;
+import updater.impl.graph.structure.edges.DependencyEdge;
+import updater.impl.graph.structure.edges.VersionEdge;
+import updater.impl.graph.structure.nodes.AbstractNode;
+import updater.impl.graph.structure.nodes.ArtifactNode;
+import updater.impl.graph.structure.nodes.ReleaseNode;
 import updater.impl.metrics.SimpleMetricDeclarator;
-
-import java.util.Optional;
-import java.util.HashSet;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import updater.impl.metrics.SimpleMetricType;
+import updater.impl.preferences.AbsenceConstraint;
+import updater.impl.preferences.PresenceConstraint;
 import util.IdGenerator;
+import util.api.CustomGraph;
 import util.helpers.system.LoggerHelpers;
-
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.List;
-import java.util.Map;
 
 public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
 
@@ -155,42 +162,166 @@ public class JgraphtRootedGraphGenerator implements RootedGraphGenerator {
         return graph;
     }
 
+    // TODO: Option to choose from the two modes
     @Override
     public void generateChangeEdge(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
             Preferences updatePreferences) {
-        // prepare things
+        LoggerHelpers.instance().info("Generate change edges");
+        generateChangeEdgeWork(projectPath, graph, updatePreferences);
+        LoggerHelpers.instance().info("Change edges size: " + graph.edges(UpdateEdge::isChange).size());
+        LoggerHelpers.instance().info("Compute change edge values");
+        computeChangeEdgeValues(graph, projectPath, updatePreferences);
+    }
+
+    private final Predicate<UpdateNode> hasSeveralVersions = n -> graph.versions(n).size() >= 2;
+
+    private Optional<String> getArtifactId(String id) {
+        String [] parts = id.split(":");
+        return switch (parts.length) {
+            case 2 -> Optional.of(id);
+            case 3 -> Optional.of(String.format("%s:%s", parts[0], parts[1]));
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> getReleaseId(String id) {
+        String [] parts = id.split(":");
+        return switch (parts.length) {
+            case 3 -> Optional.of(id);
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> getLibraryFromConstraint(Constraint<String> constraint) {
+        if (constraint instanceof AbsenceConstraint ac) {
+            return getArtifactId(ac.value());
+        } else if (constraint instanceof PresenceConstraint pc) {
+            return getArtifactId(pc.value());
+        } else {
+            return Optional.empty();
+        }
+
+    }
+
+    private Set<UpdateNode> constrainedLibraries(UpdateGraph<UpdateNode, UpdateEdge> graph, Preferences updatePreferences) {
+        return updatePreferences.constraints().stream()
+                .map(this::getLibraryFromConstraint)
+                .filter(Optional::isPresent).map(Optional::get)
+                .map(graph::getNode)
+                .filter(Optional::isPresent).map(Optional::get)
+                .filter(hasSeveralVersions)
+                .collect(Collectors.toSet());
+    }
+
+    public void generateChangeEdgeWork(Path projectPath, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Preferences updatePreferences) {
+        switch (updatePreferences.changeFocus()) {
+            case NONE:
+                generateChangeEdgeWithReleaseFocuses(graph, Set.of());
+                break;
+            case GLOBAL:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.releaseNodes());
+                break;
+            case LOCAL:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.rootNode().map(Set::of).orElse(Set.of()));
+                break;
+                case CONSTRAINTS:
+                generateChangeEdgeWithArtifactFocuses(graph, constrainedLibraries(graph, updatePreferences));
+                break;
+            case LOCAL_AND_CONSTRAINTS:
+                generateChangeEdgeWithReleaseFocuses(graph, graph.rootNode().map(Set::of).orElse(Set.of()));
+                generateChangeEdgeWithArtifactFocuses(graph, constrainedLibraries(graph, updatePreferences));
+                break;
+        }
+    }
+
+    // a focus f is a release for which we compute change edges
+    // it is done for all f -dep-> l -ver-> ri
+    // TODO: copy is needed (by now) but costly!
+    private void generateChangeEdgeWithReleaseFocuses(UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Set<UpdateNode> focuses) {
         UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
         IdGenerator generator = IdGenerator.instance();
-        LoggerHelpers.instance().info("Generate change edge");
-        // Get root node
-        Optional<UpdateNode> optRootNode = graphCopy.rootNode();
-        if(optRootNode.isPresent()){
-            UpdateNode rootNode = optRootNode.get();
-            // step 1 : create change edges between root and direct dependencies
-            graphCopy.outgoingEdgesOf(rootNode).stream().filter(UpdateEdge::isDependency).forEach(
-                    edge -> graphCopy.versions(graphCopy.target(edge)).forEach(
-                            release -> graph.addEdgeFromNodeId(rootNode.id(), release.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))
-                    )
-            );
-            LoggerHelpers.instance().info("Change edge size: "+graph.edges(UpdateEdge::isChange).size());
-            // step 2: compute change edge cost
-            LoggerHelpers.instance().info("Compute change edge values");
-            graph.changeEdges().forEach(
-                    changeEdge -> {
-                        UpdateNode releaseToCompute = graph.target(changeEdge);
-                        Optional<UpdateNode> optCurrentRelease = graph.rootCurrentDependencyRelease(graph.artifactOf(releaseToCompute).get());
-                        if(optCurrentRelease.isPresent()) {
-                            changeEdge.put(SimpleMetricType.COST,
-                                    MaracasHelpers.computeChangeCost(projectPath, optCurrentRelease.get(), releaseToCompute)
-                            );
-                        }
-                        else{
-                            LoggerHelpers.instance().error("Unable to find current used release of: "+releaseToCompute.id());
-                            changeEdge.put(SimpleMetricType.COST, 9999999.9); // FIXME: OK ?
-                        }
-                    });
-        } else {
-            LoggerHelpers.instance().error("Unable to find root node");
-        }
+        focuses.forEach(f -> constructChangeEdgeWithReleaseFocus(generator, graph, graphCopy, f));
+    }
+
+    // focus is a release node
+    // {f => r | f \in F, f-dep->l, |{r | l-ver->r}|>=2, l-ver->r}
+    private void constructChangeEdgeWithReleaseFocus(IdGenerator generator, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            UpdateGraph<UpdateNode, UpdateEdge> graphCopy, UpdateNode focus) {
+        graphCopy.outgoingEdgesOf(focus).stream()
+                .filter(UpdateEdge::isDependency)
+                .map(edge -> graphCopy.versions(graphCopy.target(edge)))
+                .filter(rs -> rs.size() >= 2)
+                .flatMap(Set::stream)
+                .forEach(r -> graph.addEdgeFromNodeId(focus.id(), r.id(),
+                        new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of())));
+    }
+
+    // a focus f is an artifact for which we compute change edges
+    // it is done for all di -dep-> f -ver-> rj
+    // TODO: copy is needed (by now) but costly!
+    private void generateChangeEdgeWithArtifactFocuses(UpdateGraph<UpdateNode, UpdateEdge> graph,
+            Set<UpdateNode> focuses) {
+        UpdateGraph<UpdateNode, UpdateEdge> graphCopy = graph.copy();
+        IdGenerator generator = IdGenerator.instance();
+        focuses.forEach(f -> constructChangeEdgeWithArtifactFocus(generator, graph, graphCopy, f));
+    }
+
+    // focus is an artifact node
+    // {d => r | f \in F-, d-dep->f, f-ver->r}
+    private void constructChangeEdgeWithArtifactFocus(IdGenerator generator, UpdateGraph<UpdateNode, UpdateEdge> graph,
+            UpdateGraph<UpdateNode, UpdateEdge> graphCopy, UpdateNode focus) {
+        Set<UpdateNode> dependents = graphCopy.directDependents(focus);
+        Set<UpdateNode> versions = graphCopy.versions(focus);
+        dependents.forEach(d -> versions.forEach(
+                r -> graph.addEdgeFromNodeId(d.id(), r.id(), new ChangeEdge(generator.nextId(EDGE_PREFIX), Map.of()))));
+    }
+
+    // we compute the cost for a change edge (source, releaseToCompute)
+    // given source -dep-> artifactOfReleaseToCompute -ver-> releaseToCompute
+    // (compared)
+    // and source -dep-> artifactOfReleaseToCompute -ver-> currentRelease (used)
+    // if problem: cost = default
+    // if source is ROOT:
+    // - if tool-direct is NONE: cost = default
+    // - if tool-direct is MARACAS: cost = computed using Maracas
+    // if source is not ROOT:
+    // - if tool-indirect is NONE: cost = default
+    // - if tool-indirect is JAPICMP: cost = computed using Japicmp
+    // TODO: discuss integration of MARACAS and JAPICMP costs but for case with 0.0
+    // limit
+    private void computeChangeEdgeValues(UpdateGraph<UpdateNode, UpdateEdge> graph, Path projectPath,
+            Preferences preferences) {
+        graph.changeEdges().forEach(changeEdge -> {
+            UpdateNode source = graph.source(changeEdge);
+            UpdateNode releaseToCompute = graph.target(changeEdge);
+            Optional<UpdateNode> artifactOfReleaseToCompute = graph.artifactOf(releaseToCompute);
+            Optional<UpdateNode> currentRelease = artifactOfReleaseToCompute
+                    .flatMap(a -> graph.currentDependencyRelease(source, a));
+            double cost;
+            if (!currentRelease.isPresent()) {
+                LoggerHelpers.instance().error(String.format("Unable to find current used release for change %s -> %s",
+                        source.id(), releaseToCompute.id()));
+                cost = preferences.defaultCost().toDouble();
+            } else {
+                boolean sourceIsRoot = source.id().equals(CustomGraph.ROOT_ID);
+                if (sourceIsRoot) {
+                    cost = switch (preferences.directTool()) {
+                        case NONE -> preferences.defaultCost().toDouble();
+                        case MARACAS ->
+                            MaracasHelpers.computeChangeCost(projectPath, currentRelease.get(), releaseToCompute,
+                                    preferences);
+                    };
+                } else {
+                    cost = switch (preferences.indirectTool()) {
+                        case NONE -> preferences.defaultCost().toDouble();
+                        case JAPICMP ->
+                            JapicmpHelpers.computeChangeCost(currentRelease.get(), releaseToCompute, preferences);
+                    };
+                }
+            }
+            changeEdge.put(SimpleMetricType.COST, cost);
+        });
     }
 }

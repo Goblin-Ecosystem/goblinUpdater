@@ -73,7 +73,7 @@ public interface CustomGraph<N extends Identifiable<String>, E> {
     /**
      * Default id used for the root node in the graph if there is one.
      */
-    static final String ROOT_ID = "ROOT";
+    String ROOT_ID = "ROOT";
 
     /**
      * Returns the first node with the given id, if it exists.

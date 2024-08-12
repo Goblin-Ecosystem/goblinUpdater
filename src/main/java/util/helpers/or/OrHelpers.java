@@ -37,6 +37,12 @@ public class OrHelpers {
         constraint.setCoefficient(x, 1);
     }
 
+    // create constraint name: x <= v
+    public static void x_le_v(MPSolver solver, String name, MPVariable x, double v) {
+        MPConstraint constraint = solver.makeConstraint(-v, MPSolver.infinity(), name);
+        constraint.setCoefficient(x, -1);
+    }
+
     // create constraint name: x = y
     public static void x_eq_y(MPSolver solver, String name, MPVariable x, MPVariable y) {
         MPConstraint constraint = solver.makeConstraint(0, 0, name);
@@ -70,8 +76,8 @@ public class OrHelpers {
         constraint.setCoefficient(y, -k);
     }
 
-    // create constraint name: sum(xs) >= y + n
-    // i.e., sum(xs) - y >= n
+    // create constraint name: sum(xi) >= y + n
+    // i.e., sum(xi) - y >= n
     public static void sum_xi_ge_y_plus_n(MPSolver solver, String name, List<MPVariable> xs,
             MPVariable y, Double n) {
         MPConstraint constraint = solver.makeConstraint(n, MPSolver.infinity(), name);

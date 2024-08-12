@@ -1,0 +1,25 @@
+#
+# update configuration file
+#
+metrics:
+  - metric: CVE
+    coef: 0.0
+  - metric: FRESHNESS
+    coef: 0.5
+  - metric: POPULARITY_1_YEAR
+    coef: 0.5
+  - metric: COST
+    coef: 0.0
+constraints:
+  - constraint: CVE_LIMIT
+    value: 0.0
+  - constraint: COST_LIMIT
+    value: 0.0
+releases:
+  focus: LOCAL
+  selectors: [MORE_RECENT]
+costs:
+  focus: LOCAL
+  default: MAX
+  tool-direct: MARACAS
+  tool-indirect: NONE

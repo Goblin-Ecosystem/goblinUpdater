@@ -14,9 +14,9 @@ import updater.impl.metrics.MetricMap;
 
 public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
 
-    private String id;
+    private final String id;
     // FIXME: not DRY wrt AbstractNode, can be extracted in a AbstractGraphElementWithMetricContainer.
-    private MetricContainer<MetricType> metricMap;
+    private final MetricContainer<MetricType> metricMap;
 
     protected AbstractEdge(String id, Map<MetricType, Double> metricMap) {
         super();
@@ -70,11 +70,8 @@ public abstract class AbstractEdge extends DefaultEdge implements UpdateEdge {
             return false;
         AbstractEdge other = (AbstractEdge) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 
 }

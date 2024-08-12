@@ -6,7 +6,7 @@ public class IdGenerator {
     private IdGenerator() {
     }
 
-    private static IdGenerator instance = new IdGenerator();
+    private static final IdGenerator instance = new IdGenerator();
 
     public static IdGenerator instance() {
         return instance;

@@ -1,6 +1,10 @@
 package util.helpers.system;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +35,16 @@ public class FileHelpers {
             } catch (IOException e) {
                 LoggerHelpers.instance().error("Unable to delete folder: " + directoryPath);
             }
+        }
+    }
+
+    public static void createCsvFile(String path, String[] headers) {
+        try {
+            FileWriter writer = new FileWriter(path, false);
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers));
+            printer.close();
+        } catch (IOException e) {
+            LoggerHelpers.instance().error("Unable to create file: " + path);
         }
     }
 }

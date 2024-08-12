@@ -43,8 +43,9 @@ public interface MetricContainer<T extends MetricType> {
         double quality = 0.0;
         for (T metricType : contentTypes().stream().filter(MetricType::isQualityMetric).toList()) {
             Optional<Double> metricValue = get(metricType);
-            if(metricValue.isPresent()){
-                quality += (metricValue.get() * updatePreferences.coefficientFor(metricType));
+            Optional<Double> coefficient = updatePreferences.coefficientFor(metricType);
+            if(metricValue.isPresent() && coefficient.isPresent()){
+                quality += (metricValue.get() * coefficient.get());
             }
         }
         return quality;

@@ -1,7 +1,10 @@
 package updater.api.preferences;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import updater.api.metrics.MetricType;
 import util.helpers.system.LoggerHelpers;
@@ -10,6 +13,68 @@ import util.helpers.system.LoggerHelpers;
  * Interface for update preferences.
  */
 public interface Preferences {
+
+    /**
+     * External representation.
+     */
+    String repr();
+
+    /**
+     * Print preferences.
+     */
+    default void print() {
+        LoggerHelpers.instance().info(this.repr());
+    }
+
+    /**
+     * Focus for the generation of alternative releases
+     */
+    enum ReleaseFocus {
+        NONE, LOCAL, CONSTRAINTS, LOCAL_AND_CONSTRAINTS, GLOBAL
+    }
+
+    /**
+     * Focus for the generation of alternative change edges
+     */
+    enum ChangeFocus {
+        NONE, LOCAL, LOCAL_AND_CONSTRAINTS, CONSTRAINTS, GLOBAL
+    }
+
+    /**
+     * Selectors of alternative releases
+     */
+    enum Selector {
+        MORE_RECENT, NO_PATCHES
+    }
+
+    /**
+     * Possible tools for direct cost computation.
+     */
+    enum DirectTool {
+        NONE, MARACAS
+    }
+
+    /**
+     * Possible tools for indirect cost computation
+     */
+    enum IndirectTool {
+        NONE, JAPICMP
+    }
+
+    /**
+     * Default cost values
+     */
+    enum DefaultCost {
+        MIN, MAX;
+
+        public double toDouble() {
+            return switch(this) {
+                case MIN -> 0.0;
+                case MAX -> 99999999.9;
+            };
+        }
+    }
+
     /**
      * Get the set of quality metrics that are of interest for the user.
      * 
@@ -37,20 +102,22 @@ public interface Preferences {
     }
 
     /**
-     * Get the coefficient for a given metric. 0.0 if the metric is not in the
-     * preferences (ie the metric has weight 0 for the user).
+     * Get the coefficient for a given metric. Optional.empty if the metric is not in the
+     * preferences (which is different from having value 0.0).
      * 
      * @param metric
      * @return
      */
-    double coefficientFor(MetricType metric);
+    Optional<Double> coefficientFor(MetricType metric);
 
     /**
      * Get the sum of all coefficients for a given set of added values.
      */
     default Double sumFor(Set<MetricType> metrics) {
         return metrics.stream()
-                .mapToDouble(this::coefficientFor)
+                .map(this::coefficientFor)
+                .filter(Optional::isPresent)
+                .mapToDouble(Optional::get)
                 .sum();
     }
 
@@ -79,4 +146,57 @@ public interface Preferences {
         }
         return true;
     }
+
+    /**
+     * Checks whether the preferences contain constraints on solutions.
+     */
+    boolean hasConstraints();
+
+    /**
+     * Returns the preference constraints.
+     */
+    List<Constraint<String>> constraints();
+
+    /**
+     * Returns the focus for releases
+     */
+    ReleaseFocus releaseFocus();
+
+    /**
+     * Returns the focus for change edges
+     */
+    ChangeFocus changeFocus();
+
+    /*
+     * Default value for costs
+     */
+    DefaultCost defaultCost();
+
+    /** 
+     * Returns the selectors
+     */
+    Set<Selector> releaseSelectors();
+
+    /**
+     * Returns the ids for focuses (
+     * 
+     * related to some constraints)
+     */
+    default Set<String> constraintFocuses() {
+        return constraints().stream()
+            .filter(Constraint::isFocus)
+            .map(Constraint::focus)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the tool used for direct cost computation.
+     */
+    DirectTool directTool();
+
+    /**
+     * Returns the tool used for indirect cost computation.
+     */
+    IndirectTool indirectTool();
+
 }

@@ -12,4 +12,11 @@ public record Dependency(String groupId, String artifactId, String version) {
      * - public equals and hashCode methods
      * - public toString method
      */
+    public String getGav(){
+        return groupId+":"+artifactId+":"+version;
+    }
+
+    public String getGa(){
+        return groupId+":"+artifactId;
+    }
 }

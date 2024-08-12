@@ -17,6 +17,7 @@ import updater.api.graph.structure.UpdateNode;
 import updater.api.metrics.MetricContainer;
 import updater.api.metrics.MetricType;
 import updater.impl.metrics.MetricMap;
+import updater.impl.metrics.SimpleMetricType;
 import util.helpers.system.LoggerHelpers;
 
 import static updater.impl.metrics.SimpleMetricType.*;
@@ -28,11 +29,11 @@ import java.util.Optional;
 public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     public enum NodeType {
-        RELEASE, ARTIFACT;
+        RELEASE, ARTIFACT
     }
 
     public enum EdgeType {
-        VERSION, DEPENDENCY, CHANGE;
+        VERSION, DEPENDENCY, CHANGE
     }
 
     public record Node001(String id, NodeType type, MetricContainer<MetricType> metrics) implements UpdateNode {
@@ -126,8 +127,8 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
 
     }
 
-    private Set<UpdateNode> nodes;
-    private Set<UpdateEdge> edges;
+    private final Set<UpdateNode> nodes;
+    private final Set<UpdateEdge> edges;
     private UpdateNode root;
 
     private UpdateNode addNode(String id, NodeType type, MetricContainer<MetricType> metrics) {
@@ -207,7 +208,8 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
     private static final UpdateGraph<UpdateNode, UpdateEdge> generateGraph(String root, List<String> artifacts,
             List<String> releases, Map<String, List<String>> versions,
             Map<String, List<Tuple2<String, String>>> dependencies,
-            Map<String, MetricContainer<MetricType>> metrics) {
+            Map<String, MetricContainer<MetricType>> metrics,
+            Map<Tuple2<String, String>, Double> costs) {
         GraphMock graph = new GraphMock();
         int idEdge = 0;
         // root (has no metrics)
@@ -232,7 +234,12 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
             for (Tuple2<String, String> d : e.getValue()) {
                 graph.addEdge("e" + idEdge++, DEPENDENCY, e.getKey(), d._1(), d._2(), null);
                 for (String v : versions.get(d._1())) {
-                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, null); // TODO: get metrics
+                    double cost = 0.0;
+                    Tuple2<String, String> changeKey = Tuple.of(e.getKey(), v);
+                    if (costs.containsKey(changeKey)) {
+                        cost = costs.get(changeKey);
+                    }
+                    graph.addEdge("e" + idEdge++, CHANGE, e.getKey(), v, null, new MetricMap<>(Map.of(SimpleMetricType.COST, cost)));
                 }
             }
         }
@@ -295,6 +302,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         Map<String, List<String>> versions = new HashMap<>();
         Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
         Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        Map<Tuple2<String, String>, Double> costs = new HashMap<>();
         //
         String root = rId(0, 1);
         qualities.put(root, genMetrics());
@@ -309,7 +317,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 qualities.put(release, genMetrics());
             }
         }
-        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities, costs);
     }
 
     /**
@@ -323,6 +331,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         Map<String, List<String>> versions = new HashMap<>();
         Map<String, List<Tuple2<String, String>>> dependencies = new HashMap<>();
         Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        Map<Tuple2<String, String>, Double> costs = new HashMap<>();
         // root
         String root = rId(0, 1); // g:0:1
         qualities.put(root, genMetrics());
@@ -343,7 +352,7 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 }
             }
         }
-        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities, costs);
     }
 
     /**
@@ -466,8 +475,25 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
                 "a:a:1", List.of(Tuple.of("b:b", "2")),
                 "b:b:1", List.of(Tuple.of("h:h", "1")),
                 "b:b:2", List.of(Tuple.of("h:h", "1"), Tuple.of("e:e", "1")));
-        Map<String, MetricContainer<MetricType>> qualities = Map.of();
-        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+        Map<String, MetricContainer<MetricType>> qualities = new HashMap<>();
+        // FIXME: root needs info too
+        qualities.put("a:a:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("b:b:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("b:b:2", new MetricMap<>(Map.of(CVE, 1.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("h:h:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("h:h:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("e:e:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        qualities.put("e:e:2", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
+        Map<Tuple2<String, String>, Double> costs = new HashMap<>();
+        costs.put(Tuple.of("a:a:1", "b:b:1"), 0.0);
+        costs.put(Tuple.of("a:a:1", "b:b:2"), 1.0);
+        costs.put(Tuple.of("b:b:1", "h:h:1"), 0.0);
+        costs.put(Tuple.of("b:b:1", "h:h:2"), 0.0);
+        costs.put(Tuple.of("b:b:2", "h:h:1"), 0.0);
+        costs.put(Tuple.of("b:b:2", "h:h:2"), 0.0);
+        costs.put(Tuple.of("b:b:2", "e:e:1"), 0.0);
+        costs.put(Tuple.of("b:b:1", "e:e:2"), 0.0);
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities, costs);
     }
 
     public static final UpdateGraph<UpdateNode, UpdateEdge> example002() {
@@ -518,7 +544,8 @@ public class GraphMock implements UpdateGraph<UpdateNode, UpdateEdge> {
         qualities.put("x:l4:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
         // neutral info for l5 version 1 (single version, end of graph)
         qualities.put("x:l5:1", new MetricMap<>(Map.of(CVE, 0.0, FRESHNESS, 0.0, POPULARITY_1_YEAR, 0.0)));
-        return generateGraph(root, artifacts, releases, versions, dependencies, qualities);
+        Map<Tuple2<String, String>, Double> costs = new HashMap<>();
+        return generateGraph(root, artifacts, releases, versions, dependencies, qualities, costs);
     }
 
     @Override

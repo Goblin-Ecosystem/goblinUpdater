@@ -1,0 +1,23 @@
+#
+# update configuration file
+#
+metrics:
+  - metric: CVE
+    coef: 0.0
+  - metric: FRESHNESS
+    coef: 1.0
+  - metric: COST
+    coef: 0.0
+constraints:
+  - constraint: COST_LIMIT
+    value: 0.0
+  - constraint: CVE_LIMIT
+    value: 0.0
+releases:
+  focus: NONE
+  selectors: []
+costs:
+  focus: NONE
+  default: MAX
+  tool-direct: NONE
+  tool-indirect: NONE

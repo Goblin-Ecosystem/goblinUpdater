@@ -18,7 +18,7 @@ public interface MetricDeclarator {
 
     /**
      * Returns the JSON key corresponding to the given metric type.
-     * @param jsonKey
+     * @param type
      * @return The JSON key corresponding to the given metric type.
      */
     default String toJsonKey(MetricType type) {
