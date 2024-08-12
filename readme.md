@@ -3,7 +3,7 @@
 
 The Goblin updater formulates the dependency update problem as a multi-objective optimization problem. This approach allows for the update of dependencies with a global perspective, considering all direct and indirect dependencies. It also enables developers to specify their preferences regarding the quality factors they want to maximize and the costs of updating they want to minimize. The update problem is encoded as a linear program whose solution is an optimal update strategy that aligns with developer priorities and minimizes incompatibilities.
 
-An example of usage of this tool is available here: TODO
+An example of experiments with this tool is available here: https://zenodo.org/records/13285362
 
 ## Requirements
 - Java 17
